@@ -78,7 +78,75 @@ export function Tabs({
 export const TabsList = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, onKeyDown, ...props }, ref) => {
+>(({ className, children, onKeyDown, ...props }, ref) => {
+  const ctx = useTabsContext('TabsList');
+  const internalRef = React.useRef<HTMLDivElement | null>(null);
+  const [indicator, setIndicator] = React.useState<{
+    left: number;
+    width: number;
+  } | null>(null);
+
+  const setMergedRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      internalRef.current = node;
+      if (typeof ref === 'function') {
+        ref(node);
+      } else if (ref) {
+        ref.current = node;
+      }
+    },
+    [ref],
+  );
+
+  const measureActiveTab = React.useCallback(() => {
+    const listEl = internalRef.current;
+    if (!listEl) return;
+    const activeTab = listEl.querySelector<HTMLButtonElement>(
+      '[role="tab"][data-state="active"]',
+    );
+    if (!activeTab) {
+      setIndicator(null);
+      return;
+    }
+    const left = activeTab.offsetLeft;
+    const width = activeTab.offsetWidth;
+    if (width <= 0) return;
+
+    setIndicator((prev) =>
+      prev && prev.left === left && prev.width === width
+        ? prev
+        : { left, width },
+    );
+  }, []);
+
+  React.useEffect(() => {
+    const rafId = window.requestAnimationFrame(measureActiveTab);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [ctx.value, children, measureActiveTab]);
+
+  React.useEffect(() => {
+    const listEl = internalRef.current;
+    if (!listEl) return;
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => {
+        measureActiveTab();
+      });
+      observer.observe(listEl);
+      const triggers = listEl.querySelectorAll('[role="tab"]');
+      triggers.forEach((trigger) => observer?.observe(trigger));
+    }
+
+    const onResize = () => measureActiveTab();
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', onResize);
+    };
+  }, [measureActiveTab, children]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
     if (e.defaultPrevented) return;
@@ -112,16 +180,29 @@ export const TabsList = React.forwardRef<
 
   return (
     <div
-      ref={ref}
+      ref={setMergedRef}
       role="tablist"
       aria-orientation="horizontal"
+      data-pill-ready={indicator ? 'true' : undefined}
       onKeyDown={handleKeyDown}
       className={cn(
-        'glass-surface inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl p-1',
+        'glass-surface group/tablist relative inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-2xl p-1',
         className,
       )}
       {...props}
-    />
+    >
+      {indicator && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1 bottom-1 left-0 z-0 rounded-xl bg-white/95 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.11),inset_0_1px_0_rgba(255,255,255,0.96)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:bg-white/[0.14] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.16)]"
+          style={{
+            width: indicator.width,
+            transform: `translate3d(${indicator.left}px, 0, 0)`,
+          }}
+        />
+      )}
+      {children}
+    </div>
   );
 });
 TabsList.displayName = 'TabsList';
@@ -157,7 +238,7 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
           }
         }}
         className={cn(
-          'relative inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-medium whitespace-nowrap text-[#6E6E73] transition-all duration-200 cursor-pointer hover:bg-black/[0.04] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white/95 data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.09),inset_0_1px_0_rgba(255,255,255,0.95)] dark:text-[#98989D] dark:hover:bg-white/[0.06] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25 dark:data-[state=active]:bg-white/[0.14] dark:data-[state=active]:text-[#F5F5F7] dark:data-[state=active]:shadow-[0_2px_10px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.14)]',
+          'relative z-10 inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-medium whitespace-nowrap text-[#6E6E73] transition-colors duration-200 cursor-pointer hover:bg-black/[0.035] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white/95 data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.09),inset_0_1px_0_rgba(255,255,255,0.95)] group-data-[pill-ready=true]/tablist:data-[state=active]:bg-transparent group-data-[pill-ready=true]/tablist:data-[state=active]:shadow-none dark:text-[#98989D] dark:hover:bg-white/[0.05] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25 dark:data-[state=active]:bg-white/[0.14] dark:data-[state=active]:text-[#F5F5F7] dark:data-[state=active]:shadow-[0_2px_10px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.14)] dark:group-data-[pill-ready=true]/tablist:data-[state=active]:bg-transparent dark:group-data-[pill-ready=true]/tablist:data-[state=active]:shadow-none',
           className,
         )}
         {...props}

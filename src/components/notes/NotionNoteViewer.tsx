@@ -75,6 +75,8 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
   const [fontMode, setFontMode] = useState<'sans' | 'serif'>('sans');
   const [widthMode, setWidthMode] = useState<'focused' | 'full'>('focused');
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
+  const articleRef = React.useRef<HTMLElement | null>(null);
 
   const safeBlocks = useMemo(() => {
     if (!Array.isArray(note.blocks)) return [];
@@ -118,7 +120,45 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
 
   useEffect(() => {
     setActiveHeadingId(tocItems[0]?.id ?? '');
+    setReadingProgress(0);
   }, [note.id, tocItems]);
+
+  // Smooth scroll-linked reading progress across the active study guide
+  useEffect(() => {
+    let rafId: number | null = null;
+    const computeProgress = () => {
+      rafId = null;
+      const el = articleRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const totalScrollable = el.offsetHeight - window.innerHeight * 0.65;
+      if (totalScrollable <= 40) {
+        setReadingProgress(100);
+        return;
+      }
+      const scrolledPastTop = Math.max(0, 120 - rect.top);
+      const pct = Math.max(
+        0,
+        Math.min(100, Math.round((scrolledPastTop / totalScrollable) * 100)),
+      );
+      setReadingProgress(pct);
+    };
+
+    const onScrollOrResize = () => {
+      if (rafId === null) {
+        rafId = window.requestAnimationFrame(computeProgress);
+      }
+    };
+
+    computeProgress();
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize, { passive: true });
+    return () => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+  }, [note.id, widthMode, safeBlocks.length]);
 
   useEffect(() => {
     if (tocItems.length === 0 || typeof IntersectionObserver === 'undefined') {
@@ -177,25 +217,20 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
   return (
     <div className="flex w-full items-start gap-6">
       {/* Main Read-Only Liquid Glass Study Document */}
-      <article className="glass-panel min-w-0 flex-1 rounded-3xl px-5 py-6 sm:px-9 sm:py-8 lg:px-12 lg:py-10">
-        {/* Top Header Bar */}
-        <header className="border-b border-black/[0.06] pb-6 dark:border-white/[0.08]">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {topicLabel && (
-                <span className="glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
-                  <FileText className="h-3 w-3" aria-hidden="true" />
-                  {topicLabel}
-                </span>
-              )}
-              <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
-                v{note.version}
+      <article
+        ref={articleRef}
+        className="glass-panel min-w-0 flex-1 rounded-3xl px-5 pb-8 sm:px-9 sm:pb-10 lg:px-12 lg:pb-12"
+      >
+        {/* Sticky Frosted Reader Bar + Hairline Reading Progress */}
+        <div className="glass-floating-bar sticky top-[108px] z-10 -mx-5 mb-6 rounded-t-3xl border-x-0 border-t-0 bg-white/88 px-5 pt-2.5 pb-0 sm:-mx-9 sm:px-9 lg:top-[62px] lg:-mx-12 lg:px-12 dark:bg-[#1E1E22]/88">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="max-w-[200px] truncate text-xs font-medium text-[#1D1D1F] sm:max-w-[280px] dark:text-[#F5F5F7]">
+                {note.title}
               </span>
-              {formattedUpdatedAt && (
-                <span className="text-xs text-[#6E6E73] dark:text-[#98989D]">
-                  Updated {formattedUpdatedAt}
-                </span>
-              )}
+              <span className="glass-pill shrink-0 rounded-full px-2 py-0.5 font-mono text-[10.5px] font-semibold tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                {readingProgress}% read
+              </span>
             </div>
 
             {/* Reader Controls: Width Mode + Outline Toggle + Sans/Serif */}
@@ -287,10 +322,36 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
             </div>
           </div>
 
+          {/* Hairline Reading Progress Track */}
+          <div className="h-[2px] w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
+            <div
+              className="h-full bg-[#1D1D1F] transition-[width] duration-150 ease-out motion-reduce:transition-none dark:bg-[#F5F5F7]"
+              style={{ width: `${readingProgress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Top Document Masthead */}
+        <header className="border-b border-black/[0.06] pb-6 dark:border-white/[0.08]">
+          <div className="flex flex-wrap items-center gap-2">
+            {topicLabel && (
+              <span className="glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
+                <FileText className="h-3 w-3" aria-hidden="true" />
+                {topicLabel}
+              </span>
+            )}
+            <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
+              v{note.version}
+            </span>
+            {formattedUpdatedAt && (
+              <span className="text-xs text-[#6E6E73] dark:text-[#98989D]">
+                Updated {formattedUpdatedAt}
+              </span>
+            )}
+          </div>
+
           <h1
-            className={`mt-5 ${proseMeasureClass} text-2xl font-semibold tracking-tight text-[#1D1D1F] sm:text-[30px] sm:leading-[1.2] dark:text-[#F5F5F7] ${
-              fontMode === 'serif' ? 'font-serif' : 'font-sans'
-            }`}
+            className={`mt-4 ${proseMeasureClass} font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#1D1D1F] sm:text-[34px] sm:leading-[1.16] dark:text-[#F5F5F7]`}
           >
             {note.title}
           </h1>
@@ -361,7 +422,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                       <h2
                         key={`block-${index}`}
                         id={anchorId}
-                        className={`${proseMeasureClass} mt-9 mb-2 scroll-mt-20 border-t border-black/[0.06] pt-5 text-xl font-semibold tracking-tight text-[#1D1D1F] first:mt-0 first:border-t-0 first:pt-0 dark:border-white/[0.08] dark:text-[#F5F5F7]`}
+                        className={`${proseMeasureClass} mt-9 mb-2 scroll-mt-36 border-t border-black/[0.06] pt-5 text-xl font-semibold tracking-tight text-[#1D1D1F] first:mt-0 first:border-t-0 first:pt-0 dark:border-white/[0.08] dark:text-[#F5F5F7]`}
                       >
                         {block.text}
                       </h2>
@@ -371,7 +432,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                     <h3
                       key={`block-${index}`}
                       id={anchorId}
-                      className={`${proseMeasureClass} mt-6 mb-1.5 scroll-mt-20 text-[17px] font-semibold tracking-tight text-[#1D1D1F] first:mt-0 dark:text-[#F5F5F7]`}
+                      className={`${proseMeasureClass} mt-6 mb-1.5 scroll-mt-36 text-[17px] font-semibold tracking-tight text-[#1D1D1F] first:mt-0 dark:text-[#F5F5F7]`}
                     >
                       {block.text}
                     </h3>
@@ -500,7 +561,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
       {outlineOpen && tocItems.length > 0 && (
         <aside
           aria-label="Table of contents"
-          className="sticky top-6 hidden w-60 shrink-0 flex-col xl:flex"
+          className="sticky top-20 hidden w-60 shrink-0 flex-col xl:flex"
         >
           <div className="glass-panel rounded-2xl p-4">
             <div className="mb-2.5 flex items-center justify-between gap-2">

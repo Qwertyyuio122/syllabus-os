@@ -16,6 +16,8 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
     opacity: z.number().optional(),
+    focusTags: z.array(z.string()).optional(),
+    onlyWhenFocused: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal('circle'),
@@ -26,6 +28,8 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
     opacity: z.number().optional(),
+    focusTags: z.array(z.string()).optional(),
+    onlyWhenFocused: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal('ellipse'),
@@ -37,6 +41,8 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
     opacity: z.number().optional(),
+    focusTags: z.array(z.string()).optional(),
+    onlyWhenFocused: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal('line'),
@@ -48,6 +54,9 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     strokeWidth: z.number().optional(),
     strokeDasharray: z.string().optional(),
     opacity: z.number().optional(),
+    focusTags: z.array(z.string()).optional(),
+    onlyWhenFocused: z.boolean().optional(),
+    animatedFlow: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal('path'),
@@ -57,6 +66,9 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     strokeWidth: z.number().optional(),
     strokeDasharray: z.string().optional(),
     opacity: z.number().optional(),
+    focusTags: z.array(z.string()).optional(),
+    onlyWhenFocused: z.boolean().optional(),
+    animatedFlow: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal('polygon'),
@@ -65,6 +77,8 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
     opacity: z.number().optional(),
+    focusTags: z.array(z.string()).optional(),
+    onlyWhenFocused: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal('text'),
@@ -76,6 +90,8 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     textAnchor: z.enum(['start', 'middle', 'end']).optional(),
     fill: z.string().optional(),
     opacity: z.number().optional(),
+    focusTags: z.array(z.string()).optional(),
+    onlyWhenFocused: z.boolean().optional(),
   }),
 ]);
 

@@ -224,7 +224,7 @@ export function FlashcardsTab({
         <div className="mx-auto max-w-2xl space-y-4">
           {/* Progress bar */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between font-mono text-xs text-[#6E6E73] dark:text-[#98989D]">
+            <div className="flex items-center justify-between font-mono text-xs tabular-nums text-[#6E6E73] dark:text-[#98989D]">
               <span>
                 Card {currentIndex + 1} of {filteredCards.length}
               </span>
@@ -240,7 +240,7 @@ export function FlashcardsTab({
             </div>
           </div>
 
-          {/* Interactive Card */}
+          {/* Interactive 3D Glass Flip Card */}
           <div
             role="button"
             tabIndex={0}
@@ -257,39 +257,89 @@ export function FlashcardsTab({
               }
             }}
             data-testid="flashcard-surface"
-            className="glass-panel glass-interactive flex min-h-[280px] cursor-pointer flex-col justify-between rounded-3xl p-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25"
+            className="flashcard-scene block w-full cursor-pointer rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25"
           >
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="font-mono uppercase">
-                  {flipped ? 'Answer' : 'Prompt'}
-                </Badge>
-                {currentCard.topic_id && topicMap[currentCard.topic_id] && (
-                  <Badge variant="subtle" className="font-mono">
-                    {topicMap[currentCard.topic_id].code}
-                  </Badge>
-                )}
+            <div
+              className="flashcard-rotator relative grid min-h-[290px]"
+              data-flipped={flipped ? 'true' : 'false'}
+            >
+              {/* Front Face: Prompt */}
+              <div
+                aria-hidden={flipped}
+                className={`flashcard-face glass-panel glass-interactive relative col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-3xl p-7 transition-[visibility] delay-[260ms] duration-0 motion-reduce:delay-0 ${
+                  flipped ? 'invisible pointer-events-none' : 'visible'
+                }`}
+              >
+                <div
+                  aria-hidden="true"
+                  className="flashcard-sheen pointer-events-none absolute inset-0"
+                />
+                <div className="relative z-10 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="font-mono uppercase">
+                      Prompt
+                    </Badge>
+                    {currentCard.topic_id && topicMap[currentCard.topic_id] && (
+                      <Badge variant="subtle" className="font-mono">
+                        {topicMap[currentCard.topic_id].code}
+                      </Badge>
+                    )}
+                  </div>
+                  {currentCard.mastered && (
+                    <Badge variant="success" className="font-mono">
+                      Mastered
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="relative z-10 my-6 text-base leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+                  <MarkdownMath content={currentCard.front_markdown} />
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                  <span>Click card or press Space to flip</span>
+                  <span className="font-mono">← / → navigate · M mastered</span>
+                </div>
               </div>
-              {currentCard.mastered && (
-                <Badge variant="success" className="font-mono">
-                  Mastered
-                </Badge>
-              )}
-            </div>
 
-            <div className="my-6 text-base leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
-              <MarkdownMath
-                content={
-                  flipped
-                    ? currentCard.back_markdown
-                    : currentCard.front_markdown
-                }
-              />
-            </div>
+              {/* Back Face: Answer */}
+              <div
+                aria-hidden={!flipped}
+                className={`flashcard-face flashcard-face-back glass-panel glass-interactive relative col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-3xl p-7 transition-[visibility] delay-[260ms] duration-0 motion-reduce:delay-0 ${
+                  flipped ? 'visible' : 'invisible pointer-events-none'
+                }`}
+              >
+                <div
+                  aria-hidden="true"
+                  className="flashcard-sheen pointer-events-none absolute inset-0"
+                />
+                <div className="relative z-10 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="default" className="font-mono uppercase">
+                      Answer
+                    </Badge>
+                    {currentCard.topic_id && topicMap[currentCard.topic_id] && (
+                      <Badge variant="subtle" className="font-mono">
+                        {topicMap[currentCard.topic_id].code}
+                      </Badge>
+                    )}
+                  </div>
+                  {currentCard.mastered && (
+                    <Badge variant="success" className="font-mono">
+                      Mastered
+                    </Badge>
+                  )}
+                </div>
 
-            <div className="flex items-center justify-between text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              <span>Click card or press Space to flip</span>
-              <span className="font-mono">← / → navigate · M mastered</span>
+                <div className="relative z-10 my-6 text-base leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+                  <MarkdownMath content={currentCard.back_markdown} />
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                  <span>Click card or press Space to flip</span>
+                  <span className="font-mono">← / → navigate · M mastered</span>
+                </div>
+              </div>
             </div>
           </div>
 

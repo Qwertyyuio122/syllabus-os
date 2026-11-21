@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useId, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -96,7 +96,71 @@ function parseViewBoxDimensions(viewBox?: string): {
   return fallback;
 }
 
-function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
+interface ShapeFocusContext {
+  activeFocusId: string | null;
+  hasAnyFocusTags: boolean;
+}
+
+function getShapeFocusStyle(shape: SvgShape, focus: ShapeFocusContext) {
+  const baseOpacity =
+    shape.opacity ?? (shape.kind === 'text' ? 0.88 : 1);
+  const tags = shape.focusTags;
+  const hasTags = Array.isArray(tags) && tags.length > 0;
+  const isMatched =
+    Boolean(focus.activeFocusId) &&
+    hasTags &&
+    tags.includes(focus.activeFocusId as string);
+
+  if (shape.onlyWhenFocused) {
+    return {
+      opacity: isMatched ? baseOpacity : 0,
+      strokeBoost: isMatched ? 0.2 : 0,
+      shouldAnimate: isMatched,
+      transitionClass:
+        'transition-opacity duration-300 motion-reduce:transition-none',
+    };
+  }
+
+  if (!focus.hasAnyFocusTags || !focus.activeFocusId) {
+    return {
+      opacity: baseOpacity,
+      strokeBoost: 0,
+      shouldAnimate: Boolean(
+        (shape.kind === 'line' || shape.kind === 'path') && shape.animatedFlow,
+      ),
+      transitionClass:
+        'transition-opacity duration-300 motion-reduce:transition-none',
+    };
+  }
+
+  if (hasTags) {
+    return {
+      opacity: isMatched ? Math.max(baseOpacity, 0.92) : Math.min(baseOpacity, 0.22),
+      strokeBoost: isMatched ? 0.55 : 0,
+      shouldAnimate: isMatched,
+      transitionClass:
+        'transition-opacity duration-300 motion-reduce:transition-none',
+    };
+  }
+
+  // Untagged structural backdrop (axes, intermediate energy lines, cell border)
+  return {
+    opacity: shape.kind === 'text' ? baseOpacity * 0.78 : baseOpacity * 0.82,
+    strokeBoost: 0,
+    shouldAnimate: false,
+    transitionClass:
+      'transition-opacity duration-300 motion-reduce:transition-none',
+  };
+}
+
+function renderSvgShape(
+  shape: SvgShape,
+  index: number,
+  focus: ShapeFocusContext,
+): React.ReactElement {
+  const { opacity, strokeBoost, shouldAnimate, transitionClass } =
+    getShapeFocusStyle(shape, focus);
+
   switch (shape.kind) {
     case 'rect':
       return (
@@ -109,8 +173,11 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           rx={shape.rx ?? 0}
           fill={normalizeSvgPaint(shape.fill, 'fill', 'rect')}
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'rect')}
-          strokeWidth={shape.stroke === 'none' ? 0 : (shape.strokeWidth ?? 1.6)}
-          opacity={shape.opacity ?? 1}
+          strokeWidth={
+            shape.stroke === 'none' ? 0 : (shape.strokeWidth ?? 1.6) + strokeBoost
+          }
+          opacity={opacity}
+          className={transitionClass}
         />
       );
     case 'circle':
@@ -122,8 +189,13 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           r={shape.r}
           fill={normalizeSvgPaint(shape.fill, 'fill', 'circle')}
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'circle')}
-          strokeWidth={shape.stroke === 'none' ? 0 : (shape.strokeWidth ?? 1.6)}
-          opacity={shape.opacity ?? 1}
+          strokeWidth={
+            shape.stroke === 'none'
+              ? 0
+              : (shape.strokeWidth ?? 1.6) + strokeBoost
+          }
+          opacity={opacity}
+          className={transitionClass}
         />
       );
     case 'ellipse':
@@ -136,8 +208,13 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           ry={shape.ry}
           fill={normalizeSvgPaint(shape.fill, 'fill', 'ellipse')}
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'ellipse')}
-          strokeWidth={shape.stroke === 'none' ? 0 : (shape.strokeWidth ?? 1.6)}
-          opacity={shape.opacity ?? 1}
+          strokeWidth={
+            shape.stroke === 'none'
+              ? 0
+              : (shape.strokeWidth ?? 1.6) + strokeBoost
+          }
+          opacity={opacity}
+          className={transitionClass}
         />
       );
     case 'line':
@@ -149,10 +226,13 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           x2={shape.x2}
           y2={shape.y2}
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'line')}
-          strokeWidth={shape.strokeWidth ?? 1.6}
+          strokeWidth={(shape.strokeWidth ?? 1.6) + strokeBoost}
           strokeDasharray={shape.strokeDasharray}
           strokeLinecap="round"
-          opacity={shape.opacity ?? 1}
+          opacity={opacity}
+          className={`${transitionClass}${
+            shape.animatedFlow && shouldAnimate ? ' animate-diagram-flow' : ''
+          }`}
         />
       );
     case 'path':
@@ -162,11 +242,18 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           d={shape.d}
           fill={normalizeSvgPaint(shape.fill, 'fill', 'path')}
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'path')}
-          strokeWidth={shape.stroke === 'none' ? 0 : (shape.strokeWidth ?? 1.6)}
+          strokeWidth={
+            shape.stroke === 'none'
+              ? 0
+              : (shape.strokeWidth ?? 1.6) + strokeBoost
+          }
           strokeDasharray={shape.strokeDasharray}
           strokeLinecap="round"
           strokeLinejoin="round"
-          opacity={shape.opacity ?? 1}
+          opacity={opacity}
+          className={`${transitionClass}${
+            shape.animatedFlow && shouldAnimate ? ' animate-diagram-flow' : ''
+          }`}
         />
       );
     case 'polygon':
@@ -176,8 +263,13 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           points={shape.points}
           fill={normalizeSvgPaint(shape.fill, 'fill', 'polygon')}
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'polygon')}
-          strokeWidth={shape.stroke === 'none' ? 0 : (shape.strokeWidth ?? 1.6)}
-          opacity={shape.opacity ?? 1}
+          strokeWidth={
+            shape.stroke === 'none'
+              ? 0
+              : (shape.strokeWidth ?? 1.6) + strokeBoost
+          }
+          opacity={opacity}
+          className={transitionClass}
         />
       );
     case 'text':
@@ -190,7 +282,8 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           fontWeight={shape.fontWeight ?? 500}
           textAnchor={shape.textAnchor ?? 'start'}
           fill={normalizeSvgPaint(shape.fill, 'fill', 'text')}
-          opacity={shape.opacity ?? 0.88}
+          opacity={opacity}
+          className={transitionClass}
           style={{ fontFamily: 'var(--font-sans)' }}
         >
           {shape.text}
@@ -218,10 +311,26 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
   } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
-  const gridPatternId = `plate-dots-${rawId}`;
+  const safeSpecId = spec.id.replace(/[^a-zA-Z0-9_-]/g, '') || 'explorer';
+  const gridPatternId = `plate-dots-${safeSpecId}`;
 
   const vb = useMemo(() => parseViewBoxDimensions(spec.viewBox), [spec.viewBox]);
+
+  const hasAnyFocusTags = useMemo(
+    () =>
+      spec.shapes.some(
+        (shape) => Array.isArray(shape.focusTags) && shape.focusTags.length > 0,
+      ),
+    [spec.shapes],
+  );
+
+  const focusContext: ShapeFocusContext = useMemo(
+    () => ({
+      activeFocusId: selfTestMode ? null : (hoveredId ?? selectedId),
+      hasAnyFocusTags,
+    }),
+    [hasAnyFocusTags, hoveredId, selectedId, selfTestMode],
+  );
 
   const activeIndex = useMemo(() => {
     if (!selectedId) return -1;
@@ -304,6 +413,11 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
             {spec.hotspots.length} interactive{' '}
             {spec.hotspots.length === 1 ? 'pin' : 'pins'}
           </span>
+          {!selfTestMode && hasAnyFocusTags && activeHotspot && (
+            <span className="glass-pill max-w-[210px] truncate rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+              Focus: {activeHotspot.category}
+            </span>
+          )}
           {selfTestMode && (
             <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
               Revealed {revealedIds.size} / {spec.hotspots.length}
@@ -327,7 +441,7 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
             >
               <Minus className="h-3 w-3" />
             </button>
-            <span className="min-w-[42px] text-center font-mono text-[10.5px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+            <span className="min-w-[42px] text-center font-mono text-[10.5px] font-medium tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
               {Math.round(zoom * 100)}%
             </span>
             <button
@@ -456,7 +570,9 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
               >
                 {/* Rendered Diagram Geometry */}
                 <g>
-                  {spec.shapes.map((shape, idx) => renderSvgShape(shape, idx))}
+                  {spec.shapes.map((shape, idx) =>
+                    renderSvgShape(shape, idx, focusContext),
+                  )}
                 </g>
 
                 {/* Hotspot Pins */}
@@ -654,7 +770,7 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
                 <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
                 Prev Pin
               </button>
-              <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
                 {activeIndex >= 0 ? activeIndex + 1 : '—'} /{' '}
                 {spec.hotspots.length}
               </span>

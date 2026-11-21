@@ -7,8 +7,15 @@ import type { CoreProjectRow } from '@/types/database';
 
 export const dynamic = 'force-dynamic';
 
-export default async function CoreWorkspacePage() {
-  const supabase = await createClient();
+export default async function CoreWorkspacePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ project?: string }>;
+}) {
+  const [{ project }, supabase] = await Promise.all([
+    searchParams,
+    createClient(),
+  ]);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -26,12 +33,15 @@ export default async function CoreWorkspacePage() {
     .order('updated_at', { ascending: false });
 
   const coreProjects = (coreProjectsData as CoreProjectRow[] | null) ?? [];
+  const initialProjectId =
+    project && coreProjects.some((p) => p.id === project) ? project : null;
 
   return (
     <CoreWorkspaceClient
       userId={user.id}
       initialProjects={coreProjects}
       coreResources={CORE_CLASSROOM_RESOURCES}
+      initialProjectId={initialProjectId}
     />
   );
 }

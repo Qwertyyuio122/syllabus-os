@@ -14,6 +14,9 @@ import {
   LayoutGrid,
   LogOut,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
   Sigma,
   X,
 } from 'lucide-react';
@@ -31,7 +34,10 @@ interface SidebarProps {
   profile: ProfileRow | null;
   userEmail: string;
   subjects: SidebarSubjectSummary[];
+  onOpenCommandPalette?: () => void;
 }
+
+const SIDEBAR_COLLAPSE_STORAGE_KEY = 'syllabusos-sidebar-collapsed';
 
 function getSubjectIcon(slug: string) {
   switch (slug) {
@@ -52,11 +58,43 @@ function getSubjectIcon(slug: string) {
   }
 }
 
-export function Sidebar({ profile, userEmail, subjects }: SidebarProps) {
+export function Sidebar({
+  profile,
+  userEmail,
+  subjects,
+  onOpenCommandPalette,
+}: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState(false);
   const [signingOut, setSigningOut] = React.useState(false);
+
+  // Sync persisted desktop collapse state post-hydration (prevents SSR mismatch)
+  React.useEffect(() => {
+    try {
+      if (window.localStorage.getItem(SIDEBAR_COLLAPSE_STORAGE_KEY) === 'true') {
+        setCollapsed(true);
+      }
+    } catch {
+      // Ignore storage access restrictions
+    }
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(
+          SIDEBAR_COLLAPSE_STORAGE_KEY,
+          next ? 'true' : 'false',
+        );
+      } catch {
+        // Ignore storage access restrictions
+      }
+      return next;
+    });
+  };
 
   React.useEffect(() => {
     setMobileOpen(false);
@@ -104,69 +142,149 @@ export function Sidebar({ profile, userEmail, subjects }: SidebarProps) {
   const inactiveNavClass =
     'text-[#6E6E73] hover:bg-black/[0.045] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:bg-white/[0.06] dark:hover:text-[#F5F5F7]';
 
-  const navContent = (
+  const renderNavContent = (isCompactDesktop: boolean) => (
     <div className="flex h-full flex-col justify-between text-[#1D1D1F] dark:text-[#F5F5F7]">
-      <div className="flex flex-col overflow-y-auto px-3.5 py-4">
-        {/* Workspace Brand Header */}
-        <div className="mb-5 flex items-center justify-between gap-2 px-1.5">
+      <div
+        className={`flex flex-col overflow-y-auto py-4 ${
+          isCompactDesktop ? 'items-center px-2' : 'px-3.5'
+        }`}
+      >
+        {/* Workspace Brand Header + Collapse Control */}
+        <div
+          className={`mb-4 flex w-full items-center gap-2 ${
+            isCompactDesktop ? 'flex-col justify-center' : 'justify-between px-1.5'
+          }`}
+        >
           <Link
             href="/dashboard"
-            className="flex min-w-0 items-center gap-2.5 rounded-xl py-1 text-[#1D1D1F] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:text-[#F5F5F7]"
+            title={isCompactDesktop ? `${APP_NAME} — Overview` : undefined}
+            className={`flex min-w-0 items-center gap-2.5 rounded-xl py-1 text-[#1D1D1F] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:text-[#F5F5F7] ${
+              isCompactDesktop ? 'justify-center px-1' : ''
+            }`}
           >
             <span className="glass-pill flex h-8 w-8 shrink-0 items-center justify-center rounded-xl">
               <BrandMonogram size={18} className="shrink-0" />
             </span>
-            <div className="min-w-0">
-              <div className="truncate text-sm font-semibold tracking-tight leading-none">
-                {APP_NAME}
+            {!isCompactDesktop && (
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold leading-none tracking-tight">
+                  {APP_NAME}
+                </div>
+                <div className="mt-1 truncate text-[10.5px] leading-none text-[#6E6E73] dark:text-[#98989D]">
+                  {APP_COHORT}
+                </div>
               </div>
-              <div className="mt-1 truncate text-[10.5px] text-[#6E6E73] dark:text-[#98989D] leading-none">
-                {APP_COHORT}
-              </div>
-            </div>
+            )}
           </Link>
+
+          {/* Mobile Drawer Close */}
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
             aria-label="Close navigation menu"
-            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-xl text-[#6E6E73] hover:bg-black/[0.06] hover:text-[#1D1D1F] lg:hidden dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7]"
+            className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-[#6E6E73] hover:bg-black/[0.06] hover:text-[#1D1D1F] lg:hidden dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7]"
           >
             <X className="h-4 w-4" />
           </button>
+
+          {/* Desktop Sidebar Collapse/Expand Toggle */}
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label={isCompactDesktop ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={isCompactDesktop ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="hidden h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-[#6E6E73] transition-colors hover:bg-black/[0.06] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 lg:inline-flex dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25"
+          >
+            {isCompactDesktop ? (
+              <PanelLeftOpen className="h-4 w-4" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
+          </button>
         </div>
 
-        {/* Workspace Overview */}
-        <div className="space-y-1">
-          <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
-            Workspace
-          </div>
-          <Link
-            href="/dashboard"
-            className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-150 ${
-              pathname === '/dashboard' ? activeNavClass : inactiveNavClass
+        {/* Spotlight Quick Search Pill (⌘K) */}
+        {onOpenCommandPalette && (
+          <button
+            type="button"
+            onClick={() => {
+              setMobileOpen(false);
+              onOpenCommandPalette();
+            }}
+            aria-label="Open command palette"
+            title={
+              isCompactDesktop ? 'Quick search (⌘K)' : 'Quick search across subjects and notes'
+            }
+            className={`glass-pill glass-interactive mb-4 flex cursor-pointer items-center text-xs text-[#6E6E73] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:text-[#98989D] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25 ${
+              isCompactDesktop
+                ? 'h-9 w-9 justify-center rounded-xl'
+                : 'w-full justify-between rounded-xl px-2.5 py-2'
             }`}
           >
+            <span className="flex items-center gap-2">
+              <Search className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              {!isCompactDesktop && <span>Quick jump…</span>}
+            </span>
+            {!isCompactDesktop && (
+              <kbd className="rounded-md border border-black/[0.08] bg-white/70 px-1.5 py-0.5 font-mono text-[10px] font-medium text-[#6E6E73] dark:border-white/[0.12] dark:bg-white/[0.06] dark:text-[#98989D]">
+                ⌘K
+              </kbd>
+            )}
+          </button>
+        )}
+
+        {/* Workspace Overview */}
+        <div className={`w-full space-y-1 ${isCompactDesktop ? 'flex flex-col items-center' : ''}`}>
+          {!isCompactDesktop && (
+            <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+              Workspace
+            </div>
+          )}
+          <Link
+            href="/dashboard"
+            title={isCompactDesktop ? 'Overview' : undefined}
+            aria-label={isCompactDesktop ? 'Overview' : undefined}
+            className={`flex items-center rounded-xl text-[13px] transition-all duration-150 ${
+              isCompactDesktop
+                ? 'h-9 w-9 justify-center'
+                : 'gap-2.5 px-2.5 py-2'
+            } ${pathname === '/dashboard' ? activeNavClass : inactiveNavClass}`}
+          >
             <LayoutGrid className="h-4 w-4 shrink-0" />
-            <span className="truncate">Overview</span>
+            {!isCompactDesktop && <span className="truncate">Overview</span>}
           </Link>
           <Link
             href="/dashboard/core"
-            className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-150 ${
+            title={isCompactDesktop ? 'EE · TOK · CAS · IAs' : undefined}
+            aria-label={isCompactDesktop ? 'EE · TOK · CAS · IAs' : undefined}
+            className={`flex items-center rounded-xl text-[13px] transition-all duration-150 ${
+              isCompactDesktop
+                ? 'h-9 w-9 justify-center'
+                : 'gap-2.5 px-2.5 py-2'
+            } ${
               pathname.startsWith('/dashboard/core')
                 ? activeNavClass
                 : inactiveNavClass
             }`}
           >
             <FolderKanban className="h-4 w-4 shrink-0" />
-            <span className="truncate">EE · TOK · CAS · IAs</span>
+            {!isCompactDesktop && (
+              <span className="truncate">EE · TOK · CAS · IAs</span>
+            )}
           </Link>
         </div>
 
         {/* Diploma Subjects */}
-        <div className="mt-6 space-y-1">
-          <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
-            IB Subjects
-          </div>
+        <div
+          className={`mt-5 w-full space-y-1 ${
+            isCompactDesktop ? 'flex flex-col items-center' : ''
+          }`}
+        >
+          {!isCompactDesktop && (
+            <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+              IB Subjects
+            </div>
+          )}
           {subjects.map((subject) => {
             const href = `/dashboard/subjects/${subject.slug}`;
             const isActive =
@@ -181,21 +299,33 @@ export function Sidebar({ profile, userEmail, subjects }: SidebarProps) {
               <Link
                 key={subject.id}
                 href={href}
-                className={`group flex flex-col gap-1.5 rounded-xl px-2.5 py-2 text-[13px] transition-all duration-150 ${
-                  isActive ? activeNavClass : inactiveNavClass
-                }`}
+                title={
+                  isCompactDesktop
+                    ? `${subject.name} (${subject.level}${subject.totalCount > 0 ? ` · ${pct}%` : ''})`
+                    : undefined
+                }
+                aria-label={isCompactDesktop ? subject.name : undefined}
+                className={`group flex flex-col rounded-xl text-[13px] transition-all duration-150 ${
+                  isCompactDesktop
+                    ? 'h-9 w-9 items-center justify-center'
+                    : 'gap-1.5 px-2.5 py-2'
+                } ${isActive ? activeNavClass : inactiveNavClass}`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex min-w-0 items-center gap-2.5">
                     <Icon className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{subject.name}</span>
+                    {!isCompactDesktop && (
+                      <span className="truncate">{subject.name}</span>
+                    )}
                   </span>
-                  <span className="shrink-0 font-mono text-[10.5px] text-[#6E6E73] dark:text-[#98989D]">
-                    {subject.level}
-                    {subject.totalCount > 0 ? ` · ${pct}%` : ''}
-                  </span>
+                  {!isCompactDesktop && (
+                    <span className="shrink-0 font-mono text-[10.5px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                      {subject.level}
+                      {subject.totalCount > 0 ? ` · ${pct}%` : ''}
+                    </span>
+                  )}
                 </div>
-                {subject.totalCount > 0 && (
+                {!isCompactDesktop && subject.totalCount > 0 && (
                   <div className="h-0.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
                     <div
                       className="h-full rounded-full bg-[#1D1D1F]/65 transition-all duration-300 dark:bg-[#F5F5F7]/70"
@@ -210,31 +340,57 @@ export function Sidebar({ profile, userEmail, subjects }: SidebarProps) {
       </div>
 
       {/* Footer: Theme & Account */}
-      <div className="border-t border-black/[0.06] p-3.5 dark:border-white/[0.08]">
-        <div className="mb-2.5 flex items-center justify-between">
-          <ThemeToggle />
+      <div
+        className={`border-t border-black/[0.06] dark:border-white/[0.08] ${
+          isCompactDesktop
+            ? 'flex flex-col items-center gap-2 p-2.5'
+            : 'p-3.5'
+        }`}
+      >
+        <div
+          className={
+            isCompactDesktop
+              ? 'flex flex-col items-center gap-1.5'
+              : 'mb-2.5 flex items-center justify-between'
+          }
+        >
+          <ThemeToggle compact={isCompactDesktop} />
           <button
             type="button"
             onClick={handleSignOut}
             disabled={signingOut}
-            className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs text-[#6E6E73] transition-colors hover:bg-black/[0.05] hover:text-[#1D1D1F] cursor-pointer disabled:opacity-50 dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7]"
+            aria-label={isCompactDesktop ? 'Sign out' : undefined}
+            title={isCompactDesktop ? 'Sign out' : undefined}
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-xl text-xs text-[#6E6E73] transition-colors hover:bg-black/[0.05] hover:text-[#1D1D1F] disabled:opacity-50 dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7] ${
+              isCompactDesktop ? 'h-8 w-8 justify-center' : 'px-2.5 py-1.5'
+            }`}
           >
             <LogOut className="h-3.5 w-3.5" />
-            <span>{signingOut ? 'Signing out…' : 'Sign out'}</span>
+            {!isCompactDesktop && (
+              <span>{signingOut ? 'Signing out…' : 'Sign out'}</span>
+            )}
           </button>
         </div>
-        <div className="glass-pill flex items-center gap-2.5 rounded-2xl px-2.5 py-2">
+
+        <div
+          title={isCompactDesktop ? `${displayName} (${userEmail})` : undefined}
+          className={`glass-pill flex items-center rounded-2xl ${
+            isCompactDesktop ? 'h-9 w-9 justify-center' : 'gap-2.5 px-2.5 py-2'
+          }`}
+        >
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1D1D1F] font-mono text-[11px] font-semibold text-white dark:bg-[#F5F5F7] dark:text-[#111113]">
             {initials}
           </div>
-          <div className="min-w-0">
-            <div className="truncate text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
-              {displayName}
+          {!isCompactDesktop && (
+            <div className="min-w-0">
+              <div className="truncate text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {displayName}
+              </div>
+              <div className="truncate text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                {userEmail}
+              </div>
             </div>
-            <div className="truncate text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              {userEmail}
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -243,13 +399,13 @@ export function Sidebar({ profile, userEmail, subjects }: SidebarProps) {
   return (
     <>
       {/* Mobile Header Bar */}
-      <header className="glass-surface sticky top-0 z-30 flex h-13 items-center justify-between border-x-0 border-t-0 px-4 lg:hidden">
+      <header className="glass-floating-bar sticky top-0 z-30 flex h-13 items-center justify-between border-x-0 border-t-0 px-4 lg:hidden">
         <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open navigation menu"
-            className="glass-pill inline-flex h-8 w-8 items-center justify-center rounded-xl text-[#1D1D1F] hover:bg-white/95 cursor-pointer dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+            className="glass-pill inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
           >
             <Menu className="h-4 w-4" />
           </button>
@@ -261,7 +417,19 @@ export function Sidebar({ profile, userEmail, subjects }: SidebarProps) {
             <span>{APP_NAME}</span>
           </Link>
         </div>
-        <ThemeToggle compact />
+        <div className="flex items-center gap-1.5">
+          {onOpenCommandPalette && (
+            <button
+              type="button"
+              onClick={onOpenCommandPalette}
+              aria-label="Open command palette"
+              className="glass-pill inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          )}
+          <ThemeToggle compact />
+        </div>
       </header>
 
       {/* Mobile Drawer */}
@@ -273,15 +441,19 @@ export function Sidebar({ profile, userEmail, subjects }: SidebarProps) {
             aria-hidden="true"
           />
           <aside className="glass-panel relative z-10 m-2 h-[calc(100%-1rem)] w-[264px] max-w-[85vw] overflow-hidden rounded-2xl">
-            {navContent}
+            {renderNavContent(false)}
           </aside>
         </div>
       )}
 
-      {/* Desktop Floating Glass Rail */}
-      <aside className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-[252px] lg:shrink-0 lg:flex-col lg:p-3 lg:pr-0">
+      {/* Desktop Floating Collapsible Glass Rail / Icon Dock */}
+      <aside
+        className={`hidden transition-[width] duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none lg:sticky lg:top-0 lg:flex lg:h-screen lg:shrink-0 lg:flex-col lg:p-3 lg:pr-0 ${
+          collapsed ? 'lg:w-[74px]' : 'lg:w-[252px]'
+        }`}
+      >
         <div className="glass-panel h-full overflow-hidden rounded-2xl">
-          {navContent}
+          {renderNavContent(collapsed)}
         </div>
       </aside>
     </>

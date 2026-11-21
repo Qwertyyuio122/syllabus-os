@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useId, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import type { StepMechanismNode, StepMechanismSpec } from '@/types/diagrams';
 import { InlineKaTeX, MarkdownMath } from '@/components/notes/MarkdownMath';
@@ -158,8 +158,7 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
   const [stepIndex, setStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const rawId = useId();
-  const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, '');
+  const safeId = spec.id.replace(/[^a-zA-Z0-9_-]/g, '') || 'mechanism';
   const activeMarkerId = `arrow-active-${safeId}`;
   const mutedMarkerId = `arrow-muted-${safeId}`;
   const gridPatternId = `mech-grid-${safeId}`;

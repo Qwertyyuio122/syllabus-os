@@ -5,10 +5,13 @@ function downArrowShapes(
   yTop: number,
   yBottom: number,
   strokeWidth = 2,
+  focusTag?: string,
 ): SvgShape[] {
   const tipY = yBottom - 2;
   const headBaseY = yBottom - 10;
-  return [
+  const tags = focusTag ? [focusTag] : undefined;
+
+  const shapes: SvgShape[] = [
     {
       kind: 'line',
       x1: x,
@@ -17,14 +20,35 @@ function downArrowShapes(
       y2: headBaseY,
       stroke: 'currentColor',
       strokeWidth,
+      ...(tags ? { focusTags: tags } : {}),
     },
     {
       kind: 'polygon',
       points: `${x - 4},${headBaseY} ${x + 4},${headBaseY} ${x},${tipY}`,
       fill: 'currentColor',
       stroke: 'none',
+      ...(tags ? { focusTags: tags } : {}),
     },
   ];
+
+  if (focusTag && headBaseY - yTop > 22) {
+    shapes.push({
+      kind: 'line',
+      x1: x + 6,
+      y1: yTop + 6,
+      x2: x + 6,
+      y2: headBaseY - 2,
+      stroke: 'currentColor',
+      strokeWidth: 1.35,
+      strokeDasharray: '4 4',
+      opacity: 0.72,
+      animatedFlow: true,
+      onlyWhenFocused: true,
+      focusTags: tags,
+    });
+  }
+
+  return shapes;
 }
 
 export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
@@ -32,7 +56,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
   id: 'bio-a1-1-water-explorer',
   title: 'Water Dipole & Tetrahedral Hydrogen-Bond Network',
   caption:
-    'Inspect the 104.5° polar covalent O–H geometry, intermolecular cohesion H-bonds, cellulose adhesion, and thermal buffering.',
+    'Select any interaction pin to isolate the 104.5° polar covalent O–H dipole, cohesion H-bonds, cellulose adhesion, or the tetrahedral thermal H-bond network.',
   viewBox: '0 0 800 440',
   shapes: [
     // Hydrophilic Cellulose Cell Wall Panel (Left)
@@ -46,6 +70,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.08)',
       stroke: 'currentColor',
       strokeWidth: 1.6,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'line',
@@ -56,6 +81,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1,
       opacity: 0.2,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'line',
@@ -66,6 +92,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1,
       opacity: 0.2,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'line',
@@ -76,6 +103,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1,
       opacity: 0.2,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'text',
@@ -86,6 +114,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'text',
@@ -96,6 +125,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.72,
+      focusTags: ['adhesion-wall'],
     },
     // Exposed -OH stubs on Cellulose surface
     {
@@ -106,6 +136,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 165,
       stroke: 'currentColor',
       strokeWidth: 2,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'circle',
@@ -115,6 +146,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.4,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'text',
@@ -125,6 +157,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'line',
@@ -134,6 +167,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 280,
       stroke: 'currentColor',
       strokeWidth: 2,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'circle',
@@ -143,6 +177,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.4,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'text',
@@ -153,6 +188,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['adhesion-wall'],
     },
 
     // Adhesion Dashed H-Bond (Cellulose -OH -> Central H1)
@@ -165,6 +201,8 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 2,
       strokeDasharray: '6 5',
+      animatedFlow: true,
+      focusTags: ['adhesion-wall'],
     },
     {
       kind: 'text',
@@ -176,6 +214,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.8,
+      focusTags: ['adhesion-wall'],
     },
 
     // Central H2O Molecule (Exact 104.5° Bent Geometry)
@@ -189,6 +228,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1,
       opacity: 0.45,
+      focusTags: ['pol-cov'],
     },
     {
       kind: 'ellipse',
@@ -200,6 +240,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1,
       opacity: 0.45,
+      focusTags: ['pol-cov'],
     },
     {
       kind: 'path',
@@ -209,6 +250,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       strokeWidth: 1.2,
       strokeDasharray: '3 3',
       opacity: 0.65,
+      focusTags: ['pol-cov'],
     },
     {
       kind: 'text',
@@ -220,6 +262,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.85,
+      focusTags: ['pol-cov'],
     },
     {
       kind: 'line',
@@ -229,6 +272,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 160,
       stroke: 'currentColor',
       strokeWidth: 4,
+      focusTags: ['pol-cov', 'adhesion-wall', 'specific-heat'],
     },
     {
       kind: 'line',
@@ -238,6 +282,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 160,
       stroke: 'currentColor',
       strokeWidth: 4,
+      focusTags: ['pol-cov', 'h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'circle',
@@ -247,6 +292,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.18)',
       stroke: 'currentColor',
       strokeWidth: 2.2,
+      focusTags: ['pol-cov', 'h-bond-coh', 'adhesion-wall', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -257,6 +303,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 700,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['pol-cov', 'h-bond-coh', 'adhesion-wall', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -268,6 +315,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.8,
+      focusTags: ['pol-cov', 'h-bond-coh', 'adhesion-wall', 'specific-heat'],
     },
     {
       kind: 'circle',
@@ -277,6 +325,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.8,
+      focusTags: ['pol-cov', 'adhesion-wall', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -287,6 +336,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 700,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['pol-cov', 'adhesion-wall', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -297,6 +347,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.78,
+      focusTags: ['pol-cov', 'adhesion-wall', 'specific-heat'],
     },
     {
       kind: 'circle',
@@ -306,6 +357,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.8,
+      focusTags: ['pol-cov', 'h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -316,6 +368,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 700,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['pol-cov', 'h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -326,6 +379,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.78,
+      focusTags: ['pol-cov', 'h-bond-coh', 'specific-heat'],
     },
 
     // Cohesion Hydrogen Bond (Central H2 -> Neighbor #2 Oxygen)
@@ -338,6 +392,8 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 2.1,
       strokeDasharray: '7 5',
+      animatedFlow: true,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -349,6 +405,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.8,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
 
     // Neighbor #2 Complete H2O Molecule (Top-Right)
@@ -360,6 +417,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 79,
       stroke: 'currentColor',
       strokeWidth: 3.2,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'line',
@@ -369,6 +427,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 157,
       stroke: 'currentColor',
       strokeWidth: 3.2,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'circle',
@@ -378,6 +437,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.14)',
       stroke: 'currentColor',
       strokeWidth: 1.8,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -388,6 +448,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 700,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -398,6 +459,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.78,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'circle',
@@ -407,6 +469,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.6,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -417,6 +480,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'circle',
@@ -426,6 +490,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.6,
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
     {
       kind: 'text',
@@ -436,6 +501,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['h-bond-coh', 'specific-heat'],
     },
 
     // Tetrahedral Neighbor #3 Complete H2O Molecule (Bottom)
@@ -448,6 +514,8 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 2,
       strokeDasharray: '6 5',
+      animatedFlow: true,
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'line',
@@ -457,6 +525,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 344,
       stroke: 'currentColor',
       strokeWidth: 3.2,
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'line',
@@ -466,6 +535,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       y2: 350,
       stroke: 'currentColor',
       strokeWidth: 3.2,
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'circle',
@@ -475,6 +545,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.6,
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'text',
@@ -485,6 +556,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'circle',
@@ -494,6 +566,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.14)',
       stroke: 'currentColor',
       strokeWidth: 1.8,
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'text',
@@ -504,6 +577,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 700,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'circle',
@@ -513,6 +587,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.6,
+      focusTags: ['specific-heat'],
     },
     {
       kind: 'text',
@@ -523,6 +598,7 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['specific-heat'],
     },
 
     // Compact Legend Strip at Bottom
@@ -613,7 +689,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
   id: 'bio-b2-2-compartment-explorer',
   title: 'Eukaryotic Secretory Pathway & Energetic Organelles',
   caption:
-    'Inspect double nuclear envelopes with pores, ribosome-studded rER, cis→trans Golgi cisternae, clathrin triskelion cages, mitochondrial cristae, and chloroplast grana.',
+    'Trace live secretory cargo flow (Nucleus → rER → cis/trans Golgi → Clathrin Vesicle) alongside mitochondrial cristae and chloroplast grana.',
   viewBox: '0 0 800 440',
   shapes: [
     {
@@ -628,6 +704,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       strokeWidth: 1.2,
       opacity: 0.25,
     },
+    // Nucleus & Pores
     {
       kind: 'circle',
       cx: 118,
@@ -635,6 +712,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       r: 72,
       fill: 'rgba(120,119,116,0.08)',
       stroke: 'none',
+      focusTags: ['nuc'],
     },
     {
       kind: 'path',
@@ -642,6 +720,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'none',
       stroke: 'currentColor',
       strokeWidth: 2.2,
+      focusTags: ['nuc'],
     },
     {
       kind: 'path',
@@ -650,6 +729,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1.2,
       opacity: 0.55,
+      focusTags: ['nuc'],
     },
     {
       kind: 'circle',
@@ -660,6 +740,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1.2,
       opacity: 0.7,
+      focusTags: ['nuc'],
     },
     {
       kind: 'text',
@@ -670,6 +751,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['nuc'],
     },
     {
       kind: 'text',
@@ -680,23 +762,42 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.7,
+      focusTags: ['nuc'],
     },
+
+    // Animated mRNA Export Pathway (Nucleus -> Rough ER)
+    {
+      kind: 'line',
+      x1: 186,
+      y1: 136,
+      x2: 220,
+      y2: 136,
+      stroke: 'currentColor',
+      strokeWidth: 1.5,
+      strokeDasharray: '4 4',
+      opacity: 0.75,
+      animatedFlow: true,
+      focusTags: ['nuc', 'rer-golgi'],
+    },
+
+    // Rough ER + 80S Ribosomes
     {
       kind: 'path',
       d: 'M 225 82 C 255 74, 295 74, 338 82 C 352 85, 352 98, 338 100 C 295 94, 255 94, 232 100 C 218 104, 218 118, 232 121 C 272 115, 312 115, 344 122 C 358 125, 358 139, 344 142 C 305 135, 260 135, 228 142 C 214 146, 214 162, 228 166 C 272 158, 316 158, 348 166 C 360 170, 360 184, 346 186 C 300 179, 258 179, 224 185',
       fill: 'rgba(120,119,116,0.1)',
       stroke: 'currentColor',
       strokeWidth: 1.8,
+      focusTags: ['rer-golgi'],
     },
-    { kind: 'circle', cx: 248, cy: 73, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 278, cy: 71, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 310, cy: 73, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 256, cy: 114, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 294, cy: 113, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 332, cy: 116, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 244, cy: 158, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 288, cy: 156, r: 2.8, fill: 'currentColor' },
-    { kind: 'circle', cx: 328, cy: 159, r: 2.8, fill: 'currentColor' },
+    { kind: 'circle', cx: 248, cy: 73, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 278, cy: 71, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 310, cy: 73, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 256, cy: 114, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 294, cy: 113, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 332, cy: 116, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 244, cy: 158, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 288, cy: 156, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
+    { kind: 'circle', cx: 328, cy: 159, r: 2.8, fill: 'currentColor', focusTags: ['rer-golgi'] },
     {
       kind: 'text',
       x: 288,
@@ -706,6 +807,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['rer-golgi'],
     },
     {
       kind: 'text',
@@ -716,7 +818,10 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.7,
+      focusTags: ['rer-golgi'],
     },
+
+    // Animated Vesicle Trafficking Stream (rER -> cis-Golgi)
     {
       kind: 'line',
       x1: 364,
@@ -724,9 +829,11 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       x2: 416,
       y2: 136,
       stroke: 'currentColor',
-      strokeWidth: 1.5,
+      strokeWidth: 1.7,
       strokeDasharray: '4 4',
-      opacity: 0.7,
+      opacity: 0.85,
+      animatedFlow: true,
+      focusTags: ['rer-golgi'],
     },
     {
       kind: 'circle',
@@ -736,13 +843,17 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'var(--diagram-surface, #ffffff)',
       stroke: 'currentColor',
       strokeWidth: 1.4,
+      focusTags: ['rer-golgi'],
     },
+
+    // Golgi Apparatus (cis -> trans)
     {
       kind: 'path',
       d: 'M 434 90 Q 418 138 434 186 Q 444 188 446 180 Q 434 138 446 96 Q 444 88 434 90 Z',
       fill: 'rgba(120,119,116,0.12)',
       stroke: 'currentColor',
       strokeWidth: 1.7,
+      focusTags: ['rer-golgi'],
     },
     {
       kind: 'path',
@@ -750,6 +861,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.14)',
       stroke: 'currentColor',
       strokeWidth: 1.7,
+      focusTags: ['rer-golgi'],
     },
     {
       kind: 'path',
@@ -757,6 +869,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.14)',
       stroke: 'currentColor',
       strokeWidth: 1.7,
+      focusTags: ['rer-golgi'],
     },
     {
       kind: 'path',
@@ -764,6 +877,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.12)',
       stroke: 'currentColor',
       strokeWidth: 1.7,
+      focusTags: ['rer-golgi'],
     },
     {
       kind: 'text',
@@ -774,6 +888,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['rer-golgi'],
     },
     {
       kind: 'text',
@@ -784,7 +899,10 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.7,
+      focusTags: ['rer-golgi'],
     },
+
+    // Animated Exit Flow (trans-Golgi -> Clathrin Vesicle)
     {
       kind: 'line',
       x1: 552,
@@ -792,9 +910,11 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       x2: 638,
       y2: 138,
       stroke: 'currentColor',
-      strokeWidth: 1.5,
+      strokeWidth: 1.7,
       strokeDasharray: '4 4',
-      opacity: 0.7,
+      opacity: 0.85,
+      animatedFlow: true,
+      focusTags: ['rer-golgi', 'clathrin'],
     },
     {
       kind: 'circle',
@@ -804,6 +924,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.14)',
       stroke: 'currentColor',
       strokeWidth: 1.8,
+      focusTags: ['clathrin'],
     },
     {
       kind: 'path',
@@ -813,6 +934,8 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       strokeWidth: 1.3,
       strokeDasharray: '5 3',
       opacity: 0.75,
+      animatedFlow: true,
+      focusTags: ['clathrin'],
     },
     {
       kind: 'path',
@@ -821,6 +944,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1.6,
       opacity: 0.8,
+      focusTags: ['clathrin'],
     },
     {
       kind: 'text',
@@ -831,6 +955,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['clathrin'],
     },
     {
       kind: 'text',
@@ -841,7 +966,10 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
       opacity: 0.7,
+      focusTags: ['clathrin'],
     },
+
+    // Mitochondrion & Folded Cristae
     {
       kind: 'rect',
       x: 68,
@@ -852,6 +980,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.1)',
       stroke: 'currentColor',
       strokeWidth: 2,
+      focusTags: ['mito'],
     },
     {
       kind: 'path',
@@ -859,6 +988,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.08)',
       stroke: 'currentColor',
       strokeWidth: 1.5,
+      focusTags: ['mito'],
     },
     {
       kind: 'text',
@@ -869,7 +999,10 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['mito'],
     },
+
+    // Chloroplast & Grana Thylakoids
     {
       kind: 'ellipse',
       cx: 576,
@@ -879,6 +1012,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fill: 'rgba(120,119,116,0.1)',
       stroke: 'currentColor',
       strokeWidth: 2,
+      focusTags: ['chloro'],
     },
     {
       kind: 'ellipse',
@@ -890,6 +1024,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1.1,
       opacity: 0.5,
+      focusTags: ['chloro'],
     },
     {
       kind: 'line',
@@ -900,20 +1035,21 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1.4,
       opacity: 0.65,
+      focusTags: ['chloro'],
     },
-    { kind: 'rect', x: 478, y: 312, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 478, y: 323, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 478, y: 334, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 478, y: 345, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 559, y: 308, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 559, y: 319, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 559, y: 330, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 559, y: 341, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 559, y: 352, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 638, y: 314, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 638, y: 325, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 638, y: 336, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'rect', x: 638, y: 347, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3 },
+    { kind: 'rect', x: 478, y: 312, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 478, y: 323, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 478, y: 334, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 478, y: 345, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 559, y: 308, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 559, y: 319, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 559, y: 330, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 559, y: 341, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 559, y: 352, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 638, y: 314, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 638, y: 325, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 638, y: 336, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
+    { kind: 'rect', x: 638, y: 347, width: 34, height: 8, rx: 4, fill: 'var(--diagram-surface, #ffffff)', stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['chloro'] },
     {
       kind: 'text',
       x: 576,
@@ -923,6 +1059,7 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['chloro'],
     },
   ],
   hotspots: [
@@ -984,9 +1121,10 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
   id: 'chem-s1-3-hydrogen-spectrum',
   title: 'Hydrogen Quantized Energy Levels & Spectral Series (Day 1.3.3)',
   caption:
-    'Inspect converging shell levels (n=1 to n=∞), downward emission arrows for Lyman (UV), Balmer (Visible), and Paschen (IR), and the line emission convergence strip.',
+    'Select Lyman (UV), Balmer (Visible), Paschen (IR), or Convergence Limit to isolate target shells, animate photon emission drops, and highlight the emission spectrum.',
   viewBox: '0 0 800 440',
   shapes: [
+    // Energy Vertical Axis
     {
       kind: 'line',
       x1: 86,
@@ -1014,25 +1152,35 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       textAnchor: 'middle',
       fill: 'currentColor',
     },
-    { kind: 'line', x1: 98, y1: 354, x2: 736, y2: 354, stroke: 'currentColor', strokeWidth: 2.6 },
-    { kind: 'text', x: 74, y: 358, text: 'n = 1', fontSize: 12, fontWeight: 600, textAnchor: 'end', fill: 'currentColor' },
-    { kind: 'line', x1: 98, y1: 206, x2: 736, y2: 206, stroke: 'currentColor', strokeWidth: 2.1 },
-    { kind: 'text', x: 74, y: 210, text: 'n = 2', fontSize: 12, fontWeight: 600, textAnchor: 'end', fill: 'currentColor' },
-    { kind: 'line', x1: 98, y1: 140, x2: 736, y2: 140, stroke: 'currentColor', strokeWidth: 1.7 },
-    { kind: 'text', x: 74, y: 144, text: 'n = 3', fontSize: 11.5, textAnchor: 'end', fill: 'currentColor' },
-    { kind: 'line', x1: 98, y1: 104, x2: 736, y2: 104, stroke: 'currentColor', strokeWidth: 1.4 },
-    { kind: 'text', x: 74, y: 108, text: 'n = 4', fontSize: 11, textAnchor: 'end', fill: 'currentColor' },
-    { kind: 'line', x1: 98, y1: 82, x2: 736, y2: 82, stroke: 'currentColor', strokeWidth: 1.2 },
-    { kind: 'text', x: 74, y: 86, text: 'n = 5', fontSize: 10.5, textAnchor: 'end', fill: 'currentColor' },
-    { kind: 'line', x1: 98, y1: 66, x2: 736, y2: 66, stroke: 'currentColor', strokeWidth: 1, opacity: 0.75 },
-    { kind: 'text', x: 74, y: 70, text: 'n = 6', fontSize: 10.5, textAnchor: 'end', fill: 'currentColor', opacity: 0.8 },
-    { kind: 'line', x1: 98, y1: 48, x2: 736, y2: 48, stroke: 'currentColor', strokeWidth: 1.5, strokeDasharray: '6 5' },
-    { kind: 'text', x: 74, y: 52, text: 'n = ∞', fontSize: 12, fontWeight: 600, textAnchor: 'end', fill: 'currentColor' },
-    { kind: 'text', x: 734, y: 40, text: 'Convergence / Ionization Limit', fontSize: 10.5, fontWeight: 600, textAnchor: 'end', fill: 'currentColor', opacity: 0.75 },
-    ...downArrowShapes(164, 206, 354, 2.2),
-    ...downArrowShapes(196, 140, 354, 2.2),
-    ...downArrowShapes(228, 104, 354, 2.2),
-    ...downArrowShapes(260, 82, 354, 1.8),
+
+    // Converging Shell Levels (n=1 to n=∞)
+    { kind: 'line', x1: 98, y1: 354, x2: 736, y2: 354, stroke: 'currentColor', strokeWidth: 2.6, focusTags: ['lyman-uv'] },
+    { kind: 'text', x: 74, y: 358, text: 'n = 1', fontSize: 12, fontWeight: 600, textAnchor: 'end', fill: 'currentColor', focusTags: ['lyman-uv'] },
+
+    { kind: 'line', x1: 98, y1: 206, x2: 736, y2: 206, stroke: 'currentColor', strokeWidth: 2.1, focusTags: ['balmer-vis'] },
+    { kind: 'text', x: 74, y: 210, text: 'n = 2', fontSize: 12, fontWeight: 600, textAnchor: 'end', fill: 'currentColor', focusTags: ['balmer-vis'] },
+
+    { kind: 'line', x1: 98, y1: 140, x2: 736, y2: 140, stroke: 'currentColor', strokeWidth: 1.7, focusTags: ['paschen-ir'] },
+    { kind: 'text', x: 74, y: 144, text: 'n = 3', fontSize: 11.5, textAnchor: 'end', fill: 'currentColor', focusTags: ['paschen-ir'] },
+
+    { kind: 'line', x1: 98, y1: 104, x2: 736, y2: 104, stroke: 'currentColor', strokeWidth: 1.4, opacity: 0.7 },
+    { kind: 'text', x: 74, y: 108, text: 'n = 4', fontSize: 11, textAnchor: 'end', fill: 'currentColor', opacity: 0.75 },
+
+    { kind: 'line', x1: 98, y1: 82, x2: 736, y2: 82, stroke: 'currentColor', strokeWidth: 1.2, opacity: 0.68 },
+    { kind: 'text', x: 74, y: 86, text: 'n = 5', fontSize: 10.5, textAnchor: 'end', fill: 'currentColor', opacity: 0.72 },
+
+    { kind: 'line', x1: 98, y1: 66, x2: 736, y2: 66, stroke: 'currentColor', strokeWidth: 1, opacity: 0.65 },
+    { kind: 'text', x: 74, y: 70, text: 'n = 6', fontSize: 10.5, textAnchor: 'end', fill: 'currentColor', opacity: 0.7 },
+
+    { kind: 'line', x1: 98, y1: 48, x2: 736, y2: 48, stroke: 'currentColor', strokeWidth: 1.7, strokeDasharray: '6 5', focusTags: ['convergence'] },
+    { kind: 'text', x: 74, y: 52, text: 'n = ∞', fontSize: 12, fontWeight: 600, textAnchor: 'end', fill: 'currentColor', focusTags: ['convergence'] },
+    { kind: 'text', x: 734, y: 40, text: 'Convergence / Ionization Limit', fontSize: 10.5, fontWeight: 600, textAnchor: 'end', fill: 'currentColor', opacity: 0.85, focusTags: ['convergence'] },
+
+    // Lyman Series (Transitions -> n=1)
+    ...downArrowShapes(164, 206, 354, 2.2, 'lyman-uv'),
+    ...downArrowShapes(196, 140, 354, 2.2, 'lyman-uv'),
+    ...downArrowShapes(228, 104, 354, 2.2, 'lyman-uv'),
+    ...downArrowShapes(260, 82, 354, 1.8, 'lyman-uv'),
     {
       kind: 'text',
       x: 212,
@@ -1042,11 +1190,14 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['lyman-uv'],
     },
-    ...downArrowShapes(354, 140, 206, 2.2),
-    ...downArrowShapes(386, 104, 206, 2.2),
-    ...downArrowShapes(418, 82, 206, 2.2),
-    ...downArrowShapes(450, 66, 206, 1.8),
+
+    // Balmer Series (Transitions -> n=2)
+    ...downArrowShapes(354, 140, 206, 2.2, 'balmer-vis'),
+    ...downArrowShapes(386, 104, 206, 2.2, 'balmer-vis'),
+    ...downArrowShapes(418, 82, 206, 2.2, 'balmer-vis'),
+    ...downArrowShapes(450, 66, 206, 1.8, 'balmer-vis'),
     {
       kind: 'text',
       x: 402,
@@ -1056,6 +1207,7 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['balmer-vis'],
     },
     {
       kind: 'text',
@@ -1065,11 +1217,14 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       fontSize: 10,
       textAnchor: 'middle',
       fill: 'currentColor',
-      opacity: 0.72,
+      opacity: 0.78,
+      focusTags: ['balmer-vis'],
     },
-    ...downArrowShapes(568, 104, 140, 2.1),
-    ...downArrowShapes(600, 82, 140, 2.1),
-    ...downArrowShapes(632, 66, 140, 1.8),
+
+    // Paschen Series (Transitions -> n=3)
+    ...downArrowShapes(568, 104, 140, 2.1, 'paschen-ir'),
+    ...downArrowShapes(600, 82, 140, 2.1, 'paschen-ir'),
+    ...downArrowShapes(632, 66, 140, 1.8, 'paschen-ir'),
     {
       kind: 'text',
       x: 600,
@@ -1079,7 +1234,10 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       fontWeight: 600,
       textAnchor: 'middle',
       fill: 'currentColor',
+      focusTags: ['paschen-ir'],
     },
+
+    // Converging Line Emission Strip
     {
       kind: 'text',
       x: 248,
@@ -1102,17 +1260,17 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1.2,
     },
-    { kind: 'line', x1: 302, y1: 398, x2: 302, y2: 420, stroke: 'currentColor', strokeWidth: 2.2 },
-    { kind: 'line', x1: 392, y1: 398, x2: 392, y2: 420, stroke: 'currentColor', strokeWidth: 2 },
-    { kind: 'line', x1: 468, y1: 398, x2: 468, y2: 420, stroke: 'currentColor', strokeWidth: 1.8 },
-    { kind: 'line', x1: 530, y1: 398, x2: 530, y2: 420, stroke: 'currentColor', strokeWidth: 1.6 },
-    { kind: 'line', x1: 582, y1: 398, x2: 582, y2: 420, stroke: 'currentColor', strokeWidth: 1.5 },
-    { kind: 'line', x1: 622, y1: 398, x2: 622, y2: 420, stroke: 'currentColor', strokeWidth: 1.3 },
-    { kind: 'line', x1: 654, y1: 398, x2: 654, y2: 420, stroke: 'currentColor', strokeWidth: 1.2 },
-    { kind: 'line', x1: 680, y1: 398, x2: 680, y2: 420, stroke: 'currentColor', strokeWidth: 1.1 },
-    { kind: 'line', x1: 700, y1: 398, x2: 700, y2: 420, stroke: 'currentColor', strokeWidth: 1 },
-    { kind: 'line', x1: 716, y1: 398, x2: 716, y2: 420, stroke: 'currentColor', strokeWidth: 1 },
-    { kind: 'line', x1: 726, y1: 398, x2: 726, y2: 420, stroke: 'currentColor', strokeWidth: 1 },
+    { kind: 'line', x1: 302, y1: 398, x2: 302, y2: 420, stroke: 'currentColor', strokeWidth: 2.2, focusTags: ['paschen-ir', 'balmer-vis', 'lyman-uv'] },
+    { kind: 'line', x1: 392, y1: 398, x2: 392, y2: 420, stroke: 'currentColor', strokeWidth: 2, focusTags: ['paschen-ir', 'balmer-vis', 'lyman-uv'] },
+    { kind: 'line', x1: 468, y1: 398, x2: 468, y2: 420, stroke: 'currentColor', strokeWidth: 1.8, focusTags: ['paschen-ir', 'balmer-vis', 'lyman-uv'] },
+    { kind: 'line', x1: 530, y1: 398, x2: 530, y2: 420, stroke: 'currentColor', strokeWidth: 1.6, focusTags: ['balmer-vis', 'lyman-uv'] },
+    { kind: 'line', x1: 582, y1: 398, x2: 582, y2: 420, stroke: 'currentColor', strokeWidth: 1.5, focusTags: ['balmer-vis', 'lyman-uv', 'convergence'] },
+    { kind: 'line', x1: 622, y1: 398, x2: 622, y2: 420, stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['lyman-uv', 'convergence'] },
+    { kind: 'line', x1: 654, y1: 398, x2: 654, y2: 420, stroke: 'currentColor', strokeWidth: 1.2, focusTags: ['lyman-uv', 'convergence'] },
+    { kind: 'line', x1: 680, y1: 398, x2: 680, y2: 420, stroke: 'currentColor', strokeWidth: 1.1, focusTags: ['lyman-uv', 'convergence'] },
+    { kind: 'line', x1: 700, y1: 398, x2: 700, y2: 420, stroke: 'currentColor', strokeWidth: 1, focusTags: ['convergence'] },
+    { kind: 'line', x1: 716, y1: 398, x2: 716, y2: 420, stroke: 'currentColor', strokeWidth: 1, focusTags: ['convergence'] },
+    { kind: 'line', x1: 726, y1: 398, x2: 726, y2: 420, stroke: 'currentColor', strokeWidth: 1.4, strokeDasharray: '2 2', focusTags: ['convergence'] },
   ],
   hotspots: [
     {

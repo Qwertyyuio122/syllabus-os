@@ -11,6 +11,8 @@ import {
 import { APP_COHORT } from '@/config/brand';
 import { createClient } from '@/lib/supabase/server';
 import { ensureUserSeeded } from '@/lib/seed-user';
+import { SubjectMotif } from '@/components/subjects/SubjectMotif';
+import { GlassSpotlight } from '@/components/ui/GlassSpotlight';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import type { CoreProjectRow, ProfileRow, SubjectRow } from '@/types/database';
@@ -142,80 +144,86 @@ export default async function DashboardOverviewPage() {
       : 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-8">
-      {/* Page Header Glass Hero */}
-      <div className="glass-panel mb-6 flex flex-col gap-5 rounded-3xl p-6 sm:flex-row sm:items-end sm:justify-between sm:p-7">
-        <div>
-          <span className="glass-pill inline-flex items-center rounded-full px-3 py-1 font-mono text-[11px] font-medium tracking-wide text-[#6E6E73] dark:text-[#98989D]">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-7">
+      {/* Compact Editorial Liquid Glass Hero + Inline Telemetry Strip */}
+      <GlassSpotlight className="glass-panel mb-7 rounded-3xl p-6 sm:p-7">
+        <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#1D1D1F] sm:text-[36px] sm:leading-[1.12] dark:text-[#F5F5F7]">
+              Welcome back, {firstName}
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
+              Track syllabus coverage, classroom materials, interactive study
+              guides, and IB rubric drafts across your Diploma workspace.
+            </p>
+          </div>
+
+          <div className="glass-surface shrink-0 rounded-2xl px-4 py-3 sm:min-w-[240px]">
+            <div className="flex items-center justify-between gap-4 text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
+              <span>Syllabus Progress</span>
+              <span className="font-mono font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {overallPct}%
+              </span>
+            </div>
+            <div className="mt-1 font-mono text-sm font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
+              {completedSubtopics} / {totalSubtopics} sub-topics
+            </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
+              <div
+                className="h-full rounded-full bg-[#1D1D1F] transition-all duration-300 dark:bg-[#F5F5F7]"
+                style={{ width: `${overallPct}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Integrated Inline Telemetry Bar */}
+        <div className="relative z-10 mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.06] pt-4 dark:border-white/[0.08]">
+          <div className="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:gap-6">
+            <div className="flex items-center gap-2 text-xs text-[#6E6E73] dark:text-[#98989D]">
+              <Paperclip className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>Materials</span>
+              <span className="font-mono text-sm font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {materials.length}
+              </span>
+            </div>
+
+            <div className="hidden h-3.5 w-px bg-black/[0.08] sm:block dark:bg-white/[0.1]" />
+
+            <div className="flex items-center gap-2 text-xs text-[#6E6E73] dark:text-[#98989D]">
+              <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>Study Notes</span>
+              <span className="font-mono text-sm font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {notes.length}
+              </span>
+            </div>
+
+            <div className="hidden h-3.5 w-px bg-black/[0.08] sm:block dark:bg-white/[0.1]" />
+
+            <div className="flex items-center gap-2 text-xs text-[#6E6E73] dark:text-[#98989D]">
+              <HelpCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>IB Questions</span>
+              <span className="font-mono text-sm font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {questions.length}
+              </span>
+            </div>
+
+            <div className="hidden h-3.5 w-px bg-black/[0.08] sm:block dark:bg-white/[0.1]" />
+
+            <div className="flex items-center gap-2 text-xs text-[#6E6E73] dark:text-[#98989D]">
+              <FolderKanban className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>Core Milestones</span>
+              <span className="font-mono text-sm font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {completedMilestones} / {totalMilestones}
+              </span>
+            </div>
+          </div>
+
+          <span className="glass-pill hidden rounded-full px-2.5 py-0.5 font-mono text-[11px] text-[#6E6E73] md:inline-flex dark:text-[#98989D]">
             {APP_COHORT}
           </span>
-          <h1 className="mt-3 text-2xl font-semibold tracking-tight text-[#1D1D1F] sm:text-3xl dark:text-[#F5F5F7]">
-            Welcome back, {firstName}
-          </h1>
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
-            Track syllabus coverage, classroom materials, interactive study
-            guides, and IB rubric drafts across your Diploma subjects.
-          </p>
         </div>
-
-        <div className="glass-surface shrink-0 rounded-2xl px-4 py-3 sm:min-w-[230px]">
-          <div className="flex items-center justify-between gap-4 text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
-            <span>Syllabus Progress</span>
-            <span className="font-mono font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-              {overallPct}%
-            </span>
-          </div>
-          <div className="mt-1.5 font-mono text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-            {completedSubtopics} / {totalSubtopics} sub-topics
-          </div>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
-            <div
-              className="h-full rounded-full bg-[#1D1D1F] transition-all duration-300 dark:bg-[#F5F5F7]"
-              style={{ width: `${overallPct}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Metrics Strip */}
-      <div className="mb-8 grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-        <div className="glass-panel rounded-2xl px-4 py-3.5">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
-            <Paperclip className="h-3.5 w-3.5" />
-            <span>Materials</span>
-          </div>
-          <div className="mt-1.5 font-mono text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
-            {materials.length}
-          </div>
-        </div>
-        <div className="glass-panel rounded-2xl px-4 py-3.5">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
-            <FileText className="h-3.5 w-3.5" />
-            <span>Study Notes</span>
-          </div>
-          <div className="mt-1.5 font-mono text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
-            {notes.length}
-          </div>
-        </div>
-        <div className="glass-panel rounded-2xl px-4 py-3.5">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
-            <HelpCircle className="h-3.5 w-3.5" />
-            <span>IB Questions</span>
-          </div>
-          <div className="mt-1.5 font-mono text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
-            {questions.length}
-          </div>
-        </div>
-        <div className="glass-panel rounded-2xl px-4 py-3.5">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
-            <FolderKanban className="h-3.5 w-3.5" />
-            <span>Core Milestones</span>
-          </div>
-          <div className="mt-1.5 font-mono text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
-            {completedMilestones} / {totalMilestones}
-          </div>
-        </div>
-      </div>
+      </GlassSpotlight>
 
       {/* 6 IB Subjects Grid */}
       <section aria-labelledby="subjects-heading">
@@ -226,7 +234,7 @@ export default async function DashboardOverviewPage() {
           >
             Diploma Programme Subjects
           </h2>
-          <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+          <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
             {subjects.length} subjects
           </span>
         </div>
@@ -241,26 +249,36 @@ export default async function DashboardOverviewPage() {
             const matCount = materialCounts[subject.id] ?? 0;
             const noteCount = noteCounts[subject.id] ?? 0;
             const qCount = questionCounts[subject.id] ?? 0;
+            const subjectHref = `/dashboard/subjects/${subject.slug}`;
 
             return (
-              <Link
+              <GlassSpotlight
                 key={subject.id}
-                href={`/dashboard/subjects/${subject.slug}`}
-                className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25"
+                className="group relative rounded-2xl"
               >
-                <Card className="glass-interactive h-full group-hover:-translate-y-0.5">
-                  <CardContent className="flex h-full flex-col justify-between gap-4 p-5">
+                <Card className="glass-interactive relative h-full overflow-hidden group-hover:-translate-y-0.5">
+                  <SubjectMotif slug={subject.slug} />
+
+                  <CardContent className="relative z-10 flex h-full flex-col justify-between gap-4 p-5">
                     <div>
                       <div className="flex items-center justify-between gap-2">
                         <Badge variant="subtle" className="font-mono">
                           Group {subject.group_number} · {subject.level}
                         </Badge>
-                        <span className="glass-pill flex h-7 w-7 items-center justify-center rounded-full text-[#6E6E73] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#1D1D1F] dark:text-[#98989D] dark:group-hover:text-[#F5F5F7]">
+                        <span
+                          aria-hidden="true"
+                          className="glass-pill flex h-7 w-7 items-center justify-center rounded-full text-[#6E6E73] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#1D1D1F] dark:text-[#98989D] dark:group-hover:text-[#F5F5F7]"
+                        >
                           <ArrowUpRight className="h-3.5 w-3.5" />
                         </span>
                       </div>
                       <h3 className="mt-3 text-base font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
-                        {subject.name}
+                        <Link
+                          href={subjectHref}
+                          className="after:absolute after:inset-0 after:z-0 focus-visible:outline-none"
+                        >
+                          {subject.name}
+                        </Link>
                       </h3>
                       {subject.description && (
                         <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
@@ -275,7 +293,7 @@ export default async function DashboardOverviewPage() {
                           <span className="text-[#6E6E73] dark:text-[#98989D]">
                             Syllabus checklist
                           </span>
-                          <span className="font-mono text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          <span className="font-mono tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
                             {stats.completed} / {stats.total} sub-topics
                           </span>
                         </div>
@@ -287,15 +305,30 @@ export default async function DashboardOverviewPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-                        <span>{matCount} materials</span>
-                        <span>{noteCount} notes</span>
-                        <span>{qCount} questions</span>
+                      <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                        <span className="tabular-nums">
+                          {matCount} mat · {noteCount} notes · {qCount} q
+                        </span>
+
+                        <div className="relative z-10 flex items-center gap-1.5">
+                          <Link
+                            href={`${subjectHref}?tab=notes`}
+                            className="glass-pill rounded-full px-2 py-0.5 font-sans text-[10.5px] font-medium text-[#1D1D1F] transition-colors hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.14]"
+                          >
+                            Notes
+                          </Link>
+                          <Link
+                            href={`${subjectHref}?tab=qbank`}
+                            className="glass-pill rounded-full px-2 py-0.5 font-sans text-[10.5px] font-medium text-[#1D1D1F] transition-colors hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.14]"
+                          >
+                            Q-Bank
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-              </Link>
+              </GlassSpotlight>
             );
           })}
         </div>
@@ -309,40 +342,42 @@ export default async function DashboardOverviewPage() {
         >
           DP Core &amp; Internal Assessments
         </h2>
-        <Link
-          href="/dashboard/core"
-          className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25"
-        >
-          <Card className="glass-interactive group-hover:-translate-y-0.5">
-            <CardContent className="flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center">
-              <div className="flex items-start gap-3.5">
-                <div className="glass-pill mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-[#1D1D1F] dark:text-[#F5F5F7]">
-                  <BookOpen className="h-4 w-4" />
-                </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-                      EE · TOK · CAS · Subject IAs Workspace
-                    </h3>
-                    <Badge variant="outline" className="font-mono">
-                      {coreProjects.length} projects
-                    </Badge>
+        <GlassSpotlight className="group rounded-2xl">
+          <Link
+            href="/dashboard/core"
+            className="block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25"
+          >
+            <Card className="glass-interactive group-hover:-translate-y-0.5">
+              <CardContent className="relative z-10 flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center">
+                <div className="flex items-start gap-3.5">
+                  <div className="glass-pill mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-[#1D1D1F] dark:text-[#F5F5F7]">
+                    <BookOpen className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <p className="mt-1 text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
-                    Review official IB Diploma rubrics (FA2027 EE 30m,
-                    TOK 10m, CAS learning outcomes, Science/History/Math/English/French
-                    IAs), classroom lab &amp; citation guides, milestone trackers,
-                    and rubric draft feedback.
-                  </p>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                        EE · TOK · CAS · Subject IAs Workspace
+                      </h3>
+                      <Badge variant="outline" className="font-mono tabular-nums">
+                        {coreProjects.length} projects
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
+                      Review official IB Diploma rubrics (FA2027 EE 30m,
+                      TOK 10m, CAS learning outcomes, Science/History/Math/English/French
+                      IAs), classroom lab &amp; citation guides, milestone trackers,
+                      and rubric draft feedback.
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <span className="glass-pill inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#1D1D1F] transition-colors group-hover:bg-white/95 dark:text-[#F5F5F7] dark:group-hover:bg-white/[0.12]">
-                <span>Open Core Workspace</span>
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </span>
-            </CardContent>
-          </Card>
-        </Link>
+                <span className="glass-pill inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-medium text-[#1D1D1F] transition-colors group-hover:bg-white/95 dark:text-[#F5F5F7] dark:group-hover:bg-white/[0.12]">
+                  <span>Open Core Workspace</span>
+                  <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
+        </GlassSpotlight>
       </section>
     </div>
   );

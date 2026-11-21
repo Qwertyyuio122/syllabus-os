@@ -255,7 +255,7 @@ export function TimelineCausalityExplorer({
                   <Quote className="h-3 w-3" aria-hidden="true" />
                   Primary Source
                 </div>
-                <p className="text-[13.5px] leading-relaxed text-[#1D1D1F] italic dark:text-[#F5F5F7]">
+                <p className="font-serif text-[15px] leading-relaxed text-[#1D1D1F] italic dark:text-[#F5F5F7]">
                   {activeEvent.primarySourceQuote}
                 </p>
               </blockquote>

@@ -48,6 +48,7 @@ interface SubjectWorkspaceClientProps {
   initialMaterials: CourseMaterialRow[];
   initialFlashcards: FlashcardRow[];
   initialTab?: SubjectWorkspaceTab;
+  initialNoteId?: string | null;
 }
 
 export function SubjectWorkspaceClient({
@@ -61,6 +62,7 @@ export function SubjectWorkspaceClient({
   initialMaterials,
   initialFlashcards,
   initialTab = 'checklist',
+  initialNoteId = null,
 }: SubjectWorkspaceClientProps) {
   const [activeTab, setActiveTab] =
     React.useState<SubjectWorkspaceTab>(initialTab);
@@ -74,9 +76,19 @@ export function SubjectWorkspaceClient({
     React.useState<FlashcardRow[]>(initialFlashcards);
 
   const [selectedNoteId, setSelectedNoteId] = React.useState<string | null>(
-    initialNotes[0]?.id ?? null,
+    initialNoteId ?? initialNotes[0]?.id ?? null,
   );
   const [qbankTopicId, setQbankTopicId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
+  React.useEffect(() => {
+    if (initialNoteId) {
+      setSelectedNoteId(initialNoteId);
+    }
+  }, [initialNoteId]);
 
   const [attemptsByQuestionId, setAttemptsByQuestionId] = React.useState<
     Record<string, QuestionAttemptRow>
@@ -221,10 +233,10 @@ export function SubjectWorkspaceClient({
       </nav>
 
       {/* Subject Header & Progress Bar */}
-      <div className="glass-panel mb-6 flex flex-col gap-4 rounded-3xl p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="glass-panel mb-5 flex flex-col gap-4 rounded-3xl p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] sm:text-3xl dark:text-[#F5F5F7]">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#1D1D1F] sm:text-[34px] sm:leading-[1.12] dark:text-[#F5F5F7]">
               {subject.name}
             </h1>
             <Badge variant="default" className="font-mono">
@@ -246,7 +258,7 @@ export function SubjectWorkspaceClient({
             <span className="text-[#6E6E73] dark:text-[#98989D]">
               Syllabus Checklist
             </span>
-            <span className="font-mono font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+            <span className="font-mono font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
               {completedSubtopics} / {totalSubtopics} ({completionPct}%)
             </span>
           </div>
@@ -259,53 +271,58 @@ export function SubjectWorkspaceClient({
         </div>
       </div>
 
-      {/* 5 Notion Workspace Tabs */}
+      {/* 5 Sticky Floating Liquid Glass Workspace Tabs */}
       <Tabs
         idPrefix={`subject-tabs-${subject.slug}`}
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as SubjectWorkspaceTab)}
       >
-        <TabsList aria-label={`${subject.name} workspace sections`}>
-          <TabsTrigger value="checklist">
-            <CheckSquare className="h-3.5 w-3.5" />
-            <span>Syllabus Checklist</span>
-            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              {completedSubtopics}/{totalSubtopics}
-            </span>
-          </TabsTrigger>
+        <div className="sticky top-[52px] z-20 -mx-2 bg-gradient-to-b from-[#F2F2F5]/95 via-[#F2F2F5]/75 to-transparent px-2 pt-2 pb-1.5 backdrop-blur-[2px] lg:top-0 lg:pt-2.5 dark:from-[#111113]/95 dark:via-[#111113]/75 dark:to-transparent">
+          <TabsList
+            aria-label={`${subject.name} workspace sections`}
+            className="glass-floating-bar"
+          >
+            <TabsTrigger value="checklist">
+              <CheckSquare className="h-3.5 w-3.5" />
+              <span>Syllabus Checklist</span>
+              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                {completedSubtopics}/{totalSubtopics}
+              </span>
+            </TabsTrigger>
 
-          <TabsTrigger value="notes">
-            <FileText className="h-3.5 w-3.5" />
-            <span>Study Notes</span>
-            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              {notes.length}
-            </span>
-          </TabsTrigger>
+            <TabsTrigger value="notes">
+              <FileText className="h-3.5 w-3.5" />
+              <span>Study Notes</span>
+              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                {notes.length}
+              </span>
+            </TabsTrigger>
 
-          <TabsTrigger value="qbank">
-            <HelpCircle className="h-3.5 w-3.5" />
-            <span>Question Bank</span>
-            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              {questions.length}
-            </span>
-          </TabsTrigger>
+            <TabsTrigger value="qbank">
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span>Question Bank</span>
+              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                {questions.length}
+              </span>
+            </TabsTrigger>
 
-          <TabsTrigger value="materials">
-            <FolderOpen className="h-3.5 w-3.5" />
-            <span>Classroom Materials</span>
-            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              {materials.length}
-            </span>
-          </TabsTrigger>
+            <TabsTrigger value="materials">
+              <FolderOpen className="h-3.5 w-3.5" />
+              <span>Classroom Materials</span>
+              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                {materials.length}
+              </span>
+            </TabsTrigger>
 
-          <TabsTrigger value="flashcards">
-            <Layers className="h-3.5 w-3.5" />
-            <span>Flashcards</span>
-            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              {flashcards.length}
-            </span>
-          </TabsTrigger>
-        </TabsList>
+            <TabsTrigger value="flashcards">
+              <Layers className="h-3.5 w-3.5" />
+              <span>Flashcards</span>
+              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                {flashcards.length}
+              </span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="checklist">
           <SyllabusChecklistTree

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useId, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Activity, Crosshair, SlidersHorizontal } from 'lucide-react';
 import type { InteractiveFunctionGraphSpec } from '@/types/diagrams';
 import { compileMathExpression, type CompiledMathFn } from '@/lib/math/safe-eval';
@@ -156,7 +156,7 @@ export function InteractiveFunctionGraph({
   const [isDraggingProbe, setIsDraggingProbe] = useState(false);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const clipId = `graph-clip-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  const clipId = `graph-clip-${spec.id.replace(/[^a-zA-Z0-9_-]/g, '') || 'graph'}`;
 
   const compiledCurves = useMemo(
     () =>

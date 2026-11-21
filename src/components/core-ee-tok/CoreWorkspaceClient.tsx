@@ -38,6 +38,7 @@ interface CoreWorkspaceClientProps {
   userId: string;
   initialProjects: CoreProjectRow[];
   coreResources: ClassroomSeedCoreResource[];
+  initialProjectId?: string | null;
 }
 
 function countWords(text: string): number {
@@ -108,6 +109,7 @@ export function CoreWorkspaceClient({
   userId,
   initialProjects,
   coreResources,
+  initialProjectId = null,
 }: CoreWorkspaceClientProps) {
   const orderedProjects = React.useMemo(() => {
     const used = new Set<string>();
@@ -144,8 +146,14 @@ export function CoreWorkspaceClient({
   const [projects, setProjects] =
     React.useState<CoreProjectRow[]>(initialProjects);
   const [selectedProjectId, setSelectedProjectId] = React.useState<string>(
-    orderedProjects[0]?.project.id ?? initialProjects[0]?.id ?? '',
+    initialProjectId ?? orderedProjects[0]?.project.id ?? initialProjects[0]?.id ?? '',
   );
+
+  React.useEffect(() => {
+    if (initialProjectId) {
+      setSelectedProjectId(initialProjectId);
+    }
+  }, [initialProjectId]);
   const [subTab, setSubTab] = React.useState<'draft' | 'rubric' | 'toolkit'>(
     'draft',
   );
@@ -436,7 +444,7 @@ export function CoreWorkspaceClient({
 
       {/* Page Title */}
       <div className="glass-panel mb-6 rounded-3xl p-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] sm:text-3xl dark:text-[#F5F5F7]">
+        <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#1D1D1F] sm:text-[34px] sm:leading-[1.12] dark:text-[#F5F5F7]">
           DP Core &amp; Internal Assessments
         </h1>
         <p className="mt-1.5 text-sm text-[#6E6E73] dark:text-[#98989D]">
@@ -600,26 +608,28 @@ export function CoreWorkspaceClient({
               setSubTab(v as 'draft' | 'rubric' | 'toolkit')
             }
           >
-            <TabsList>
-              <TabsTrigger value="draft">
-                <FileText className="h-3.5 w-3.5" />
-                <span>Draft &amp; Milestones</span>
-              </TabsTrigger>
-              <TabsTrigger value="rubric">
-                <Check className="h-3.5 w-3.5" />
-                <span>Official IB Rubric</span>
-                <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
-                  {activeRubric.criteria.length}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="toolkit">
-                <BookMarked className="h-3.5 w-3.5" />
-                <span>Classroom Reference Toolkit</span>
-                <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
-                  {filteredResources.length}
-                </span>
-              </TabsTrigger>
-            </TabsList>
+            <div className="sticky top-[52px] z-20 -mx-2 bg-gradient-to-b from-[#F2F2F5]/95 via-[#F2F2F5]/75 to-transparent px-2 pt-2 pb-1.5 backdrop-blur-[2px] lg:top-0 lg:pt-2.5 dark:from-[#111113]/95 dark:via-[#111113]/75 dark:to-transparent">
+              <TabsList className="glass-floating-bar">
+                <TabsTrigger value="draft">
+                  <FileText className="h-3.5 w-3.5" />
+                  <span>Draft &amp; Milestones</span>
+                </TabsTrigger>
+                <TabsTrigger value="rubric">
+                  <Check className="h-3.5 w-3.5" />
+                  <span>Official IB Rubric</span>
+                  <span className="font-mono text-[11px] tabular-nums text-[#787774] dark:text-[#9B9A97]">
+                    {activeRubric.criteria.length}
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="toolkit">
+                  <BookMarked className="h-3.5 w-3.5" />
+                  <span>Classroom Reference Toolkit</span>
+                  <span className="font-mono text-[11px] tabular-nums text-[#787774] dark:text-[#9B9A97]">
+                    {filteredResources.length}
+                  </span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             {/* Tab 1: Draft, RQ, Milestones & AI Rubric Evaluation */}
             <TabsContent value="draft" className="space-y-5">

@@ -264,6 +264,30 @@ test.describe('SyllabusOS Smoke & Gate Verification', () => {
     ).toBeVisible();
     await assertNoHorizontalOverflow(page, 'dashboard (1280x800)');
 
+    // Desktop Sidebar collapse/expand toggle + ⌘K Command Palette
+    await page.getByRole('button', { name: 'Collapse sidebar' }).click();
+    await expect(
+      page.getByRole('button', { name: 'Expand sidebar' }),
+    ).toBeVisible();
+    await assertNoHorizontalOverflow(
+      page,
+      'dashboard collapsed sidebar (1280x800)',
+    );
+    await page.getByRole('button', { name: 'Expand sidebar' }).click();
+    await expect(
+      page.getByRole('button', { name: 'Collapse sidebar' }),
+    ).toBeVisible();
+
+    await page.keyboard.press('Control+k');
+    const commandPalette = page.getByTestId('command-palette');
+    await expect(commandPalette).toBeVisible();
+    await commandPalette.getByRole('textbox').fill('Hydrogen');
+    await expect(
+      commandPalette.getByRole('option', { name: /Hydrogen/i }).first(),
+    ).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(commandPalette).toBeHidden();
+
     // Open Biology HL workspace
     await page.getByRole('link', { name: /Biology/i }).first().click();
     await expect(page).toHaveURL(/\/dashboard\/subjects\/biology-hl/);
@@ -345,13 +369,14 @@ test.describe('SyllabusOS Smoke & Gate Verification', () => {
       page.getByRole('button', { name: /Generate \/ Update Study Suite/i }),
     ).toBeVisible();
 
-    // 5) Flashcards tab: verify flashcard flip
+    // 5) Flashcards tab: verify 3D flashcard flip (Prompt -> Answer)
     await page.getByRole('tab', { name: /Flashcards/i }).click();
     const flashcardSurface = page.getByTestId('flashcard-surface');
     await expect(flashcardSurface).toBeVisible();
     await expect(flashcardSurface.getByText('Prompt')).toBeVisible();
     await page.keyboard.press('Space');
     await expect(flashcardSurface.getByText('Answer')).toBeVisible();
+    await expect(flashcardSurface.getByText('Prompt')).toBeHidden();
 
     // 6) Core & IA Workspace (/dashboard/core)
     await page.goto('/dashboard/core');

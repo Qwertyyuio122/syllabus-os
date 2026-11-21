@@ -31,9 +31,9 @@ export default async function SubjectWorkspacePage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; note?: string }>;
 }) {
-  const [{ slug }, { tab }] = await Promise.all([params, searchParams]);
+  const [{ slug }, { tab, note }] = await Promise.all([params, searchParams]);
 
   const supabase = await createClient();
   const {
@@ -119,6 +119,9 @@ export default async function SubjectWorkspacePage({
       ? (tab as SubjectWorkspaceTab)
       : 'checklist';
 
+  const initialNoteId =
+    note && notes.some((n) => n.id === note) ? note : null;
+
   return (
     <SubjectWorkspaceClient
       userId={user.id}
@@ -131,6 +134,7 @@ export default async function SubjectWorkspacePage({
       initialMaterials={materials}
       initialFlashcards={flashcards}
       initialTab={initialTab}
+      initialNoteId={initialNoteId}
     />
   );
 }
