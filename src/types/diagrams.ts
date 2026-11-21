@@ -4,6 +4,15 @@ import { z } from 'zod';
 // 1. Labeled Anatomy / Structure Explorer
 // ---------------------------------------------------------------------------
 
+const BaseSvgShapeProps = {
+  opacity: z.number().optional(),
+  focusTags: z.array(z.string()).optional(),
+  onlyWhenFocused: z.boolean().optional(),
+  hotspotId: z.string().optional(),
+  layers: z.array(z.string()).optional(),
+  strokeDasharray: z.string().optional(),
+};
+
 export const SvgShapeSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('rect'),
@@ -15,9 +24,7 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     fill: z.string().optional(),
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
-    opacity: z.number().optional(),
-    focusTags: z.array(z.string()).optional(),
-    onlyWhenFocused: z.boolean().optional(),
+    ...BaseSvgShapeProps,
   }),
   z.object({
     kind: z.literal('circle'),
@@ -27,9 +34,7 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     fill: z.string().optional(),
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
-    opacity: z.number().optional(),
-    focusTags: z.array(z.string()).optional(),
-    onlyWhenFocused: z.boolean().optional(),
+    ...BaseSvgShapeProps,
   }),
   z.object({
     kind: z.literal('ellipse'),
@@ -40,9 +45,7 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     fill: z.string().optional(),
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
-    opacity: z.number().optional(),
-    focusTags: z.array(z.string()).optional(),
-    onlyWhenFocused: z.boolean().optional(),
+    ...BaseSvgShapeProps,
   }),
   z.object({
     kind: z.literal('line'),
@@ -52,11 +55,8 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     y2: z.number(),
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
-    strokeDasharray: z.string().optional(),
-    opacity: z.number().optional(),
-    focusTags: z.array(z.string()).optional(),
-    onlyWhenFocused: z.boolean().optional(),
     animatedFlow: z.boolean().optional(),
+    ...BaseSvgShapeProps,
   }),
   z.object({
     kind: z.literal('path'),
@@ -64,11 +64,8 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     fill: z.string().optional(),
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
-    strokeDasharray: z.string().optional(),
-    opacity: z.number().optional(),
-    focusTags: z.array(z.string()).optional(),
-    onlyWhenFocused: z.boolean().optional(),
     animatedFlow: z.boolean().optional(),
+    ...BaseSvgShapeProps,
   }),
   z.object({
     kind: z.literal('polygon'),
@@ -76,9 +73,7 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     fill: z.string().optional(),
     stroke: z.string().optional(),
     strokeWidth: z.number().optional(),
-    opacity: z.number().optional(),
-    focusTags: z.array(z.string()).optional(),
-    onlyWhenFocused: z.boolean().optional(),
+    ...BaseSvgShapeProps,
   }),
   z.object({
     kind: z.literal('text'),
@@ -89,9 +84,7 @@ export const SvgShapeSchema = z.discriminatedUnion('kind', [
     fontWeight: z.union([z.number(), z.string()]).optional(),
     textAnchor: z.enum(['start', 'middle', 'end']).optional(),
     fill: z.string().optional(),
-    opacity: z.number().optional(),
-    focusTags: z.array(z.string()).optional(),
-    onlyWhenFocused: z.boolean().optional(),
+    ...BaseSvgShapeProps,
   }),
 ]);
 
@@ -109,14 +102,55 @@ export const LabeledHotspotSchema = z.object({
 
 export type LabeledExplorerHotspot = z.infer<typeof LabeledHotspotSchema>;
 
+export const LabeledExplorerLayerSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  defaultVisible: z.boolean().optional(),
+});
+
+export type LabeledExplorerLayer = z.infer<typeof LabeledExplorerLayerSchema>;
+
+export const LabeledExplorerViewSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  subtitle: z.string().optional(),
+  viewBox: z.string().optional(),
+  shapes: z.array(SvgShapeSchema).min(1),
+  hotspots: z.array(LabeledHotspotSchema).min(1),
+  layers: z.array(LabeledExplorerLayerSchema).optional(),
+});
+
+export type LabeledExplorerView = z.infer<typeof LabeledExplorerViewSchema>;
+
+export const LabeledExplorerAnimationStepSchema = z.object({
+  title: z.string().min(1),
+  detailMarkdown: z.string().min(1),
+  highlightHotspotIds: z.array(z.string()),
+  activeFlowTags: z.array(z.string()),
+});
+
+export const LabeledExplorerAnimationSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  steps: z.array(LabeledExplorerAnimationStepSchema).min(1),
+});
+
+export type LabeledExplorerAnimation = z.infer<
+  typeof LabeledExplorerAnimationSchema
+>;
+
 export const LabeledExplorerSpecSchema = z.object({
   type: z.literal('labeled_explorer'),
   id: z.string().min(1),
   title: z.string().min(1),
   caption: z.string().min(1),
   viewBox: z.string().optional(),
+  palette: z.enum(['scientific', 'monochrome']).optional(),
+  layers: z.array(LabeledExplorerLayerSchema).optional(),
   shapes: z.array(SvgShapeSchema).min(1),
   hotspots: z.array(LabeledHotspotSchema).min(1),
+  views: z.array(LabeledExplorerViewSchema).optional(),
+  animations: z.array(LabeledExplorerAnimationSchema).optional(),
 });
 
 export type LabeledExplorerSpec = z.infer<typeof LabeledExplorerSpecSchema>;
@@ -153,6 +187,7 @@ export const StepMechanismStepSchema = z.object({
   formulaLatex: z.string().optional(),
   activeNodeIds: z.array(z.string()),
   activeEdgeIds: z.array(z.string()),
+  stepIllustration: z.array(SvgShapeSchema).optional(),
   metrics: z.array(
     z.object({
       label: z.string().min(1),
@@ -168,6 +203,7 @@ export const StepMechanismSpecSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   caption: z.string().min(1),
+  palette: z.enum(['scientific', 'monochrome']).optional(),
   nodes: z.array(StepMechanismNodeSchema).min(1),
   edges: z.array(StepMechanismEdgeSchema),
   steps: z.array(StepMechanismStepSchema).min(1),
@@ -208,6 +244,34 @@ export const FunctionMarkerSchema = z.object({
 
 export type FunctionMarker = z.infer<typeof FunctionMarkerSchema>;
 
+export const FunctionAsymptoteSchema = z.object({
+  kind: z.enum(['vertical', 'horizontal']),
+  expression: z.string().min(1),
+  label: z.string().optional(),
+});
+
+export type FunctionAsymptote = z.infer<typeof FunctionAsymptoteSchema>;
+
+export const FunctionInverseReflectionSchema = z.object({
+  enabled: z.boolean().optional(),
+  defaultVisible: z.boolean().optional(),
+  sourceCurveId: z.string().min(1),
+  label: z.string().optional(),
+});
+
+export type FunctionInverseReflection = z.infer<
+  typeof FunctionInverseReflectionSchema
+>;
+
+export const FunctionReadoutSchema = z.object({
+  label: z.string().min(1),
+  expression: z.string().min(1),
+  format: z.enum(['number', 'coordinate']).optional(),
+  yExpression: z.string().optional(),
+});
+
+export type FunctionReadout = z.infer<typeof FunctionReadoutSchema>;
+
 export const InteractiveFunctionGraphSpecSchema = z.object({
   type: z.literal('function_graph'),
   id: z.string().min(1),
@@ -223,6 +287,9 @@ export const InteractiveFunctionGraphSpecSchema = z.object({
   curves: z.array(FunctionCurveSchema).min(1),
   tangentX: z.number().optional(),
   markers: z.array(FunctionMarkerSchema).optional(),
+  asymptotes: z.array(FunctionAsymptoteSchema).optional(),
+  inverseReflection: FunctionInverseReflectionSchema.optional(),
+  readouts: z.array(FunctionReadoutSchema).optional(),
 });
 
 export type InteractiveFunctionGraphSpec = z.infer<
@@ -258,6 +325,14 @@ export type ConceptComparisonMatrixSpec = z.infer<
 // 5. Timeline & Causality Explorer
 // ---------------------------------------------------------------------------
 
+export const HistoriographyNoteSchema = z.object({
+  historian: z.string().min(1),
+  school: z.string().min(1),
+  argument: z.string().min(1),
+});
+
+export type HistoriographyNote = z.infer<typeof HistoriographyNoteSchema>;
+
 export const TimelineEventSchema = z.object({
   id: z.string().min(1),
   dateLabel: z.string().min(1),
@@ -266,6 +341,8 @@ export const TimelineEventSchema = z.object({
   summaryMarkdown: z.string().min(1),
   primarySourceQuote: z.string().optional(),
   significanceMarkdown: z.string().min(1),
+  conceptTags: z.array(z.string()).optional(),
+  historiographyNotes: z.array(HistoriographyNoteSchema).optional(),
 });
 
 export type TimelineEvent = z.infer<typeof TimelineEventSchema>;
@@ -276,10 +353,129 @@ export const TimelineCausalitySpecSchema = z.object({
   title: z.string().min(1),
   caption: z.string().min(1),
   categories: z.array(z.string()).optional(),
+  concepts: z.array(z.string()).optional(),
   events: z.array(TimelineEventSchema).min(1),
 });
 
 export type TimelineCausalitySpec = z.infer<typeof TimelineCausalitySpecSchema>;
+
+// ---------------------------------------------------------------------------
+// 6. Chemistry SL — VSEPR & Dipole Polarity 3D Lab
+// ---------------------------------------------------------------------------
+
+export const VseprAtom3dSchema = z.object({
+  id: z.string().min(1),
+  element: z.string().min(1),
+  x: z.number(),
+  y: z.number(),
+  z: z.number(),
+  delta: z.enum(['delta+', 'delta-', 'none']).optional(),
+});
+
+export const VseprBondSchema = z.object({
+  from: z.string().min(1),
+  to: z.string().min(1),
+  order: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  isDative: z.boolean().optional(),
+});
+
+export const VseprMoleculeSchema = z.object({
+  id: z.string().min(1),
+  formula: z.string().min(1),
+  name: z.string().min(1),
+  centralAtom: z.string().min(1),
+  outerAtoms: z.array(z.string()),
+  electronDomains: z.union([z.literal(2), z.literal(3), z.literal(4)]),
+  bondingPairs: z.number().int().min(1),
+  lonePairs: z.number().int().min(0),
+  electronGeometry: z.string().min(1),
+  molecularGeometry: z.string().min(1),
+  idealAngleDeg: z.number(),
+  actualAngleLabel: z.string().min(1),
+  bondDeltaEn: z.number(),
+  bondPolarity: z.enum(['non-polar', 'polar']),
+  molecularPolarity: z.enum(['non-polar', 'polar']),
+  symmetrySummary: z.string().min(1),
+  lewisSummary: z.string().min(1),
+  atoms3d: z.array(VseprAtom3dSchema).min(2),
+  bonds: z.array(VseprBondSchema).min(1),
+  lonePairDirs: z
+    .array(z.object({ x: z.number(), y: z.number(), z: z.number() }))
+    .optional(),
+  ibExamTip: z.string().min(1),
+});
+
+export type VseprMolecule = z.infer<typeof VseprMoleculeSchema>;
+
+export const VseprPolarityLabSpecSchema = z.object({
+  type: z.literal('vsepr_polarity_lab'),
+  id: z.string().min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  defaultMoleculeId: z.string().optional(),
+  molecules: z.array(VseprMoleculeSchema).min(1),
+});
+
+export type VseprPolarityLabSpec = z.infer<typeof VseprPolarityLabSpecSchema>;
+
+// ---------------------------------------------------------------------------
+// 7. Chemistry SL — van Arkel-Ketelaar Triangle & Structure Models Lab
+// ---------------------------------------------------------------------------
+
+export const BondingCompoundPointSchema = z.object({
+  id: z.string().min(1),
+  formula: z.string().min(1),
+  name: z.string().min(1),
+  enA: z.number(),
+  enB: z.number(),
+  avgEn: z.number(),
+  deltaEn: z.number(),
+  bondingClass: z.enum(['ionic', 'polar_covalent', 'nonpolar_covalent', 'metallic']),
+  stateAtStp: z.string().min(1),
+  meltingPointC: z.string().min(1),
+  conductivity: z.string().min(1),
+  explanationMarkdown: z.string().min(1),
+});
+
+export type BondingCompoundPoint = z.infer<typeof BondingCompoundPointSchema>;
+
+export const BondingStructureModelSchema = z.object({
+  id: z.enum([
+    'ionic_lattice',
+    'metallic_sea',
+    'diamond',
+    'graphite',
+    'graphene',
+    'sio2',
+    'c60_fullerene',
+  ]),
+  title: z.string().min(1),
+  bondingType: z.string().min(1),
+  summaryMarkdown: z.string().min(1),
+  keyProperties: z.array(
+    z.object({
+      label: z.string().min(1),
+      value: z.string().min(1),
+    }),
+  ),
+  examTrapNote: z.string().optional(),
+});
+
+export type BondingStructureModel = z.infer<typeof BondingStructureModelSchema>;
+
+export const BondingContinuumLabSpecSchema = z.object({
+  type: z.literal('bonding_continuum_lab'),
+  id: z.string().min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  defaultTab: z.enum(['triangle', 'models']).optional(),
+  compounds: z.array(BondingCompoundPointSchema).min(1),
+  models: z.array(BondingStructureModelSchema).min(1),
+});
+
+export type BondingContinuumLabSpec = z.infer<
+  typeof BondingContinuumLabSpecSchema
+>;
 
 // ---------------------------------------------------------------------------
 // Discriminated Union of Playable Diagrams & Read-Only Notion Note Blocks
@@ -291,6 +487,8 @@ export const PlayableDiagramSpecSchema = z.discriminatedUnion('type', [
   InteractiveFunctionGraphSpecSchema,
   ConceptComparisonMatrixSpecSchema,
   TimelineCausalitySpecSchema,
+  VseprPolarityLabSpecSchema,
+  BondingContinuumLabSpecSchema,
 ]);
 
 export type PlayableDiagramSpec = z.infer<typeof PlayableDiagramSpecSchema>;

@@ -1,9 +1,13 @@
 'use client';
 
 import React, { useMemo, useRef, useState } from 'react';
-import { Activity, Crosshair, SlidersHorizontal } from 'lucide-react';
+import { Activity, Crosshair, FlipHorizontal2, SlidersHorizontal } from 'lucide-react';
 import type { InteractiveFunctionGraphSpec } from '@/types/diagrams';
-import { compileMathExpression, type CompiledMathFn } from '@/lib/math/safe-eval';
+import {
+  compileMathExpression,
+  evaluateMathExpression,
+  type CompiledMathFn,
+} from '@/lib/math/safe-eval';
 
 export interface InteractiveFunctionGraphProps {
   spec: InteractiveFunctionGraphSpec;
@@ -150,6 +154,9 @@ export function InteractiveFunctionGraph({
 
   const hasInitialTangent = typeof spec.tangentX === 'number' && Number.isFinite(spec.tangentX);
   const [tangentEnabled, setTangentEnabled] = useState<boolean>(hasInitialTangent);
+  const [inverseVisible, setInverseVisible] = useState<boolean>(
+    Boolean(spec.inverseReflection?.enabled && spec.inverseReflection?.defaultVisible),
+  );
   const [tangentX, setTangentX] = useState<number>(
     hasInitialTangent ? (spec.tangentX as number) : Number(((xMin + xMax) / 2).toFixed(2)),
   );
@@ -187,6 +194,119 @@ export function InteractiveFunctionGraph({
       })),
     [compiledCurves, sliderValues, xMin, xMax, yMin, yMax],
   );
+
+  const resolvedAsymptotes = useMemo(() => {
+    if (!spec.asymptotes || spec.asymptotes.length === 0) return [];
+    return spec.asymptotes
+      .map((asym, idx) => {
+        const val = evaluateMathExpression(asym.expression, sliderValues);
+        if (!Number.isFinite(val)) return null;
+        return {
+          idx,
+          kind: asym.kind,
+          value: val,
+          label:
+            asym.label ??
+            `${asym.kind === 'vertical' ? 'x' : 'y'} = ${Number(val.toFixed(2))}`,
+        };
+      })
+      .filter((a): a is NonNullable<typeof a> => a !== null);
+  }, [spec.asymptotes, sliderValues]);
+
+  const inversePathData = useMemo(() => {
+    if (!spec.inverseReflection?.enabled || !inverseVisible) return null;
+    const source = compiledCurves.find(
+      (c) => c.curve.id === spec.inverseReflection?.sourceCurveId,
+    ) ?? compiledCurves[0];
+    if (!source) return null;
+
+    const samples = 280;
+    const dx = (xMax - xMin) / samples;
+    const parts: string[] = [];
+    let open = false;
+    let prevXInv: number | null = null;
+    let prevYInv: number | null = null;
+
+    for (let i = 0; i <= samples; i += 1) {
+      const origX = xMin + i * dx;
+      const origY = source.fn({ ...sliderValues, x: origX });
+      if (!Number.isFinite(origY)) {
+        open = false;
+        prevXInv = null;
+        prevYInv = null;
+        continue;
+      }
+      // Reflect across y = x -> plotted point is (origY, origX)
+      const px = origY;
+      const py = origX;
+      if (px < xMin || px > xMax || py < yMin || py > yMax) {
+        open = false;
+        prevXInv = null;
+        prevYInv = null;
+        continue;
+      }
+      const jump =
+        prevXInv !== null && prevYInv !== null
+          ? Math.hypot(px - prevXInv, py - prevYInv)
+          : 0;
+      const sx = mapToSvgX(px, xMin, xMax).toFixed(2);
+      const sy = mapToSvgY(py, yMin, yMax).toFixed(2);
+      if (!open || jump > (xMax - xMin) * 0.45) {
+        parts.push(`M ${sx} ${sy}`);
+        open = true;
+      } else {
+        parts.push(`L ${sx} ${sy}`);
+      }
+      prevXInv = px;
+      prevYInv = py;
+    }
+
+    const diagStart = Math.max(xMin, yMin);
+    const diagEnd = Math.min(xMax, yMax);
+    return {
+      pathD: parts.join(' '),
+      label: spec.inverseReflection.label ?? 'f⁻¹(x) reflection across y = x',
+      diag:
+        diagStart < diagEnd
+          ? {
+              x1: mapToSvgX(diagStart, xMin, xMax),
+              y1: mapToSvgY(diagStart, yMin, yMax),
+              x2: mapToSvgX(diagEnd, xMin, xMax),
+              y2: mapToSvgY(diagEnd, yMin, yMax),
+            }
+          : null,
+    };
+  }, [
+    spec.inverseReflection,
+    inverseVisible,
+    compiledCurves,
+    sliderValues,
+    xMin,
+    xMax,
+    yMin,
+    yMax,
+  ]);
+
+  const liveReadouts = useMemo(() => {
+    if (!spec.readouts || spec.readouts.length === 0) return [];
+    return spec.readouts.map((r) => {
+      const val = evaluateMathExpression(r.expression, sliderValues);
+      if (r.format === 'coordinate' && r.yExpression) {
+        const yVal = evaluateMathExpression(r.yExpression, sliderValues);
+        return {
+          label: r.label,
+          value:
+            Number.isFinite(val) && Number.isFinite(yVal)
+              ? `(${Number(val.toFixed(2))}, ${Number(yVal.toFixed(2))})`
+              : 'Undefined',
+        };
+      }
+      return {
+        label: r.label,
+        value: Number.isFinite(val) ? String(Number(val.toFixed(3))) : 'Undefined',
+      };
+    });
+  }, [spec.readouts, sliderValues]);
 
   const tangentStats = useMemo(() => {
     if (!tangentEnabled || compiledCurves.length === 0) return null;
@@ -268,19 +388,37 @@ export function InteractiveFunctionGraph({
           })}
         </div>
 
-        <button
-          type="button"
-          aria-pressed={tangentEnabled}
-          onClick={() => setTangentEnabled((prev) => !prev)}
-          className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
-            tangentEnabled
-              ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-              : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
-          }`}
-        >
-          <Crosshair className="h-3.5 w-3.5" aria-hidden="true" />
-          Tangent &amp; f&apos;(x)
-        </button>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {spec.inverseReflection?.enabled && (
+            <button
+              type="button"
+              aria-pressed={inverseVisible}
+              onClick={() => setInverseVisible((prev) => !prev)}
+              className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                inverseVisible
+                  ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                  : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
+              }`}
+            >
+              <FlipHorizontal2 className="h-3.5 w-3.5" aria-hidden="true" />
+              Reflect y = x (f⁻¹)
+            </button>
+          )}
+
+          <button
+            type="button"
+            aria-pressed={tangentEnabled}
+            onClick={() => setTangentEnabled((prev) => !prev)}
+            className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+              tangentEnabled
+                ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
+            }`}
+          >
+            <Crosshair className="h-3.5 w-3.5" aria-hidden="true" />
+            Tangent &amp; f&apos;(x)
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.55fr_1fr]">
@@ -442,6 +580,96 @@ export function InteractiveFunctionGraph({
 
               {/* Sampled Curves (clipped cleanly to plot box) */}
               <g clipPath={`url(#${clipId})`}>
+                {/* Dynamic Asymptotes (Vertical & Horizontal) */}
+                {resolvedAsymptotes.map((asym) => {
+                  if (asym.kind === 'vertical') {
+                    if (asym.value < xMin || asym.value > xMax) return null;
+                    const ax = toSvgX(asym.value);
+                    return (
+                      <g key={`asym-${asym.idx}`}>
+                        <line
+                          x1={ax}
+                          y1={PAD_TOP}
+                          x2={ax}
+                          y2={PAD_TOP + PLOT_H}
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                          strokeDasharray="6 4"
+                          opacity={0.62}
+                        />
+                        <text
+                          x={ax + 6}
+                          y={PAD_TOP + 16}
+                          fontSize={10.5}
+                          fontWeight={600}
+                          fill="currentColor"
+                          opacity={0.82}
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                          {asym.label}
+                        </text>
+                      </g>
+                    );
+                  }
+                  if (asym.value < yMin || asym.value > yMax) return null;
+                  const ay = toSvgY(asym.value);
+                  return (
+                    <g key={`asym-${asym.idx}`}>
+                      <line
+                        x1={PAD_LEFT}
+                        y1={ay}
+                        x2={PAD_LEFT + PLOT_W}
+                        y2={ay}
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        strokeDasharray="6 4"
+                        opacity={0.62}
+                      />
+                      <text
+                        x={PAD_LEFT + PLOT_W - 8}
+                        y={ay - 6}
+                        textAnchor="end"
+                        fontSize={10.5}
+                        fontWeight={600}
+                        fill="currentColor"
+                        opacity={0.82}
+                        style={{ fontFamily: 'var(--font-mono)' }}
+                      >
+                        {asym.label}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* y = x Reflection Line & Reflected Inverse f⁻¹(x) */}
+                {inversePathData && (
+                  <g>
+                    {inversePathData.diag && (
+                      <line
+                        x1={inversePathData.diag.x1}
+                        y1={inversePathData.diag.y1}
+                        x2={inversePathData.diag.x2}
+                        y2={inversePathData.diag.y2}
+                        stroke="currentColor"
+                        strokeWidth={1.25}
+                        strokeDasharray="4 4"
+                        opacity={0.5}
+                      />
+                    )}
+                    {inversePathData.pathD && (
+                      <path
+                        d={inversePathData.pathD}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeDasharray="3 3"
+                        opacity={0.78}
+                        strokeLinecap="round"
+                      />
+                    )}
+                  </g>
+                )}
+
                 {curvePaths.map(({ curve, idx, d }) =>
                   d ? (
                     <path
@@ -655,6 +883,25 @@ export function InteractiveFunctionGraph({
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Live Dynamic Algebraic Readouts */}
+            {liveReadouts.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {liveReadouts.map((ro) => (
+                  <div
+                    key={ro.label}
+                    className="glass-surface rounded-2xl px-3 py-2"
+                  >
+                    <div className="font-mono text-[10px] font-medium tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+                      {ro.label}
+                    </div>
+                    <div className="mt-0.5 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                      {ro.value}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { BookOpen, Calendar, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 import type { TimelineCausalitySpec } from '@/types/diagrams';
 import { MarkdownMath } from '@/components/notes/MarkdownMath';
 
@@ -32,17 +32,44 @@ export function TimelineCausalityExplorer({
     return ['All', ...list];
   }, [spec.categories, spec.events]);
 
+  const conceptFilters = useMemo(() => {
+    const seen = new Set<string>();
+    const list: string[] = [];
+    for (const c of spec.concepts ?? []) {
+      const trimmed = c.trim();
+      if (trimmed && !seen.has(trimmed)) {
+        seen.add(trimmed);
+        list.push(trimmed);
+      }
+    }
+    for (const ev of spec.events) {
+      for (const tag of ev.conceptTags ?? []) {
+        const trimmed = tag.trim();
+        if (trimmed && !seen.has(trimmed)) {
+          seen.add(trimmed);
+          list.push(trimmed);
+        }
+      }
+    }
+    return list;
+  }, [spec.concepts, spec.events]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedConcept, setSelectedConcept] = useState<string>('All');
   const [selectedEventId, setSelectedEventId] = useState<string>(
     spec.events[0]?.id ?? '',
   );
 
   const filteredEvents = useMemo(() => {
-    if (selectedCategory === 'All') return spec.events;
-    return spec.events.filter(
-      (ev) => ev.category.trim() === selectedCategory,
-    );
-  }, [spec.events, selectedCategory]);
+    return spec.events.filter((ev) => {
+      const matchCategory =
+        selectedCategory === 'All' || ev.category.trim() === selectedCategory;
+      const matchConcept =
+        selectedConcept === 'All' ||
+        (ev.conceptTags ?? []).some((t) => t.trim() === selectedConcept);
+      return matchCategory && matchConcept;
+    });
+  }, [spec.events, selectedCategory, selectedConcept]);
 
   const activeIndex = useMemo(() => {
     if (filteredEvents.length === 0) return -1;
@@ -55,10 +82,28 @@ export function TimelineCausalityExplorer({
 
   const handleSelectCategory = (cat: string) => {
     setSelectedCategory(cat);
-    const nextList =
-      cat === 'All'
-        ? spec.events
-        : spec.events.filter((ev) => ev.category.trim() === cat);
+    const nextList = spec.events.filter((ev) => {
+      const matchCat = cat === 'All' || ev.category.trim() === cat;
+      const matchCon =
+        selectedConcept === 'All' ||
+        (ev.conceptTags ?? []).some((t) => t.trim() === selectedConcept);
+      return matchCat && matchCon;
+    });
+    if (nextList.length > 0 && !nextList.some((ev) => ev.id === selectedEventId)) {
+      setSelectedEventId(nextList[0].id);
+    }
+  };
+
+  const handleSelectConcept = (concept: string) => {
+    setSelectedConcept(concept);
+    const nextList = spec.events.filter((ev) => {
+      const matchCat =
+        selectedCategory === 'All' || ev.category.trim() === selectedCategory;
+      const matchCon =
+        concept === 'All' ||
+        (ev.conceptTags ?? []).some((t) => t.trim() === concept);
+      return matchCat && matchCon;
+    });
     if (nextList.length > 0 && !nextList.some((ev) => ev.id === selectedEventId)) {
       setSelectedEventId(nextList[0].id);
     }
@@ -141,6 +186,33 @@ export function TimelineCausalityExplorer({
           </button>
         </div>
       </div>
+
+      {/* Optional May 2028 Historical Concept Filter Row */}
+      {conceptFilters.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-black/[0.06] bg-white/20 px-4 py-2 dark:border-white/[0.08] dark:bg-white/[0.015]">
+          <span className="font-mono text-[10px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+            2028 Concepts:
+          </span>
+          {['All', ...conceptFilters].map((concept) => {
+            const isSelected = concept === selectedConcept;
+            return (
+              <button
+                key={`concept-${concept}`}
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => handleSelectConcept(concept)}
+                className={`inline-flex h-6 cursor-pointer items-center rounded-full px-2.5 text-[11px] font-medium transition-all ${
+                  isSelected
+                    ? 'glass-pill border border-[#1D1D1F]/40 font-semibold text-[#1D1D1F] dark:border-[#F5F5F7]/40 dark:text-[#F5F5F7]'
+                    : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D]'
+                }`}
+              >
+                {concept}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Horizontal Timeline Nodes + Scrubber */}
       {filteredEvents.length > 0 && (
@@ -238,6 +310,14 @@ export function TimelineCausalityExplorer({
               <span className="glass-pill rounded-full px-2.5 py-0.5 text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
                 {activeEvent.category}
               </span>
+              {activeEvent.conceptTags?.map((tag) => (
+                <span
+                  key={tag}
+                  className="glass-pill rounded-full border border-black/10 px-2.5 py-0.5 font-mono text-[10.5px] font-medium text-[#1D1D1F] dark:border-white/15 dark:text-[#F5F5F7]"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
 
             <h4 className="text-base font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
@@ -270,6 +350,34 @@ export function TimelineCausalityExplorer({
                 className="text-[13px] leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]"
               />
             </div>
+
+            {activeEvent.historiographyNotes &&
+              activeEvent.historiographyNotes.length > 0 && (
+                <div className="glass-surface rounded-2xl p-4">
+                  <div className="mb-2 flex items-center gap-1.5 font-mono text-[10px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+                    <BookOpen className="h-3 w-3" aria-hidden="true" />
+                    Historiographical Perspectives (Paper 3 Argument Evaluation)
+                  </div>
+                  <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+                    {activeEvent.historiographyNotes.map((h) => (
+                      <div
+                        key={h.historian}
+                        className="rounded-xl border border-black/[0.06] bg-white/40 px-3 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.03]"
+                      >
+                        <div className="text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          {h.historian}
+                        </div>
+                        <div className="font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
+                          {h.school}
+                        </div>
+                        <p className="mt-1 text-xs leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          {h.argument}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
           </div>
         ) : (
           <div className="py-6 text-center text-xs text-[#6E6E73] dark:text-[#98989D]">

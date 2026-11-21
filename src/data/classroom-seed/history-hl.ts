@@ -1,18 +1,23 @@
 import type { SubjectClassroomSeed } from './types';
+import {
+  HIST_IA_2028_BLUEPRINT,
+  HIST_INTRO_CONCEPTS_EXPLORER,
+  HIST_P3_ITALY_TIMELINE,
+  HIST_P3_TOTALITARIANISM_MATRIX,
+} from './enhanced-diagrams';
 
 export const HISTORY_HL_SEED: SubjectClassroomSeed = {
   slug: 'history-hl',
   materials: [
     {
-      fileName: 'IB HISTORY 11 INTRODUCTION.pptx',
-      fileType: 'pptx',
-      topicCode: 'CONCEPTS',
-      externalUrl: 'https://drive.google.com/file/d/1IG52Fg_lJ45cNvpJsD3iOfSkZZAnwVFQ/view?usp=drivesdk',
+      fileName: 'Paper 3  - Europe - Pearson 2026.pdf',
+      fileType: 'pdf',
+      topicCode: 'P3',
       extractedText: [
-        'IB History 11 Introduction Slides — Core Concepts & Historiography:',
-        '- Why study history & where history lives (archival documents, material culture, oral memory, historiography).',
-        '- Core IB historical concepts (May 2028 guide): Cause & Consequence, Continuity & Change, Perspectives, Significance.',
-        '- Historiography & Revisionism: How shifting societal contexts, newly opened archives, and newer fields (social, women’s, cultural, microhistory vs traditional diplomatic/military history) reshape historical interpretations.',
+        'Official Course Textbook (May 2028 Regional Study — Europe): Pearson IB Diploma History Paper 3: Europe (2026 Edition).',
+        '- Chapter 1: European totalitarianism (1918–41) — Case Study 1: Italy & Mussolini (1918–26 & 1926–40 economic battles, corporatism, Church, foreign policy); Case Study 2: Germany, Weimar & Hitler (1918–34 & 1933–39 Gleichschaltung, racial state, rearmament); Case Study 3: USSR & Stalin (collectivization, Five-Year Plans, Great Terror to 1941).',
+        '- Chapter 2: Europe and the Second World War (1918–49) — Versailles fragility, Spanish Civil War, Axis diplomacy, Barbarossa/total war home fronts, early Cold War partition (1945–49).',
+        '- May 2028 Paper 3 Method (pp. 4–12): Emphasizes sustained argument–evidence evaluation across Inquiry Topics, historical perspectives, and consistent substantiated judgement.',
       ].join('\n'),
     },
     {
@@ -22,10 +27,10 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       externalUrl: 'https://drive.google.com/file/d/1Ops0OiGOIZTZK6aBi8D5C73THnOiztwZ/view?usp=drivesdk',
       extractedText: [
         'IB 11 Regional Study Slides: Italy 1890–1939 (Slides 1–13 Socratic Seminar Guide):',
-        '- Liberal Italy Instability (1890–1915): North–South economic divide, Battle of Adowa (1896), Crispi’s Triple Alliance links, Giolitti (1903–14) coalitions, Pope Pius X easing Catholic electoral ban, Tripoli war & June 1914 "Red Week".',
-        '- WWI & "Mutilated Victory" (1915–1922): Secret Treaty of London (April 1915), Wilson’s opposition, D’Annunzio’s 1919 occupation of Fiume, PSI & Popolari rise, Fasci di Combattimento, squadre d’azione violence, Pact of Pacification, July–Aug 1922 general strike, March on Rome (Oct 24–28, 1922) & King Victor Emmanuel III refusing martial law.',
-        '- Fascist Consolidation & Dictatorship (1922–1929): MVSN militia, Acerbo Electoral Law (April 1924), Matteotti murder (June 1924) & failed Aventine Secession, corporate state syndicates & National Council of Corporations, Battle for Grain & Births, Lateran Treaties & Concordat (1929).',
-        '- Foreign Policy (1923–1936): Corfu Incident (1923), Balkan Pact of Rome & Albania influence, Locarno/Kellogg-Briand participation, 1934 Dollfuss assassination mobilization, Stresa Front (1935) before eventual Nazi alignment.',
+        '- Liberal Italy Instability (1890–1915): North–South divide, Adowa (1896), Giolitti transformismo, Pope Pius X, Tripoli War & 1914 Red Week.',
+        '- WWI & "Mutilated Victory" (1915–1922): Secret Treaty of London (Apr 1915), Wilson opposition, D’Annunzio’s Fiume (1919), PSI & Popolari, Fasci di Combattimento, squadre d’azione, Pact of Pacification, July–Aug 1922 general strike, March on Rome (Oct 24–28, 1922).',
+        '- Consolidation (1922–1929): MVSN, Acerbo Law (Apr 1924), Matteotti murder (June 1924) & Aventine Secession, Jan 1925 speech, Corporate State, Battles for Grain & Births, Lateran Treaties (1929).',
+        '- Foreign Policy (1923–1936): Corfu (1923), Albania, Locarno, 1934 Dollfuss mobilization, Stresa Front (1935), Abyssinia & Axis shift.',
       ].join('\n'),
     },
     {
@@ -34,10 +39,10 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'P3.2',
       externalUrl: 'https://drive.google.com/file/d/1LvLsE3hKe_A5xvxMkhQC3vEFAWv131hM/view?usp=drivesdk',
       extractedText: [
-        'IB 11 European Totalitarianism 1918–1941 Slides (Slides 1–13 Analytical Prompts):',
-        '- Origins of Italian Fascism: Italian unification parliament/transformismo coalitions, Terra Irredenta, Mussolini’s wartime interventionist U-turn, Biennio Rosso (1919–20) factory/land occupations, Arditi veterans, elite conservative backing.',
-        '- Institutional Consolidation: PNF creation, Fascist Grand Council, Ceka secret violence, outlawing opposition parties/non-fascist unions, 1928–29 plebiscite electoral overhaul, "All within the state, nothing outside or against the state."',
-        '- Economic & Social Control: Autarky, Battle for the Lira ("Quota 90" political prestige vs export deflation), IRI Depression state bailout, Corporatism historiography (propaganda facade vs worker suppression), Opera Nazionale Balilla (ONB) youth, Dopolavoro leisure, Miniculpop propaganda, 1938 Antisemitic Racial Laws (historiographical debate: German pressure vs indigenous Fascist racism), and limits of totalitarianism (Monarchy + Catholic Church survival).',
+        'IB 11 European Totalitarianism 1918–1941 Slides (Slides 1–13):',
+        '- Origins: transformismo paralysis, Terra Irredenta, Biennio Rosso (1919–20), elite industrial/agrarian backing.',
+        '- Consolidation: PNF, Fascist Grand Council, Ceka/OVRA, outlawing opposition parties/unions, 1928–29 plebiscite.',
+        '- Control & Limits: Autarky, Battle for Lira ("Quota 90"), IRI bailout, Corporatism (propaganda vs workers), ONB youth, Dopolavoro, Miniculpop, 1938 Racial Laws (German pressure vs domestic racism debate), survival of Monarchy & Catholic Church.',
       ].join('\n'),
     },
     {
@@ -46,12 +51,9 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'P3',
       externalUrl: 'https://drive.google.com/file/d/1nA7u2OcVovmFRkxwodojYjijF7XPwlRG/view?usp=drivesdk',
       extractedText: [
-        'Official May 2028 IB History Paper 3 Generic Markscheme Extract (pp. 87–88, 15 marks per essay × 2 essays = 30 marks):',
+        'Official May 2028 IB History Paper 3 Generic Markscheme Extract (2 hours, 35%, 24 questions / 12 studies, answer 2 × 15-mark essays from different studies = 30 marks):',
         '- Band 13–15: Consistently analytical; reasoned judgement consistent with analysis; consistently appropriate & effective examples; explores different perspectives and establishes clear links.',
-        '- Band 10–12: Understands and addresses demands; clear coherent analysis; well-explained relevant examples; integrates perspectives.',
-        '- Band 7–9: Moves beyond description to some analysis/critical commentary; mostly appropriate examples; attempts links/perspectives.',
-        '- Band 4–6: Some understanding; mostly narrative/descriptive; uneven support.',
-        '- Band 1–3: Minimal understanding, generalized assertions.',
+        '- Band 10–12: Clear coherent analysis; well-explained examples; integrates perspectives.',
       ].join('\n'),
     },
     {
@@ -60,7 +62,7 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'P3',
       externalUrl: 'https://drive.google.com/file/d/1N85Jjn2H2_VQ7Iprnzq-DljgNrNcNVRs/view?usp=drivesdk',
       extractedText:
-        'May 2028 Paper 3 Assessed Student Work Example 1: "The civil rights movement largely ended segregation in the South." To what extent do you agree? Demonstrates IB examiner scoring of causal evaluation, de jure vs de facto persistence, and regional scope.',
+        'May 2028 Paper 3 Assessed Student Work Example 1: Demonstrates examiner scoring of causal evaluation and de jure vs de facto social change under 15-mark Band descriptors.',
     },
     {
       fileName: 'Sample Paper 3-2 2028.pdf',
@@ -68,7 +70,7 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'P3',
       externalUrl: 'https://drive.google.com/file/d/1A59tRUPCp6pBCyXjnpEPpibtqw6PQpNw/view?usp=drivesdk',
       extractedText:
-        'May 2028 Paper 3 Assessed Student Work Example 2: "The First World War was the major cause of Egyptian nationalism to 1945." To what extent do you agree? Illustrates weighing short-term wartime mobilization against long-term British occupation and economic grievances under 2028 descriptors.',
+        'May 2028 Paper 3 Assessed Student Work Example 2: Weighs short-term WWI catalyst against long-term nationalist grievances under 2028 descriptors.',
     },
     {
       fileName: 'Sample Paper 3-3 2028.pdf',
@@ -76,7 +78,7 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'P3.3',
       externalUrl: 'https://drive.google.com/file/d/1lqRm-TsSZiVyw7uadbJ7uvk0HSc6jw-d/view?usp=drivesdk',
       extractedText:
-        'May 2028 Paper 3 Assessed Student Work Example 3: Features two European Paper 3 essays — "Balkan Nationalism was the most significant factor in the outbreak of WW1" and an evaluation of Weimar Germany’s Golden Era (1924–1929) highlighting cultural/diplomatic stabilization undermined by fragile Dawes Plan short-term US loans and structural extremist survival before the 1929 Wall Street Crash.',
+        'May 2028 Paper 3 Assessed Student Work Example 3: Features Weimar Germany Golden Era (1924–1929) essay evaluating Stresemann cultural/Locarno stabilization undermined by short-term Dawes Plan US loans and persistent extremism prior to 1929 crash.',
     },
     {
       fileName: 'Sample Paper 3-4 2028.pdf',
@@ -84,7 +86,15 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'P3',
       externalUrl: 'https://drive.google.com/file/d/1jiYhjtXFqSt8AwG8l92T4L-zQSC7wxf2/view?usp=drivesdk',
       extractedText:
-        'May 2028 Paper 3 Assessed Student Work Example 4: Essays assessing Jiang Jieshi’s Nanjing Decade (1927–37) and Cold War historiography (orthodox vs revisionist Gaddis synthesis) — models explicit historiographical perspectives integration required for Band 13–15.',
+        'May 2028 Paper 3 Assessed Student Work Example 4: Models explicit historiographical schools (orthodox vs revisionist synthesis) required for Band 13–15.',
+    },
+    {
+      fileName: 'IB HISTORY 11 INTRODUCTION.pptx',
+      fileType: 'pptx',
+      topicCode: 'CONCEPTS',
+      externalUrl: 'https://drive.google.com/file/d/1IG52Fg_lJ45cNvpJsD3iOfSkZZAnwVFQ/view?usp=drivesdk',
+      extractedText:
+        'IB History 11 Intro Slides: Archives/material culture, four May 2028 core concepts (Cause & Consequence, Continuity & Change, Perspectives, Significance), and historiography/revisionism.',
     },
     {
       fileName: 'Sample 1.pdf',
@@ -92,7 +102,7 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'C.4',
       externalUrl: 'https://drive.google.com/file/d/1lyKvU9qsP36EALVNY4NomvuvHZ381gxy/view?usp=drivesdk',
       extractedText:
-        'May 2028 IB History Internal Assessment Example 1 (1,979 words): "To what extent was Hernán Cortés significant in the fall of the Aztec Empire between 1519 and 1521?" Models bounded 2028 IA Criterion A source OPCVL evaluation, Criterion B analytical investigation (Indigenous Tlaxcalan alliances + smallpox vs Cortés leadership), and Criterion C conclusion.',
+        'May 2028 IB History IA Example 1 (1,979 words): "To what extent was Hernán Cortés significant in the fall of the Aztec Empire (1519–1521)?" Weighs Cortés diplomacy + Tlaxcalan allies + smallpox inside the 24-mark 2028 IA framework (max 7 sources, ≤2,200w, no standalone Reflection).',
     },
     {
       fileName: 'Sample 2.pdf',
@@ -100,7 +110,7 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'C.3',
       externalUrl: 'https://drive.google.com/file/d/1FQI9q18dfJ4QWkacx27b5Q-BF27hhEi_/view?usp=drivesdk',
       extractedText:
-        'May 2028 IB History Internal Assessment Example 3 (~2,199 words): "To what extent did Erwin Rommel support the 20 July 1944 plot to kill Adolf Hitler?" Evaluates historiographical debate between postwar myth-making (*The Rommel Papers* / *The Desert Fox*) and critical German scholarship (Reuth).',
+        'May 2028 IB History IA Example 3 (~2,199 words): "To what extent did Erwin Rommel support the 20 July 1944 plot to kill Adolf Hitler?" Contrasts sanitized postwar *Rommel Papers* against Ralf-Georg Reuth archival scholarship with Chicago NB footnotes.',
     },
     {
       fileName: 'Sample 3.pdf',
@@ -108,7 +118,7 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'C.3',
       externalUrl: 'https://drive.google.com/file/d/1q9bM_Ryn5SfgItNUptxhmUwtytHhpTCy/view?usp=drivesdk',
       extractedText:
-        'May 2028 IB History Internal Assessment Example 2 (~2,200 words): "How accurate is the 1966 film *The Battle of Algiers* in its depiction of the role of women in the Front de libération nationale (FLN)?" Demonstrates film-vs-scholarship comparative evaluation using Chicago citations.',
+        'May 2028 IB History IA Example 2 (~2,200 words): "How accurate is *The Battle of Algiers* (1966) in depicting women in the FLN?" Models film-vs-scholarship comparative evaluation using Chicago citations.',
     },
     {
       fileName: 'cmos-nb-sample-paper-purdue-owl-2-publish-20260312.pdf',
@@ -116,92 +126,45 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       topicCode: 'CONCEPTS',
       externalUrl: 'https://drive.google.com/file/d/1cbdYbP8qgB43qb_QQrc8j9HDQeZrG3vo/view?usp=drivesdk',
       extractedText:
-        'Purdue OWL Chicago Manual of Style (Notes & Bibliography) Sample Paper: Authoritative formatting template for IB History HL Internal Assessments and History Extended Essays — superscript footnote citations, shortened subsequent footnotes, block quotes, Chicago Bibliography entries, and title-page conventions.',
+        'Purdue OWL Chicago Manual of Style (Notes & Bibliography) Sample Paper: Authoritative template for superscript footnote numbers, shortened subsequent notes, primary/secondary bibliography, and block quotes in the History IA.',
     },
   ],
   notes: [
     {
       topicCode: 'P3.1',
-      title: 'Liberal Italy & Mussolini’s Rise to Dictatorship (1890–1929)',
+      title: 'Paper 3 Spotlight — Liberal Italy & Mussolini’s Dictatorship (1890–1940)',
       summary:
-        'Interactive causal timeline built directly from IB 11 Italy 1890–1939 & European Totalitarianism slides tracing structural weaknesses, Biennio Rosso, March on Rome, Matteotti crisis, and the Lateran Pacts.',
-      sourceFileNames: ['IB 11 Italy 1890-1939.pptx', 'IB 11 European Totalitarianism.pptx'],
+        'ACTIVE FOCUS (Paper 3 Europe · Pearson 2026 Ch. 1 & CRHS Italy Slides): Interactive causal timeline from Adowa (1896) and Biennio Rosso to March on Rome, Acerbo Law, Matteotti, Lateran Treaties, and 1938 Racial Laws.',
+      sourceFileNames: ['IB 11 Italy 1890-1939.pptx', 'Paper 3  - Europe - Pearson 2026.pdf'],
       blocks: [
-        { type: 'heading', level: 2, text: '1. Causal Chain: From Liberal Fragility to One-Party State' },
         {
-          type: 'paragraph',
+          type: 'callout',
+          variant: 'syllabus_link',
+          title: 'Current Course Focus: May 2028 History IA & Paper 3 (Europe)',
           markdown:
-            'Italian Fascism did not seize power purely through revolutionary force in October 1922: it exploited **long-term Liberal fragility** (*transformismo* corruption, North–South divide, Catholic hostility, *Adowa* humiliation), **post-WWI disillusionment** (*Mutilated Victory*, D’Annunzio’s Fiume precedent, *Biennio Rosso*), and **elite conservative miscalculation** by Giolitti, industrialists, and King Victor Emmanuel III.',
+            'Your Grade 11 History class is prioritizing the **May 2028 24-mark 3-Section IA** and **Paper 3 Europe (Totalitarianism 1918–41 & WWII 1918–49)**. Paper 1 & Paper 2 notes remain indexed below strictly as Year 2 references.',
         },
+        { type: 'playable_diagram', spec: HIST_P3_ITALY_TIMELINE },
         {
           type: 'playable_diagram',
           spec: {
-            type: 'timeline_causality',
-            id: 'hist-p3-1-italy-timeline',
-            title: 'Italy 1896–1929: Structural Crisis -> Fascist Consolidation',
-            caption: 'Click events and filter by Crisis / Consolidation / Church-Social Policy to connect causes to Paper 3 arguments.',
-            categories: ['Liberal Crisis', 'Seizure of Power', 'Dictatorship Consolidation'],
-            events: [
+            type: 'comparison_matrix',
+            id: 'hist-p3-italy-historiography',
+            title: 'Key Turning Points & Historiographical Debates in Mussolini’s Italy (Pearson Ch. 1)',
+            caption: 'Directly integrates IB 11 Italy & Totalitarianism Socratic seminar prompts.',
+            columns: ['Turning Point', 'Specific Empirical Evidence', 'Historiographical Perspectives'],
+            rows: [
               {
-                id: 'adowa-1896',
-                dateLabel: '1896',
-                title: 'Defeat at Battle of Adowa & Giolitti Era Frailty',
-                category: 'Liberal Crisis',
-                summaryMarkdown:
-                  'Ethiopian forces crushed Italian colonial troops under Crispi, exposing military weakness alongside deep North–South economic disparity and shifting coalition politics (*transformismo*).',
-                significanceMarkdown:
-                  'Fuelled radical nationalist resentment ("proletarian nation") later weaponized by Mussolini.',
+                criterion: 'March on Rome (Oct 1922)',
+                cells: ['~25–30,000 Blackshirts converged poorly armed; King Victor Emmanuel III refused PM Facta’s martial law decree and invited Mussolini', 'Orthodox coercion vs Revisionist **Renzo De Felice**: weak liberal elites handed power to co-opt Fascists against socialism'],
               },
               {
-                id: 'london-fiume-1915-19',
-                dateLabel: '1915–1919',
-                title: 'Treaty of London, "Mutilated Victory" & Fiume',
-                category: 'Liberal Crisis',
-                summaryMarkdown:
-                  'Britain and France promised Italy Adriatic territories in the secret April 1915 Treaty of London; Woodrow Wilson’s opposition left nationalists outraged at Versailles, prompting D’Annunzio’s September 1919 blackshirt seizure of Fiume.',
-                primarySourceQuote: 'D’Annunzio’s Fiume choreographed balconies, black shirts, and paramilitary defiance of Rome.',
-                significanceMarkdown:
-                  'Demonstrated that liberal coalitions lacked will or force to suppress illegal right-wing nationalism.',
+                criterion: 'Matteotti Crisis & Jan 1925 Pivot',
+                cells: ['Giacomo Matteotti denounced Acerbo election fraud & was murdered; opposition boycotted parliament (Aventine Secession); Mussolini assumed "moral responsibility" (3 Jan 1925)', 'Legal-conservative collusion prolonged Mussolini until hardline ras forced open dictatorship via Leggi Fascistissime (1925–26)'],
               },
               {
-                id: 'biennio-squadre-1920',
-                dateLabel: '1919–1921',
-                title: 'Biennio Rosso & Squadre d’Azione Escalation',
-                category: 'Liberal Crisis',
-                summaryMarkdown:
-                  'Wartime inflation sparked northern factory occupations and socialist PSI/Confederation electoral surges. Landowners, industrialists, and army veterans funded Mussolini’s *squadre d’azione* to smash socialist halls with tacit police tolerance.',
-                significanceMarkdown:
-                  'Pushed Mussolini from his radical 1919 programme toward a conservative pro-monarchy/capitalist alliance (PNF 1921).',
-              },
-              {
-                id: 'march-on-rome-1922',
-                dateLabel: 'Oct 1922',
-                title: 'General Strike Collapse & March on Rome',
-                category: 'Seizure of Power',
-                summaryMarkdown:
-                  'After fascists broke the left’s July–August 1922 general strike, Mussolini mobilized Blackshirts toward Rome on 28 October. King Victor Emmanuel III refused PM Facta’s martial law decree and appointed Mussolini PM legally.',
-                significanceMarkdown:
-                  'Turning point: Fascists gained office via royal/establishment concession, NOT triumphant military conquest.',
-              },
-              {
-                id: 'acerbo-matteotti-1924',
-                dateLabel: '1923–1925',
-                title: 'Acerbo Law, Matteotti Murder & Jan 1925 Speech',
-                category: 'Dictatorship Consolidation',
-                summaryMarkdown:
-                  'Creation of the state-paid MVSN militia and the Acerbo Electoral Law (25% plurality won two-thirds of Chamber seats) secured the April 1924 PNF victory. Socialist deputy Giacomo Matteotti’s June 1924 murder triggered the futile opposition Aventine Secession; Mussolini accepted political responsibility in Jan 1925 and outlawed opposition by 1926.',
-                significanceMarkdown:
-                  'Marks exact transition from coalition PM to open one-party dictatorship.',
-              },
-              {
-                id: 'lateran-1929',
-                dateLabel: 'Feb 1929',
-                title: 'Lateran Treaties & Concordat',
-                category: 'Dictatorship Consolidation',
-                summaryMarkdown:
-                  'Healed the 1870 rift with the Papacy: Italy recognized Vatican sovereignty and paid financial compensation; Catholicism became sole state religion with compulsory church marriage and religious education, while Pope Pius XI recognized Fascist Italy.',
-                significanceMarkdown:
-                  'Delivered huge domestic legitimacy ("the man sent by Providence") yet proved totalitarianism remained incomplete because the Church kept Catholic Action youth networks.',
+                criterion: 'Corporatism, "Quota 90" & Lateran 1929',
+                cells: ['22 Corporations outlawed strikes; Battle for the Lira (90 ITL/£) hurt exports; IRI rescued Depression banks; Lateran Pact ceded Vatican sovereignty', 'Propaganda mirage masking wage cuts; **Richard Bosworth**: surviving Monarchy & Church limited "totalitarian" penetration'],
               },
             ],
           },
@@ -209,57 +172,61 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
       ],
     },
     {
-      topicCode: 'P3.5',
-      title: 'European Totalitarianism Compared & May 2028 Paper 3 Method (P3.5)',
+      topicCode: 'P3.2',
+      title: 'Paper 3 Spotlight — Comparative European Totalitarianism (1918–1941) & Band 13–15 Essays',
       summary:
-        'Analytical synthesis of European Totalitarianism (1918–1941), Weimar fragility (Sample Paper 3-3), and May 2028 Band 13–15 essay structure from the 2028 Paper 3 Markscheme.',
-      sourceFileNames: [
-        'IB 11 European Totalitarianism.pptx',
-        'Paper 3 MarkScheme 2028 Extract.pdf',
-        'Sample Paper 3-3 2028.pdf',
-      ],
+        'ACTIVE FOCUS (Pearson 2026 Ch. 1–2 + 2028 Markscheme): Compare Mussolini’s Italy, Weimar/Nazi Germany, and Stalin’s USSR alongside exact May 2028 Paper 3 structure (2h, 2×15m = 30m, 35%).',
+      sourceFileNames: ['IB 11 European Totalitarianism.pptx', 'Paper 3  - Europe - Pearson 2026.pdf', 'Paper 3 MarkScheme 2028 Extract.pdf', 'Sample Paper 3-3 2028.pdf'],
       blocks: [
-        { type: 'heading', level: 2, text: '1. Comparative Authoritarian/Totalitarian Control (1918–1941)' },
+        { type: 'playable_diagram', spec: HIST_P3_TOTALITARIANISM_MATRIX },
         {
-          type: 'paragraph',
+          type: 'callout',
+          variant: 'definition',
+          title: 'May 2028 Paper 3 Exam Format & Band 13–15 Markscheme (Pearson pp. 4–12 + Extract)',
           markdown:
-            'In May 2028 IB History Paper 3, top-band (13–15/15) essays do NOT narrate policies chronologically. They evaluate **extent**, contrast **ideological rhetoric with practical outcome** ("Battles" vs autarky; Totalitarian slogan *"All within the state"* vs surviving elites), and embed **historiographical debate**.',
+            '**Exam Structure:** **2 hours**, **35% HL weighting**. Choose any **2 essays out of 24 questions** (2 per each of 12 regional studies; essays MUST come from different regional studies in Europe), **15 marks each = 30 marks total**. To hit **Band 13–15**, go beyond narrative ("what happened"): (1) unpack command terms (*Evaluate*, *To what extent*, *Compare and contrast*); (2) anchor every paragraph in explicit causal weighting and precise examples; (3) embed **multiple perspectives / historiography**; (4) hold a consistent substantiated judgement across introduction, body, and conclusion.',
         },
         {
-          type: 'playable_diagram',
-          spec: {
-            type: 'comparison_matrix',
-            id: 'hist-p3-5-totalitarian-matrix',
-            title: 'Fascist Italy vs Weimar/Nazi Germany: Economic, Social & Institutional Control',
-            caption: 'Direct comparison anchored in European Totalitarianism slides & Sample Paper 3-3 Weimar analysis.',
-            columns: ['Dimension', 'Mussolini’s Fascist Italy', 'Weimar Collapse / Nazi Germany', 'Historiographical Debate / Nuance'],
-            rows: [
-              {
-                criterion: 'Economic Restructuring',
-                cells: ['Corporate State (22 Corporations), Battle for Grain/Lira Quota 90, IRI Depression bailouts', 'Dawes Plan 1924–29 illusion ended in 1929 crash; Schacht New Plan & Four-Year Plan autarky', 'Critics view Italian corporatism as anti-union propaganda protecting big business rather than third-way harmony'],
-              },
-              {
-                criterion: 'Youth & Propaganda',
-                cells: ['ONB youth militarization, Dopolavoro leisure clubs, Miniculpop censorship', 'Hitler Youth / BDM compulsory integration, Goebbels Reich Ministry of Propaganda', 'Italian Church Catholic Action & school autonomy limited total fascist mind-control'],
-                ibExamTip: 'Compare official Miniculpop mobilization with structural compromises that left the Monarchy and Church intact.',
-              },
-              {
-                criterion: 'Coercion & Racial Policy',
-                cells: ['OVRA secret police, Lipari exile; 1938 Antisemitic Racial Laws (no Final Solution until 1943 German occupation)', 'Gestapo/SS camps, 1935 Nuremberg Laws escalating into industrialized Holocaust', 'Historians debate whether 1938 laws mirrored Nazi alliance pressure vs homegrown colonial racism'],
-              },
-              {
-                criterion: 'Structural Survival Limits',
-                cells: ['King Victor Emmanuel III kept constitutional dismissal power (exercised July 1943) + Vatican Concordat', 'Hindenburg died 1934 -> Hitler fused Chancellor & President; Wehrmacht swore personal oath', 'Most historians classify Italy as incomplete/authoritarian dictatorship rather than pure totalitarianism'],
-              },
-            ],
-          },
+          type: 'key_terms',
+          items: [
+            { term: 'Italy Limits vs Germany/USSR (P3.2–P3.4)', definitionMarkdown: 'Victor Emmanuel III could dismiss Mussolini (1943) and Pope Pius XI kept Catholic Action intact; Nazi Germany achieved far tighter Gleichschaltung under Führerprinzip; Stalin’s purges/NKVD eliminated old Bolsheviks completely.', markschemeKeyword: 'totalitarian limits vs terror saturation' },
+            { term: 'Weimar Fragility (Sample Paper 3-3)', definitionMarkdown: 'Stresemann stabilized 1924–29 via Locarno and Rentenmark, yet reliance on recallable short-term US Dawes loans, Article 48 loopholes, and Versailles resentment left Weimar vulnerable to the 1929 Crash.', markschemeKeyword: 'Dawes Plan structural weakness' },
+            { term: '1938 Italian Antisemitic Racial Laws debate', definitionMarkdown: 'Did Mussolini mimic Hitler after Axis alignment, or formalize indigenous imperial race hierarchies formed in Eritrea/Ethiopia (1936–37)?', markschemeKeyword: 'German alignment vs endogenous imperialism' },
+          ],
         },
+      ],
+    },
+    {
+      topicCode: 'CONCEPTS',
+      title: 'IA Spotlight — May 2028 Historical Investigation Blueprint (24 Marks · 3 Sections)',
+      summary:
+        'ACTIVE FOCUS (Sample 1–3 + Purdue CMOS NB): Step-by-step architecture for the redesigned May 2028 History IA — Inquiry Question (6m), Sources & Perspectives (6m), Synthesis & Evaluation (12m), max 7 sources, ≤2,200w.',
+      sourceFileNames: ['Sample 1.pdf', 'Sample 2.pdf', 'Sample 3.pdf', 'cmos-nb-sample-paper-purdue-owl-2-publish-20260312.pdf'],
+      blocks: [
+        { type: 'playable_diagram', spec: HIST_IA_2028_BLUEPRINT },
         {
           type: 'callout',
           variant: 'examiner_warning',
-          title: 'May 2028 Paper 3 Band 13–15 Checklist (p. 88)',
+          title: 'Four Non-Negotiable May 2028 History IA Changes vs Legacy Pre-2028 Guides!',
           markdown:
-            '1. Address the **command term** ("To what extent..." / "Evaluate") directly in thesis & every topic sentence.\n2. Pair **precise chronology and statistics/institutions** (Acerbo Law, Quota 90, IRI, Dawes Plan) with **alternative historical perspectives**.\n3. End with a **reasoned judgement consistent with the analysis** (never contradict your body paragraphs).',
+            '1) **3 Sections totaling 24 marks (20% HL):** **Section 1: Historical Inquiry Question [6m]** (~200–300w), **Section 2: Sources and Perspectives [6m]** (~400–500w), **Section 3: Synthesis and Evaluation [12m]** (~1,300–1,500w). 2) **Standalone Reflection is REMOVED.** 3) **Hard source cap = MAX 7 sources total** in your Chicago Notes & Bibliography! 4) **Section 2 is NOT mechanical OPCVL checklists** — compare *how/why* sources offer distinct perspectives (e.g. postwar apologetics in *The Rommel Papers* vs archival critiques by Reuth in Sample 2) to illuminate your RQ.',
+        },
+      ],
+    },
+    {
+      topicCode: 'CONCEPTS',
+      title: 'May 2028 Core Historical Concepts & Historiography (Year 2 P1/P2 Reference)',
+      summary:
+        'Master the 4 May 2028 IB History concepts (Cause/Consequence, Continuity/Change, Perspectives, Significance) plus concise Year-2 readiness notes for redesigned Paper 1 & Paper 2.',
+      sourceFileNames: ['IB HISTORY 11 INTRODUCTION.pptx', 'Sample Paper 3-4 2028.pdf'],
+      blocks: [
+        { type: 'playable_diagram', spec: HIST_INTRO_CONCEPTS_EXPLORER },
+        {
+          type: 'callout',
+          variant: 'syllabus_link',
+          title: 'Year 2 Reference Overview: May 2028 Paper 1 & Paper 2 Redesigns',
+          markdown:
+            '- **Paper 1 (1h15 · 24 marks · 20% HL):** Sources paper covering Prescribed Topics (*Conflict/Diplomacy/Society/Environment*). Replaces old mechanical Q2 OPCVL question with integrated perspective synthesis.\n- **Paper 2 (1h45 · 25 marks · 25% HL):** Essay paper covering Thematic Studies; choose **1 question (15m) + 1 source-linked/comparative prompt (10m)** with regional contrast. Keep your active study energy in **Grade 11 on Paper 3 Europe & your Historical Investigation IA**.',
         },
       ],
     },
@@ -267,187 +234,261 @@ export const HISTORY_HL_SEED: SubjectClassroomSeed = {
   questions: [
     {
       topicCode: 'P3.1',
-      paperType: 'Paper 3 (Regional Study — Europe)',
+      paperType: 'Paper 3 (May 2028 · 15m)',
       commandTerm: 'Evaluate',
-      difficulty: 'HL Extension',
+      difficulty: 'Standard IB',
       maxMarks: 15,
       questionMarkdown:
-        '"The weaknesses of Liberal Italy, rather than Fascist violence, were the primary reason Mussolini became Prime Minister in October 1922." To what extent do you agree with this statement?',
+        'Evaluate the relative importance of **post-WWI economic and social instability (1919–1922)** versus **liberal political weakness and elite connivance** in Mussolini’s appointment as Prime Minister in October 1922 (Pearson Ch. 1 · IB Italy Slides).',
       markscheme: {
         marking_points: [
-          {
-            code: 'A1',
-            criterion:
-              'Consistent focus on the relative weight of Liberal structural weaknesses vs Fascist paramilitary coercion, delivering a reasoned 13–15 judgement',
-            marks: 5,
-          },
-          {
-            code: 'M1',
-            criterion:
-              'Liberal weaknesses examined with concrete detail: transformismo parliamentary deadlock, North–South divide, "Mutilated Victory" over Treaty of London/Fiume, Biennio Rosso strikes, and King Victor Emmanuel III refusing PM Facta’s martial law decree',
-            marks: 5,
-          },
-          {
-            code: 'M2',
-            criterion:
-              'Fascist violence & tactical agency weighed: squadre d’azione killing socialists (1920–21), breaking the Aug 1922 general strike, 1921 PNF shift to reassuring elites, and coercive threat of the March on Rome — plus competing perspectives',
-            marks: 5,
-          },
+          { code: 'P1', criterion: 'Thesis & Causal Weighting: Establishes clear judgement comparing socioeconomic *Biennio Rosso* panic against liberal *transformismo* paralysis and King Victor Emmanuel III’s decisive refusal of martial law.', marks: 4 },
+          { code: 'E1', criterion: 'Economic & Social Crisis: Wartime inflation/debt, 2M unemployed veterans, 1919–20 Biennio Rosso factory/land strikes, and landowners financing squadre d’azione.', marks: 4 },
+          { code: 'E2', criterion: 'Political Collapse & Coercion: Treaty of London / Fiume humiliation ("Mutilated Victory"), proportional voting fragmenting PSI & Popolari, Facta cabinet weakness, March on Rome bluff vs Royal refusal of siege decree.', marks: 4 },
+          { code: 'H1', criterion: 'Historiographical Perspectives: Contrasts structural economic-fear interpretations (Marxist class reaction) with Renzo De Felice’s emphasis on liberal establishment miscalculation expecting to "tame" Mussolini.', marks: 3 },
         ],
         model_answer:
-          'A Band 13–15 essay argues that **Liberal collapse created the indispensable political vacuum, while Fascist violence and Mussolini’s dual-track opportunism enabled him to capture it**. Examine Liberal structural fragility (*transformismo*, wartime inflation, PSI vs *Popolari* parliamentary paralysis, failed response to D’Annunzio at Fiume), balance this against *squadre d’azione* terror in northern agricultural provinces and breaking the August 1922 general strike, and conclude with the King’s decisive legal invitation in October 1922.',
+          'While wartime debt, *Biennio Rosso* strikes, and agrarian alarm fueled Fascist *squadrismo* funding, Mussolini did not seize Rome by military conquest (~30,000 poorly armed Blackshirts could have been dispersed by the regular army). Crucially, chronic *transformismo* fragmentation under weak coalition ministries convinced King Victor Emmanuel III and industrial/monarchist elites to hand Mussolini the premiership legally on 29 October 1922 in the mistaken belief they could harness Fascism against the left.',
       },
-      sourceFileNames: ['IB 11 Italy 1890-1939.pptx', 'Paper 3 MarkScheme 2028 Extract.pdf'],
+      sourceFileNames: ['IB 11 Italy 1890-1939.pptx', 'Paper 3  - Europe - Pearson 2026.pdf', 'Paper 3 MarkScheme 2028 Extract.pdf'],
+    },
+    {
+      topicCode: 'P3.1',
+      paperType: 'Paper 3 (May 2028 · 15m)',
+      commandTerm: 'To what extent',
+      difficulty: 'Standard IB',
+      maxMarks: 15,
+      questionMarkdown:
+        '*"Between 1922 and 1929, Mussolini relied more on legal compromise and institutional accommodation than on violence to consolidate a dictatorship."* To what extent do you agree with this statement?',
+      markscheme: {
+        marking_points: [
+          { code: 'L1', criterion: 'Institutional/Legal Accommodation: Coalition cabinet (1922–24), MVSN legalization, 1923 Acerbo Law (25% -> 2/3 seats), Leggi Fascistissime (1925–26), 1929 Lateran Treaties settling Church–State conflict.', marks: 5 },
+          { code: 'V1', criterion: 'Coercion & Paramilitary Violence: Pre-election squadrismo intimidation, Ceka secret violence, June 1924 Matteotti murder crisis, OVRA police, Special Tribunal, outlawing opposition after Jan 1925.', marks: 5 },
+          { code: 'J1', criterion: 'Synthesized Judgement & Perspectives: Shows violence and legalism operated dialectically — terror silenced resistance during elections and crises, while compromises with Monarchy, industrialists, and Papacy secured lasting elite consent.', marks: 5 },
+        ],
+        model_answer:
+          'Mussolini combined coercive terror and strategic institutional accommodation. Paramilitary *squadrismo* and the murder of Socialist leader Matteotti crushed active opposition, yet legal instruments—especially the 1923 Acerbo Law, the 1925–26 *Leggi Fascistissime*, and the 1929 Lateran Concordat—were decisive in preventing the King or Church from removing him.',
+      },
+      sourceFileNames: ['IB 11 Italy 1890-1939.pptx', 'IB 11 European Totalitarianism.pptx'],
     },
     {
       topicCode: 'P3.2',
-      paperType: 'Paper 3 (Regional Study — Europe)',
-      commandTerm: 'To what extent',
+      paperType: 'Paper 3 (May 2028 · 15m)',
+      commandTerm: 'Compare and contrast',
       difficulty: 'HL Extension',
       maxMarks: 15,
       questionMarkdown:
-        'To what extent did Mussolini establish a **totalitarian state** in Italy by 1939?',
+        'Compare and contrast the **nature and extent of state control over economy and society** in **Fascist Italy (1925–40)** and **Nazi Germany (1933–39)** (Pearson Ch. 1 · Totalitarianism Slides).',
       markscheme: {
         marking_points: [
-          {
-            code: 'A1',
-            criterion:
-              'Defines totalitarian criteria ("All within the state, nothing outside or against") and tests claim consistently across political, economic, and social spheres',
-            marks: 5,
-          },
-          {
-            code: 'M1',
-            criterion:
-              'Evidence FOR totalitarian reach: outlawing opposition & non-fascist unions (1925–28), OVRA surveillance, Miniculpop propaganda, ONB youth indoctrination, Dopolavoro, Corporate State rhetoric, and 1938 Racial Laws',
-            marks: 5,
-          },
-          {
-            code: 'M2',
-            criterion:
-              'Evidence LIMITING totalitarianism & historiography: survival of Monarchy (retained royal armed forces oath & dismissed Mussolini in 1943), Catholic Church institutional autonomy under 1929 Lateran Concordat (Catholic Action), Southern clientelism, and incomplete economic control under IRI/Corporations',
-            marks: 5,
-          },
+          { code: 'C1', criterion: 'Economic Similarities & Contrasts: Both pursued autarky (Italy Battles for Grain/Lira/IRI vs German Four-Year Plan/Schacht Mefo bills) while leaving private industrialists intact, yet Nazi rearmament militarized German industry far more deeply than Quota 90 deflation.', marks: 5 },
+          { code: 'S1', criterion: 'Social Control & Propaganda: Parallel youth/leisure mobilization (ONB/Dopolavoro vs Hitler Youth/KdF) and censorship (Miniculpop vs Goebbels RMVP), alongside escalating antisemitism (1935 Nuremberg Laws vs 1938 Italian Racial Laws).', marks: 5 },
+          { code: 'L1', criterion: 'Degree of Totalitarian Penetration & Perspectives: Contrast Bosworth’s "imperfect totalitarianism" in Italy (Monarchy & Vatican autonomy survived intact) with pervasive Nazi terror (SS/Gestapo police state, purged army officers in 1938).', marks: 5 },
         ],
         model_answer:
-          'Argue that Mussolini created an **authoritarian one-party dictatorship with totalitarian ambitions rather than a fully realized totalitarian state**. Weigh institutional elimination of opposition (Acerbo Law, Matteotti crisis aftermath, OVRA, ONB, Miniculpop) against entrenched institutional compromises — especially the **Monarchy** and **Vatican** under the 1929 Lateran Treaties — citing historians who label Fascist Italy a "compromise" or "imperfect" totalitarianism.',
+          'Both regimes erected state-directed corporatist/autarkic economies, monopolized youth socialization (ONB vs HJ) and leisure (Dopolavoro vs KdF), and suppressed independent labour. Yet Nazi Germany achieved markedly deeper totalitarian saturation through pervasive Gestapo/SS terror and rapid war mobilization, whereas Victor Emmanuel III and the Catholic Church curtailed Mussolini’s absolute monopoly until 1943.',
       },
-      sourceFileNames: ['IB 11 European Totalitarianism.pptx', 'Paper 3 MarkScheme 2028 Extract.pdf'],
+      sourceFileNames: ['IB 11 European Totalitarianism.pptx', 'Paper 3  - Europe - Pearson 2026.pdf'],
     },
     {
       topicCode: 'P3.3',
-      paperType: 'Paper 3 (Regional Study — Europe)',
+      paperType: 'Paper 3 (May 2028 · 15m)',
+      commandTerm: 'Evaluate',
+      difficulty: 'Standard IB',
+      maxMarks: 15,
+      questionMarkdown:
+        'Evaluate the claim that the Weimar Republic’s **"Golden Era" (1924–1929)** achieved genuine long-term political and economic stability before the 1929 Wall Street Crash (Sample Paper 3-3 & Pearson Ch. 1).',
+      markscheme: {
+        marking_points: [
+          { code: 'S1', criterion: 'Evidence of Stabilization: Rentenmark taming 1923 hyperinflation, Stresemann diplomatic rehabilitation (1925 Locarno, 1926 League entry), Weimar cultural flowering, drop in extremist vote share in 1928.', marks: 5 },
+          { code: 'F1', criterion: 'Underlying Fragilities: Heavy dependence on short-term recallable US Dawes Plan loans, agrarian depression from 1927, rigid coalition turnover, Article 48 & Hindenburg authoritarian instincts, persistent nationalist resentment of Versailles.', marks: 5 },
+          { code: 'J1', criterion: 'Balanced Judgement: Stability was real yet superficial ("dancing on a volcano" per Stresemann) — the US capital withdrawal in 1929 exposed unresolved constitutional and social fractures rather than creating them ex nihilo.', marks: 5 },
+        ],
+        model_answer:
+          'Between 1924 and 1929 Stresemann stabilized the currency, eased Ruhr tensions, and restored diplomatic standing at Locarno, depressing Nazi votes to 2.6% in 1928. Nevertheless, industrial recovery depended precariously on short-term American Dawes loans while conservative elites tolerated Weimar only conditionally—meaning the 1929 slump detonated structural fault lines already embedded since 1919.',
+      },
+      sourceFileNames: ['Sample Paper 3-3 2028.pdf', 'Paper 3  - Europe - Pearson 2026.pdf'],
+    },
+    {
+      topicCode: 'CONCEPTS',
+      paperType: 'IA (May 2028 · 24m)',
+      commandTerm: 'Explain',
+      difficulty: 'Foundation',
+      maxMarks: 6,
+      questionMarkdown:
+        'Explain the **three graded sections**, mark distribution, maximum word limit, and source cap of the redesigned **May 2028 IB History Internal Assessment**, noting what was removed from the old pre-2028 rubric.',
+      markscheme: {
+        marking_points: [
+          { code: 'S1', criterion: 'Section 1: Historical Inquiry Question (6 marks) — clear focused, arguable historical question + scope/context rationale.', marks: 2 },
+          { code: 'S2', criterion: 'Section 2: Sources and Perspectives (6 marks) — comparative evaluation of perspectives/origins/reliability of sources inside the strict MAX 7 sources limit (replaces rigid standalone OPCVL).', marks: 2 },
+          { code: 'S3', criterion: 'Section 3: Synthesis and Evaluation (12 marks) — sustained analytical argument + reasoned historical judgement; total max 2,200 words; standalone Section 3 Reflection REMOVED for May 2028.', marks: 2 },
+        ],
+        model_answer:
+          'May 2028 History IA scores 24 marks total: Section 1 Inquiry Question (6m), Section 2 Sources & Perspectives (6m), and Section 3 Synthesis & Evaluation (12m), capped at 2,200 words and max 7 sources; the separate Reflection section has been eliminated.',
+      },
+      sourceFileNames: ['Sample 1.pdf', 'Sample 2.pdf', 'Sample 3.pdf'],
+    },
+    {
+      topicCode: 'C.3',
+      paperType: 'IA (May 2028 · Section 2)',
+      commandTerm: 'Compare and contrast',
+      difficulty: 'Standard IB',
+      maxMarks: 6,
+      questionMarkdown:
+        'Using **IA Sample 2 (Erwin Rommel & the 20 July Plot)**, model how a May 2028 **Section 2: Sources and Perspectives** paragraph contrasts the origin and limitations of *The Rommel Papers* against archival German historiography (Ralf-Georg Reuth).',
+      markscheme: {
+        marking_points: [
+          { code: 'P1', criterion: 'Identifies Origin & Purpose of *The Rommel Papers* (1953): curated postwar by widow/son Manfred Rommel & British military theorist B.H. Liddell Hart during Cold War West German rearmament to construct a "clean Wehrmacht" chivalrous knight.', marks: 2 },
+          { code: 'P2', criterion: 'Contrasts Origin/Method of Ralf-Georg Reuth (*Rommel: The End of a Legend*, 2005): draws on declassified Wehrmacht/Nazi documentation after Cold War thaw showing Rommel profited from Hitler patronage until late military defeat.', marks: 2 },
+          { code: 'L1', criterion: 'Connects source perspective contrast directly to historical inquiry — preventing uncritical reliance on postwar family/Allied memoirs.', marks: 2 },
+        ],
+        model_answer:
+          'Whereas *The Rommel Papers* (edited by Manfred Rommel and Liddell Hart in 1953) reflects Cold War incentives to distance apolitical Wehrmacht generals from Hitler’s crimes, Reuth’s 2005 archival reassessment uses wartime dispatches to expose Rommel’s prolonged loyalty to Hitler—illustrating how political context reshapes evidence across generations.',
+      },
+      sourceFileNames: ['Sample 2.pdf', 'IB HISTORY 11 INTRODUCTION.pptx'],
+    },
+    {
+      topicCode: 'CONCEPTS',
+      paperType: 'IA (Purdue CMOS NB)',
+      commandTerm: 'Apply',
+      difficulty: 'Foundation',
+      maxMarks: 4,
+      questionMarkdown:
+        'Contrast how a **first Chicago NB footnote**, a **shortened subsequent footnote**, and a **Chicago Bibliography entry** differ in punctuation and name order (Purdue OWL Template).',
+      markscheme: {
+        marking_points: [
+          { code: 'F1', criterion: 'First footnote: superscript number, First Last, *Title* (Place: Publisher, Year), page. (Commas separate fields, publication inside parentheses).', marks: 2 },
+          { code: 'F2', criterion: 'Subsequent note & Bibliography: Shortened note uses Last, *Short Title*, page; Bibliography uses hanging indent, Last, First. *Title*. Place: Publisher, Year. (Periods replace commas, no page numbers unless journal chapter).', marks: 2 },
+        ],
+        model_answer:
+          'First footnote uses First Last and commas with parenthetical publication facts plus exact cited page; subsequent notes use Last, *Short Title*, p.; the alphabetical Bibliography inverts to Last, First with periods and drops single-page citations.',
+      },
+      sourceFileNames: ['cmos-nb-sample-paper-purdue-owl-2-publish-20260312.pdf'],
+    },
+    {
+      topicCode: 'P3.2',
+      paperType: 'Paper 3 (May 2028 · 15m)',
       commandTerm: 'Evaluate',
       difficulty: 'HL Extension',
       maxMarks: 15,
       questionMarkdown:
-        'Evaluate the view that **Weimar Germany’s "Golden Era" (1924–1929)** merely masked deep economic and political fragilities.',
+        'Evaluate the economic impact of Mussolini’s **Corporate State** and **Economic Battles (Grain, Lira, IRI)** on Italian living standards and modernization up to 1940.',
       markscheme: {
         marking_points: [
-          {
-            code: 'A1',
-            criterion: 'Balanced evaluation weighing genuine stabilization against underlying structural vulnerabilities (consistent with Sample Paper 3-3)',
-            marks: 5,
-          },
-          {
-            code: 'M1',
-            criterion: 'Achievements examined: Rentenmark stability under Stresemann, 1924 Dawes Plan, Locarno Treaties & League of Nations entry, Weimar modernist culture, and temporary decline in extremist Reichstag seats',
-            marks: 5,
-          },
-          {
-            code: 'M2',
-            criterion: 'Underlying fragilities: over-reliance on recallable US short-term Dawes loans (exposed catastrophically by 1929 Wall Street Crash), agrarian depression, Article 48 presidential rule, and conservative judicial/military sympathy toward right-wing anti-republicans',
-            marks: 5,
-          },
+          { code: 'B1', criterion: 'Battles & Autarky: Battle for Grain cut wheat imports ~75% yet distorted southern olive/citrus exports & livestock; Quota 90 (90 ITL = 1£) crushed export wages while favoring prestige & heavy arms/chemical imports.', marks: 5 },
+          { code: 'C1', criterion: 'Corporatism & IRI: 1926 Rocco Law & 1934 22 Corporations banned strikes/free unions; 1933 IRI salvaged major Depression banks/utilities, expanding state shareholding without genuine worker empowerment.', marks: 5 },
+          { code: 'J1', criterion: 'Nuanced Judgement: Delivered selective industrial rescue (IRI) and short-term public works prestige, yet failed to close North–South inequality or prepare Italy economically for modern industrial war in 1940.', marks: 5 },
         ],
         model_answer:
-          'Following the analytical balance in *Sample Paper 3-3 2028*, demonstrate that Stresemann’s Rentenmark currency stabilization, the 1924 Dawes Plan, Locarno diplomacy, and cultural flourishing created real mid-1920s recovery, **yet rested on fatal short-term American loans, unappeased conservative judiciary/military elites, proportional parliamentary fragmentation, and Article 48 powers** — explaining how the 1929 Wall Street Crash immediately shattered the republic’s equilibrium.',
+          'Although the 1933 IRI bank/industry bailout shielded heavy firms from total Depression collapse and wheat self-sufficiency grew, Fascist economics subordinated living standards to political prestige: Quota 90 depressed wages, misallocated grain acreage crippled southern exports, and the Corporate State stripped labour autonomy without solving Italy’s raw-material shortages before WWII.',
       },
-      sourceFileNames: ['Sample Paper 3-3 2028.pdf', 'Paper 3 MarkScheme 2028 Extract.pdf'],
+      sourceFileNames: ['IB 11 European Totalitarianism.pptx', 'Paper 3  - Europe - Pearson 2026.pdf'],
     },
     {
-      topicCode: 'P3.2',
-      paperType: 'Paper 2 (Thematic Essay)',
-      commandTerm: 'Compare and contrast',
+      topicCode: 'P3.4',
+      paperType: 'Paper 3 (May 2028 · 15m)',
+      commandTerm: 'Evaluate',
+      difficulty: 'HL Extension',
+      maxMarks: 15,
+      questionMarkdown:
+        'To what extent did **Stalin’s Five-Year Plans and Collectivization (1928–1941)** achieve their economic and political objectives inside the USSR (Pearson Ch. 1 Case Study 3)?',
+      markscheme: {
+        marking_points: [
+          { code: 'E1', criterion: 'Industrial Transformation: First–Third Five-Year Plans transformed USSR into a heavy-industrial/military producer (Magnitogorsk steel, Dnieprostroi hydro, coal/tractors), crucial for surviving Barbarossa in 1941.', marks: 5 },
+          { code: 'C1', criterion: 'Agricultural & Human Cost: Forced collectivization & dekulakization triggered grain requisitioning famine (Holodomor in Ukraine/Kazakhstan), livestock slaughter, and falling rural living standards.', marks: 5 },
+          { code: 'P1', criterion: 'Political Consolidation & Perspectives: Subordinated countryside to central command and forged loyal Stalinist nomenklatura amid the 1936–38 Great Terror, though consumer goods & efficiency suffered drastically.', marks: 5 },
+        ],
+        model_answer:
+          'Economically and militarily, rapid heavy industrialization created the Ural–Siberian industrial base that later outproduced Nazi Germany, and politically collectivization broke peasant autonomy. However, agricultural output plunged amid man-made famine (1932–33), urban living conditions stalled, and purge terror crippled Red Army/technical expertise on the eve of 1941.',
+      },
+      sourceFileNames: ['Paper 3  - Europe - Pearson 2026.pdf'],
+    },
+    {
+      topicCode: 'P3.6',
+      paperType: 'Paper 3 (May 2028 · 15m)',
+      commandTerm: 'Examine',
       difficulty: 'Standard IB',
       maxMarks: 15,
       questionMarkdown:
-        'Evaluate the effectiveness of Fascist Italy’s **economic "Battles"** (Battle for Grain, Battle for the Lira / Quota 90, Battle for Births, and IRI) in achieving Mussolini’s goals.',
+        'Examine the role of the **1936–1939 Spanish Civil War** and **Appeasement crises** in forging the Rome–Berlin Axis and destabilizing European collective security (Pearson Ch. 2).',
       markscheme: {
         marking_points: [
-          { code: 'A1', criterion: 'Distinguishes regime political/propaganda objectives (autarky, prestige) from actual macroeconomic & living-standard outcomes', marks: 5 },
-          { code: 'M1', criterion: 'Grain & Lira: grain output rose cutting wheat imports yet hurt olive/citrus exports & southern peasants; Quota 90 prestige crushed export industries while aiding heavy imports', marks: 5 },
-          { code: 'M2', criterion: 'Births & Depression: Batchelor tax & ONMI prizes failed to lift long-term birthrates; IRI (1933) cushioned industrial collapse yet entrenched state bureaucracy', marks: 5 },
+          { code: 'I1', criterion: 'Italian–German Intervention: Massive Italian troop/air aid (70,000+ CTV) and German Condor Legion deepened Rome–Berlin ideological/military bonds while estranging Italy from Britain/France after Abyssinia.', marks: 5 },
+          { code: 'A1', criterion: 'Failure of Non-Intervention & League: British/French Non-Intervention Committee failed to halt Axis intervention, signaling Western unwillingness to enforce Versailles borders or confront aggression (1938 Anschluss, Munich).', marks: 5 },
+          { code: 'J1', criterion: 'Balanced Causal Weighting: Combined with Ethiopia (1935–36) and Nazi rearmament, Spain shifted Mussolini permanently away from the Stresa Front into German orbit by the 1939 Pact of Steel.', marks: 5 },
         ],
         model_answer:
-          'Contrast propaganda triumphs with mixed economic reality: the **Battle for Grain** sharply cut cereal imports at the cost of distorting high-value southern cash crops and livestock pastures; **Quota 90** boosted nationalist prestige while deflating wages and hurting exporters; the **Battle for Births** failed demographically; and the **IRI** salvaged banks during the Great Depression without solving structural North–South poverty.',
+          'Combined Axis intervention on Franco’s side bled Italian finances yet forged military coordination with Berlin just after Abyssinia shattered the Stresa Front. Meanwhile Allied passivity in the Non-Intervention Committee convinced Hitler and Mussolini that Western powers lacked the resolve to uphold Versailles collective security.',
       },
-      sourceFileNames: ['IB 11 European Totalitarianism.pptx', 'IB 11 Italy 1890-1939.pptx'],
+      sourceFileNames: ['Paper 3  - Europe - Pearson 2026.pdf', 'IB 11 Italy 1890-1939.pptx'],
     },
     {
-      topicCode: 'CONCEPTS',
-      paperType: 'Paper 1 (Focused Study)',
-      commandTerm: 'Compare and contrast',
+      topicCode: 'C.4',
+      paperType: 'IA (May 2028 · Sample 1)',
+      commandTerm: 'Evaluate',
       difficulty: 'Standard IB',
       maxMarks: 6,
-      stimulusMarkdown:
-        'Historian A argues that Mussolini’s **1938 Antisemitic Racial Laws** were enacted opportunistically solely to cement the Rome–Berlin Axis with Hitler. Historian B contends that indigenous Italian colonial racism in Ethiopia (1935–36) and domestic radicalization drove the legislation independently.',
       questionMarkdown:
-        'Using the IB concept of **Perspectives**, explain how comparing orthodox diplomatic interpretations with revisionist cultural scholarship changes our evaluation of Fascist ideology.',
+        'How does **IA Sample 1 (Fall of the Aztec Empire, 1519–1521)** exemplify strong **Section 3: Synthesis and Evaluation (12 marks)** reasoning on historical *Significance* and *Causation*?',
       markscheme: {
         marking_points: [
-          { code: 'M1', criterion: 'Explains Perspective A (external diplomatic pressure from Nazi alliance alignment after 1936)', marks: 2 },
-          { code: 'M2', criterion: 'Explains Perspective B (internal colonial racial decrees in East Africa & desire to radicalize stagnant Fascist youth)', marks: 2 },
-          { code: 'A1', criterion: 'Evaluates how historiographical synthesis (revisionism) reveals interplay between external diplomacy and internal ideology rather than a single monocausal trigger', marks: 2 },
+          { code: 'C1', criterion: 'Counters simplistic European-supremacy narrative ("Great Man" Cortés) with structural internal Aztec imperial fragility and Indigenous Tlaxcalan alliance manpower (up to 100,000+ allies).', marks: 3 },
+          { code: 'C2', criterion: 'Evaluates biological contingency (1520 smallpox epidemic decimating Tenochtitlán leadership) alongside Spanish steel/diplomacy to render a weighed, nuanced final judgement.', marks: 3 },
         ],
         model_answer:
-          'Diplomatic interpretations emphasize strategic alignment with Germany after the Ethiopian crisis, whereas revisionist scholarship traces racial decrees in Italian East Africa and Mussolini’s internal push to rejuvenate Fascist revolutionary zeal. Synthesizing both shows how **Perspectives** turns a binary claim into an analysis of interacting external and domestic pressures.',
+          'Rather than merely narrating battles, Sample 1 weighs Cortés’s political exploitation of tributary hatred (forging the Tlaxcalan coalition) against biological catastrophe (smallpox) and Aztec diplomatic constraints, delivering an explicit multi-causal conclusion.',
       },
-      sourceFileNames: ['IB HISTORY 11 INTRODUCTION.pptx', 'IB 11 European Totalitarianism.pptx'],
+      sourceFileNames: ['Sample 1.pdf'],
+    },
+    {
+      topicCode: 'P1.1',
+      paperType: 'Paper 1 & 2 (Year 2 Reference)',
+      commandTerm: 'Compare',
+      difficulty: 'Foundation',
+      maxMarks: 4,
+      questionMarkdown:
+        'Briefly summarize the structure and weighting of **May 2028 History HL Paper 1** and **Paper 2** (kept as Year 2 context while current Grade 11 work targets IA & Paper 3).',
+      markscheme: {
+        marking_points: [
+          { code: 'P1', criterion: 'Paper 1: 1h15, 24 marks, 20% HL — source-based Prescribed Topic integrating perspectives without legacy mechanical Q2 OPCVL checklists.', marks: 2 },
+          { code: 'P2', criterion: 'Paper 2: 1h45, 25 marks, 25% HL — Thematic Study answering 1 × 15m essay + 1 × 10m source/comparative prompt (leaving Paper 3 at 35% and IA at 20%).', marks: 2 },
+        ],
+        model_answer:
+          'May 2028 HL weights: Paper 1 = 20% (1h15, 24m source synthesis), Paper 2 = 25% (1h45, 25m = 15m + 10m), Paper 3 = 35% (2h, 30m = 2 × 15m essays), IA = 20% (24m across 3 sections).',
+      },
+      sourceFileNames: ['Paper 3 MarkScheme 2028 Extract.pdf', 'IB HISTORY 11 INTRODUCTION.pptx'],
     },
   ],
   flashcards: [
-    {
-      topicCode: 'P3.1',
-      frontMarkdown: 'Why did nationalists call WWI peace the **"Mutilated Victory"** (*vittoria mutilata*)?',
-      backMarkdown:
-        'Although the secret **Treaty of London (April 1915)** promised Dalmatia and colonies, Woodrow Wilson blocked key territorial claims at Versailles (1919), prompting D’Annunzio’s seizure of **Fiume**.',
-    },
-    {
-      topicCode: 'P3.1',
-      frontMarkdown: 'How did the **Acerbo Law (1923–1924)** guarantee Mussolini a parliamentary majority?',
-      backMarkdown:
-        'Any party list winning at least **$25\\%$** of votes automatically received **two-thirds ($66\\%$) of Chamber of Deputies seats** — delivering PNF legislative control in April 1924.',
-    },
-    {
-      topicCode: 'P3.1',
-      frontMarkdown: 'What was the significance of the **Matteotti Crisis & Aventine Secession (1924–1925)**?',
-      backMarkdown:
-        'Socialist Giacomo Matteotti exposed fascist election fraud and was murdered (June 1924). Opposition deputies walked out (**Aventine Secession**), allowing Mussolini to survive, assume responsibility in Jan 1925, and outlaw opposition.',
-    },
-    {
-      topicCode: 'P3.2',
-      frontMarkdown: 'What did Mussolini & Pope Pius XI exchange in the **1929 Lateran Treaties**?',
-      backMarkdown:
-        'Italy recognized independent **Vatican City**, paid reparations, and made Catholicism the state religion; the Papacy formally recognized the Kingdom of Italy under Fascist rule.',
-    },
-    {
-      topicCode: 'P3.2',
-      frontMarkdown: 'Why is the **Battle for the Lira ("Quota 90")** considered political rather than sound economics?',
-      backMarkdown:
-        'Revaluing the lira to $90\\ \\text{ITL} = 1\\ \\text{GBP}$ displayed national prestige and lowered raw-material import costs, but severely damaged Italian exports and compressed workers’ real wages.',
-    },
-    {
-      topicCode: 'CONCEPTS',
-      frontMarkdown: 'Name the **4 IB History Core Concepts** in the May 2028 syllabus.',
-      backMarkdown:
-        '1. **Cause and consequence**\n2. **Continuity and change**\n3. **Perspectives** (incl. historiography/revisionism)\n4. **Significance**',
-    },
+    { topicCode: 'CONCEPTS', frontMarkdown: 'May 2028 History IA mark breakdown (24 marks total) & hard caps?', backMarkdown: 'Section 1 Inquiry Question (6m) + Section 2 Sources & Perspectives (6m) + Section 3 Synthesis & Evaluation (12m). Max 2,200 words, MAX 7 sources, NO standalone Reflection.' },
+    { topicCode: 'CONCEPTS', frontMarkdown: 'What is the citation style required across History IA & History EE?', backMarkdown: 'Chicago Manual of Style (Notes & Bibliography): numbered superscript footnotes + separate Primary/Secondary bibliography.' },
+    { topicCode: 'P3', frontMarkdown: 'May 2028 History HL Paper 3 format, time & weighting?', backMarkdown: '2 hours · 35% of HL grade · 30 marks total (2 × 15-mark essays from different European regional studies out of 24 total Paper 3 questions).' },
+    { topicCode: 'P3', frontMarkdown: 'Four hallmarks of a May 2028 Paper 3 Band 13–15 essay?', backMarkdown: 'Consistent analytical focus on command terms, reasoned sustained judgement, accurate specific evidence, and explicit exploration of multiple perspectives / historiography.' },
+    { topicCode: 'P3.1', frontMarkdown: 'Why did Italian nationalists denounce 1919 peace as a "Mutilated Victory"?', backMarkdown: 'The secret Treaty of London (April 1915) promised Dalmatia/colonies, yet Woodrow Wilson blocked territorial claims at Versailles — fueling D’Annunzio’s seizure of Fiume.' },
+    { topicCode: 'P3.1', frontMarkdown: 'How did the 1923–24 Acerbo Law secure PNF parliamentary control?', backMarkdown: 'Any electoral list winning ≥25% of votes automatically received two-thirds (66%) of Chamber seats — locking PNF dominance in April 1924.' },
+    { topicCode: 'P3.1', frontMarkdown: 'Significance of the June 1924 Matteotti Crisis & Aventine Secession?', backMarkdown: 'Socialist Giacomo Matteotti exposed fascist ballot fraud and was assassinated; non-fascist MPs walked out (Aventine Secession), letting Mussolini survive and proclaim open dictatorship on 3 Jan 1925.' },
+    { topicCode: 'P3.2', frontMarkdown: 'Terms of the 1929 Lateran Treaties between Mussolini & Pope Pius XI?', backMarkdown: 'Italy recognized independent Vatican City statehood, paid indemnity, and affirmed Catholicism; Papacy formally recognized the Kingdom of Italy under Fascist government.' },
+    { topicCode: 'P3.2', frontMarkdown: 'Why was Mussolini’s Battle for the Lira ("Quota 90") political rather than sound economics?', backMarkdown: 'Revaluing lira to 90 ITL = £1 bolstered national prestige and cheapened raw imports, but priced Italian exports out of world markets and forced severe wage cuts.' },
+    { topicCode: 'P3.2', frontMarkdown: 'Historian Richard Bosworth’s argument on limits of Italian totalitarianism?', backMarkdown: 'Unlike Nazi Germany, Mussolini never displaced the Monarchy (King Victor Emmanuel III dismissed him in July 1943) or the Catholic Church/Vatican.' },
+    { topicCode: 'P3.2', frontMarkdown: 'Two historiographical views on Italy’s 1938 Antisemitic Racial Laws?', backMarkdown: '1) Pressure/imitation of Hitler after Axis rapprochement vs 2) Autochthonous expansion of Fascist imperial racial hierarchies (1935–37 Ethiopia decrees + anti-bourgeois radicalization).' },
+    { topicCode: 'P3.2', frontMarkdown: 'What was IRI (1933) vs the 22 Corporations (1934) in Fascist Italy?', backMarkdown: 'IRI (Institute for Industrial Reconstruction) bailed out failed Depression banks making the state major shareholder; Corporations banned independent strikes while siding predominantly with industrialists.' },
+    { topicCode: 'P3.3', frontMarkdown: 'Why was Weimar Germany’s 1924–29 "Golden Era" compared to "dancing on a volcano"?', backMarkdown: 'Stresemann stabilized inflation (Rentenmark) and diplomacy (Locarno 1925), yet recovery depended on short-term US Dawes Plan loans recalled immediately after Oct 1929 Wall Street Crash.' },
+    { topicCode: 'P3.4', frontMarkdown: 'Key trade-off in Stalin’s Five-Year Plans & Collectivization (1928–41)?', backMarkdown: 'Rapidly industrialized heavy steel/arms base east of the Urals (critical in 1941), yet forced grain collectivization caused catastrophic famine (1932–33) and purged top officers.' },
+    { topicCode: 'P3.6', frontMarkdown: 'Why did the 1936–39 Spanish Civil War shatter the Stresa Front?', backMarkdown: 'Joint Italian CTV & German Condor Legion support for Franco pushed Italy into the Rome–Berlin Axis as British/French Non-Intervention exposed Western passivity.' },
+    { topicCode: 'CONCEPTS', frontMarkdown: 'Four Core Concepts in the May 2028 IB History syllabus?', backMarkdown: '1) Cause and Consequence; 2) Continuity and Change; 3) Perspectives (historiography); 4) Significance.' },
+    { topicCode: 'C.3', frontMarkdown: 'What makes Sample 2’s use of *The Rommel Papers* strong May 2028 Section 2 critique?', backMarkdown: 'Contrasts family/Liddell Hart postwar Cold War "clean Wehrmacht" myth-making against Reuth’s post-Cold War archival findings rather than mechanically listing OPCVL bullets.' },
+    { topicCode: 'CONCEPTS', frontMarkdown: 'First Chicago NB Footnote vs Bibliography punctuation?', backMarkdown: 'Footnote: First Last, *Title* (Place: Pub, Year), p. Bibliog: Last, First. *Title*. Place: Pub, Year.' },
   ],
   topicGuidanceNotes: {
-    CONCEPTS: 'IB History 11 Intro & Sample 3-4: Every Paper 3 essay and May 2028 IA must anchor analysis in Cause/Consequence, Continuity/Change, Perspectives (historiography), and Significance, formatted in Chicago Notes & Bibliography.',
-    'P3.1': 'IB 11 Italy Slides 1–8: Track continuity from Adowa (1896) & Giolitti transformismo through Treaty of London (1915), Biennio Rosso (1919–20), March on Rome (Oct 1922), Acerbo Law, and Matteotti (1924).',
-    'P3.2': 'European Totalitarianism Slides 7–13: Evaluate Corporate State, Economic Battles, IRI, ONB, Miniculpop, 1929 Lateran Concordat, and 1938 Racial Laws against surviving limits (Monarchy & Church).',
-    'P3.3': 'Sample Paper 3-3 2028: Contrast Stresemann’s Weimar stabilization (1924–29) with recallable Dawes US loans and extremist persistence prior to the 1929 Wall Street Crash.',
-    P3: 'May 2028 Paper 3 Rubric: 2 hours, write 2 essays out of 24 across European sections (30 marks total, 35% of HL). Band 13–15 requires sustained analysis, precise evidence, perspectives, and consistent judgement.',
+    CONCEPTS: 'ACTIVE FOCUS — May 2028 History IA (24m across Inquiry Question 6m / Sources & Perspectives 6m / Synthesis & Evaluation 12m; max 7 sources, ≤2,200w, Chicago NB) + 4 IB Concepts.',
+    P3: 'ACTIVE FOCUS — Pearson 2026 Europe Paper 3 Textbook & May 2028 Extract (2h, 35%, 30m = 2 × 15m essays across European Regional Studies; Band 13–15 demands sustained argument + historiography).',
+    'P3.1': 'ACTIVE FOCUS — Italy 1890–1940: Adowa, Treaty of London ("Mutilated Victory"), Biennio Rosso, March on Rome (Oct 1922), Acerbo Law, Matteotti Crisis, and Lateran 1929.',
+    'P3.2': 'ACTIVE FOCUS — European Totalitarianism Compared (Italy vs Germany vs USSR): Corporatism, Quota 90, IRI, ONB/Miniculpop, 1938 Racial Laws, and Monarchy/Church limits.',
+    'P3.3': 'ACTIVE FOCUS — Sample Paper 3-3 & Pearson Ch. 1 Case Study 2: Weimar Golden Era fragility (Dawes Plan dependence) -> Hitler Gleichschaltung (1933–39).',
+    'P3.4': 'ACTIVE FOCUS — Pearson Ch. 1 Case Study 3: Stalin Collectivization, Five-Year Plans, Holodomor, and Great Terror (to 1941).',
+    'P3.5': 'ACTIVE FOCUS — Cross-study comparison of authoritarian consolidation, propaganda, racial/social policy, and war readiness.',
+    'P3.6': 'ACTIVE FOCUS — Pearson Ch. 2: Europe & WWII (1918–49) — Spanish Civil War, Appeasement, Total War, and Early Cold War partition.',
+    'P1.1': 'Year 2 Reference — May 2028 Paper 1 (1h15, 24m, 20% HL source synthesis without legacy Q2 OPCVL checklist).',
+    'P2.1': 'Year 2 Reference — May 2028 Paper 2 (1h45, 25m = 15m + 10m comparative thematic essay).',
   },
 };

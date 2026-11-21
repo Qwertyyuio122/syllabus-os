@@ -554,9 +554,9 @@ export const CORE_CLASSROOM_RESOURCES: ClassroomSeedCoreResource[] = [
     sourceFileName: 'Sample 1.pdf',
     externalUrl: 'https://drive.google.com/file/d/1lyKvU9qsP36EALVNY4NomvuvHZ381gxy/view?usp=drivesdk',
     contentMarkdown: [
-      '### May 2028 History IA Exemplar 1 Highlights (24-Mark Model)',
+      '### May 2028 History IA Exemplar 1 Highlights (24-Mark 3-Section Model)',
       '- **RQ:** *"To what extent was Hernán Cortés significant in the fall of the Aztec Empire between 1519 and 1521?"*',
-      '- **Structure Note (2028 Guide):** Uses the streamlined 2028 IA architecture (**Section 1 Identification & Evaluation of Sources** + **Section 2 Investigation & Conclusion** across max **7 sources** and **2,200 words** — Reflection Section 3 removed in 2028 guide!).',
+      '- **Structure Note (2028 Guide):** Streamlined **May 2028 IA architecture** (**Section 1: Historical Inquiry Question [6 marks]**, **Section 2: Sources and Perspectives [6 marks]**, **Section 3: Synthesis and Evaluation [12 marks]**; max **7 sources**, **2,200 words**; standalone Reflection removed). Note that older IB samples still label criteria A/B/C or "Identification and Evaluation of Sources" — map them onto the 2028 three-section weighting.',
       '- **Analytical Balance:** Weighs Cortés’s diplomatic exploitation of Indigenous Tlaxcalan rivalries against European epidemic disease (smallpox) and Aztec internal tributary resentment.',
     ].join('\n'),
   },
@@ -573,7 +573,7 @@ export const CORE_CLASSROOM_RESOURCES: ClassroomSeedCoreResource[] = [
     contentMarkdown: [
       '### May 2028 History IA Exemplar 3 Highlights',
       '- **RQ:** *"To what extent did Erwin Rommel support the 20 July 1944 plot to kill Adolf Hitler?"*',
-      '- **Criterion A OPCVL Showcase:** Explicitly contrasts bias/origin limitations of *The Rommel Papers* (edited postwar by Liddell Hart & Manfred Rommel to sanitize Wehrmacht honour) against archival critiques (Ralf-Georg Reuth).',
+      '- **Section 2 Sources & Perspectives Showcase:** Explicitly contrasts the origin, purpose, and reliability of *The Rommel Papers* (edited postwar by Liddell Hart & Manfred Rommel to sanitize Wehrmacht honour) against archival historiography (Ralf-Georg Reuth), modeling how May 2028 evaluates perspectives rather than rigid OPCVL checklists.',
       '- **Citation Format:** Uses numbered footnotes and separate primary/secondary bibliography in Chicago style.',
     ].join('\n'),
   },
@@ -663,10 +663,10 @@ export const CORE_STARTER_OVERRIDES: CoreStarterProjectOverride[] = [
       'To what extent did [specific causal actor/factor] shape [bounded historical shift] between [year] and [year]?',
     wordCountTarget: 2200,
     milestones: [
-      { id: 'hist-ia-1', title: 'Grade 11 Mock IA Draft (OPCVL + Chicago Footnotes)', dueDate: '2027-01-17', completed: false },
-      { id: 'hist-ia-2', title: 'Grade 11 Complete Mock Historical Investigation (Max 7 Sources)', dueDate: '2027-05-27', completed: false },
-      { id: 'hist-ia-3', title: 'Criterion A (OPCVL of 2 Sources) & B Investigation Using Chicago NB (18 marks)', dueDate: '2028-02-01', completed: false },
-      { id: 'hist-ia-4', title: 'Final 2,200-Word IA Submission (Criteria A–C; No Section 3 Reflection)', dueDate: '2028-03-07', completed: false },
+      { id: 'hist-ia-1', title: 'Section 1: Bounded Historical Inquiry Question & Scope Justification (6 marks)', dueDate: '2027-01-17', completed: false },
+      { id: 'hist-ia-2', title: 'Grade 11 Mock IA: Section 2 Sources & Perspectives Audit (Max 7 Sources, 6 marks)', dueDate: '2027-05-27', completed: false },
+      { id: 'hist-ia-3', title: 'Section 3: Synthesis, Historiography & Evaluation Draft w/ Chicago NB (12 marks)', dueDate: '2028-02-01', completed: false },
+      { id: 'hist-ia-4', title: 'Final 2,200-Word IA Submission (Sections 1–3 = 24 Marks; No Standalone Reflection)', dueDate: '2028-03-07', completed: false },
     ],
     draftExcerpt: '',
   },
@@ -701,4 +701,51 @@ export const CORE_STARTER_OVERRIDES: CoreStarterProjectOverride[] = [
     ],
     draftExcerpt: '',
   },
+];
+
+export interface CrhsMilestoneItem {
+  id: string;
+  date: string;
+  dateLabel: string;
+  title: string;
+  subjectOrCore: string;
+  subjectSlug: string | null;
+  cohortStage: 'Grade 11 (2026–2027)' | 'Grade 12 (2027–2028)';
+  sourceRef: string;
+}
+
+export const CRHS_2026_2028_MILESTONES: CrhsMilestoneItem[] = [
+  { id: 'crhs-ee-start', date: '2026-10-15', dateLabel: 'Oct 15, 2026', title: 'EE Expectations & DP Subject Selection', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'Timeline 2028 cohort.docx' },
+  { id: 'crhs-upei', date: '2026-11-04', dateLabel: 'Nov 4, 2026', title: 'UPEI Robertson Library Research Orientation', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-ee-rq', date: '2026-11-26', dateLabel: 'Nov 26, 2026', title: 'ManageBac EE Research Question & Supervisor Request', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'Timeline 2028 cohort.docx' },
+  { id: 'crhs-csp', date: '2026-12-18', dateLabel: 'Dec 1–18, 2026', title: 'Collaborative Sciences Project & EE 1st Check-In', subjectOrCore: 'Group 4 + EE', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-hist-mock-1', date: '2027-01-17', dateLabel: 'Jan 17, 2027', title: 'History HL Grade 11 Mock IA Draft (Sections 1–2)', subjectOrCore: 'History HL IA', subjectSlug: 'history-hl', cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-ee-rpf1', date: '2027-01-21', dateLabel: 'Jan 21, 2027', title: 'EE First Formal Supervisor Meeting (RRS / RPF 1)', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'Timeline 2028 cohort.docx' },
+  { id: 'crhs-cas-proj', date: '2027-03-15', dateLabel: 'Mar 15, 2027', title: 'CAS Collaborative Project Plan & Eng TFA Logs', subjectOrCore: 'CAS / English', subjectSlug: 'english-lit-hl', cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-ee-bib', date: '2027-03-31', dateLabel: 'Mar 27–31, 2027', title: 'EE Annotated Bibliography Due on Classroom', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'Timeline 2028 cohort.docx' },
+  { id: 'crhs-ee-1000', date: '2027-04-22', dateLabel: 'Apr 22, 2027', title: 'EE 1,000-Word Checkpoint (Turnitin + Classroom)', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'Timeline 2028 cohort.docx' },
+  { id: 'crhs-eng-mock-io', date: '2027-04-30', dateLabel: 'Apr 2027', title: 'English A Lit HL Mock Individual Orals (G11)', subjectOrCore: 'English HL IO', subjectSlug: 'english-lit-hl', cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-ee-rpf2', date: '2027-05-22', dateLabel: 'May 22, 2027', title: 'EE Second Formal Supervisor Meeting (RPF 2)', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-hist-mock-2', date: '2027-05-27', dateLabel: 'May 27, 2027', title: 'History HL Grade 11 Complete Mock IA (Max 7 Sources)', subjectOrCore: 'History HL IA', subjectSlug: 'history-hl', cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-eng-final-io', date: '2027-05-28', dateLabel: 'May 2027', title: 'English A Lit HL Recorded Final Individual Oral', subjectOrCore: 'English HL IO', subjectSlug: 'english-lit-hl', cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-tok-exh', date: '2027-06-04', dateLabel: 'Jun 2027 (Wk 1)', title: 'TOK Exhibition Showcase (3 Objects + 950w)', subjectOrCore: 'TOK', subjectSlug: null, cohortStage: 'Grade 11 (2026–2027)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-chem-plan', date: '2027-10-09', dateLabel: 'Oct 9, 2027', title: 'Chemistry SL IA Plan, SDS & Preliminary Trials', subjectOrCore: 'Chemistry SL IA', subjectSlug: 'chemistry-sl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-ee-draft', date: '2027-10-15', dateLabel: 'Oct 15, 2027', title: 'Extended Essay Full Draft (≤4,000 Words)', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'Timeline 2028 cohort.docx' },
+  { id: 'crhs-eng-hl-prop', date: '2027-11-19', dateLabel: 'Nov 19, 2027', title: 'English A Lit HL Essay Proposal', subjectOrCore: 'English HL Essay', subjectSlug: 'english-lit-hl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-chem-data', date: '2027-11-23', dateLabel: 'Nov 23, 2027', title: 'Chemistry SL IA Lab Data Collection', subjectOrCore: 'Chemistry SL IA', subjectSlug: 'chemistry-sl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-bio-start', date: '2027-11-25', dateLabel: 'Nov 25, 2027', title: 'Biology HL Scientific Investigation Launch', subjectOrCore: 'Biology HL IA', subjectSlug: 'biology-hl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-ee-final', date: '2027-12-07', dateLabel: 'Dec 7, 2027', title: 'Extended Essay Final Authenticated Submission', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-math-draft', date: '2027-12-20', dateLabel: 'Dec 20, 2027', title: 'Math AA SL Exploration Draft', subjectOrCore: 'Math AA SL IA', subjectSlug: 'math-aa-sl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-chem-draft', date: '2028-01-17', dateLabel: 'Jan 17, 2028', title: 'Chemistry SL IA Complete Draft (Error Bars)', subjectOrCore: 'Chemistry SL IA', subjectSlug: 'chemistry-sl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-bio-draft', date: '2028-01-25', dateLabel: 'Jan 25, 2028', title: 'Biology HL IA Complete Draft', subjectOrCore: 'Biology HL IA', subjectSlug: 'biology-hl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-tok-essay', date: '2028-01-29', dateLabel: 'Jan 29, 2028', title: 'TOK Essay Final Submission (1,600 Words)', subjectOrCore: 'TOK', subjectSlug: null, cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-hist-draft', date: '2028-02-01', dateLabel: 'Feb 1, 2028', title: 'History HL IA Section 3 Synthesis & Chicago Draft', subjectOrCore: 'History HL IA', subjectSlug: 'history-hl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-ee-viva', date: '2028-02-19', dateLabel: 'Feb 15–19, 2028', title: 'Extended Essay Viva Voce & 500w Reflection', subjectOrCore: 'Extended Essay', subjectSlug: null, cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-eng-hl-final', date: '2028-02-17', dateLabel: 'Feb 17, 2028', title: 'English A Lit HL Essay Final Submission', subjectOrCore: 'English HL Essay', subjectSlug: 'english-lit-hl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-chem-math-final', date: '2028-02-28', dateLabel: 'Feb 28, 2028', title: 'Final Chemistry IA & Math AA SL Exploration', subjectOrCore: 'Chem IA + Math IA', subjectSlug: null, cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-fr-io', date: '2028-03-04', dateLabel: 'Mar 1–4, 2028', title: 'French B SL Recorded Individual Oral', subjectOrCore: 'French B SL IO', subjectSlug: 'french-b-sl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-hist-final', date: '2028-03-07', dateLabel: 'Mar 7, 2028', title: 'History HL Final 2,200w IA (May 2028 3-Section)', subjectOrCore: 'History HL IA', subjectSlug: 'history-hl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-bio-final', date: '2028-03-14', dateLabel: 'Mar 14, 2028', title: 'Biology HL Final 3,000w Scientific Investigation', subjectOrCore: 'Biology HL IA', subjectSlug: 'biology-hl', cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-cas-final', date: '2028-03-28', dateLabel: 'Mar 28, 2028', title: 'CAS Portfolio Final Completion (All 7 LOs)', subjectOrCore: 'CAS', subjectSlug: null, cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB Assessment Calendar 2026-2027.pdf' },
+  { id: 'crhs-may28-exams', date: '2028-05-01', dateLabel: 'May 2028', title: 'IB Diploma May 2028 External Examinations', subjectOrCore: 'All 6 Subjects', subjectSlug: null, cohortStage: 'Grade 12 (2027–2028)', sourceRef: 'IB May 2028 Assessment Session' },
 ];

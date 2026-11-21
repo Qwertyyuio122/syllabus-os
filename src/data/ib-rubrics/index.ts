@@ -59,7 +59,7 @@ export const EE_FA2027_RUBRIC: IBAssessmentRubric = {
     'Redesigned 30-mark Extended Essay rubric (First Assessment 2027+). Streamlines assessment into 5 criteria: Framework (6), Knowledge & Understanding (6), Analysis & Line of Argument (6), Discussion & Evaluation (8), and Reflection (4).',
   examinerNotes: [
     'Formal academic presentation and referencing are now integrated directly into Criterion D (Discussion and evaluation) rather than scored in a standalone Presentation criterion.',
-    'The 500-word Reflections on Planning and Progress Form (RPF) across three mandatory supervisor sessions accounts for 4 marks under Criterion E.',
+    'The 3 mandatory formal supervisor reflection sessions are logged across your Researcher’s Reflection Space (RRS) and culminate in a SINGLE 500-word final reflective statement on the RPF (4 marks, Criterion E).',
     'All essays strictly cap at 4,000 words; examiners stop reading beyond 4,000 words.',
   ],
   criteria: [
@@ -763,26 +763,26 @@ export const HISTORY_IA_2028_RUBRIC: IBAssessmentRubric = {
   projectType: 'IA',
   subjectSlug: 'history-hl',
   variantKey: 'HISTORY_IA_2028',
-  title: 'Historical Investigation (May 2028 Redesigned History IA)',
+  title: 'Historical Investigation (May 2028 24-Mark 3-Section IA)',
   cohortSession: 'May 2028 First Assessment',
   totalMaxMarks: 24,
-  wordLimit: '2,200 words maximum · maximum 7 sources',
-  weightingNote: '20% of History HL grade (Criterion A: 6, Criterion B: 12, Criterion C: 6)',
+  wordLimit: '2,200 words maximum · maximum 7 sources · Chicago NB',
+  weightingNote: '20% of History HL grade (Section 1: 6, Section 2: 6, Section 3: 12)',
   overview:
-    'Redesigned May 2028 IB History Internal Assessment: totals 24 marks across Criterion A Identification & Evaluation of Sources (6), Criterion B Investigation (12), and Criterion C Conclusion & Historical Judgment (6), capped at 2,200 words and a maximum of 7 total sources. Note: The standalone Section 3 Reflection from the 2017/2020 guide has been REMOVED in the 2028 specification.',
+    'Redesigned May 2028 IB History Internal Assessment: 24 marks total organized into 3 mandatory sections (`Sample 1–3.pdf`): Section 1 Historical Inquiry Question (6 marks), Section 2 Sources and Perspectives (6 marks — replaces isolated OPCVL!), and Section 3 Synthesis and Evaluation (12 marks). Capped at 2,200 words and a maximum of 7 sources; standalone Reflection section removed.',
   examinerNotes: [
-    'May 2028 Guide Change: The standalone Reflection section (previously 4 marks / Section 3 out of 25) has been REMOVED. Do NOT write a separate Reflection section.',
-    'Total word limit remains 2,200 words, and total sources cited in the investigation are strictly capped at a maximum of 7 sources.',
-    'Follow Chicago Manual of Style Notes & Bibliography (superscript footnotes + alphabetized bibliography) per classroom Purdue OWL guidelines.',
+    'May 2028 Guide Change 1: Section 2 (Sources & Perspectives, 6 marks) replaces the old standalone mechanical OPCVL checklist by synthesizing source context, origin, and competing perspectives across your ≤7 sources.',
+    'May 2028 Guide Change 2: Criterion B/Section 3 (Synthesis & Evaluation) carries 12/24 marks (50%), while the standalone 2017/2020 Reflection section has been REMOVED.',
+    'Total word limit is 2,200 words (excluding footnotes and bibliography), and total sources cited across the entire investigation are capped at 7 sources formatted in Chicago Notes & Bibliography.',
   ],
   criteria: [
     {
       code: 'A',
-      name: 'Identification and evaluation of sources',
+      name: 'Section 1: Historical Inquiry Question',
       maxMarks: 6,
       weightDescription: '25% of IA',
       summary:
-        'Formulate a clearly stated, sharply bounded research question; select relevant sources (≤7 total); and evaluate TWO sources explicitly for Value and Limitations via Origin, Purpose, and Content.',
+        'Formulate a clearly stated, sharply bounded historical inquiry question anchored in a 2028 Historical Concept, explain its significance/origin, and justify selection of up to 7 curated sources.',
       descriptors: [
         {
           marks: '0',
@@ -793,33 +793,69 @@ export const HISTORY_IA_2028_RUBRIC: IBAssessmentRubric = {
           marks: '1-2',
           levelLabel: 'Limited',
           descriptor:
-            'A question for investigation has been stated, though it may lack clarity or focus. Two sources are identified, but evaluation of their value and limitations is superficial, assertive, or disconnected from origin, purpose, and content.',
+            'A historical inquiry question is stated, though it lacks chronological or conceptual focus. Justification of why the question and selected sources (≤7) matter is minimal or unclear.',
         },
         {
           marks: '3-4',
           levelLabel: 'Good',
           descriptor:
-            'A clear and relevant research question is stated. Two appropriate sources are selected and evaluated with explicit reference to origin, purpose, and content, establishing valid values and limitations, though balance or depth may vary.',
+            'A clear, relevant historical inquiry question is stated with defined scope (dates, actors, concept), and selection of up to 7 pertinent sources is explained.',
         },
         {
           marks: '5-6',
           levelLabel: 'Excellent',
           descriptor:
-            'An appropriate, sharply focused research question is clearly stated and justified. Two contrasting, highly pertinent sources are evaluated in thorough depth, explicitly linking Origin, Purpose, and Content to specific analytical Values and Limitations for this exact investigation.',
+            'An appropriate, sharply bounded inquiry question is explicitly anchored in an IB Historical Concept (e.g., cause/consequence, significance, perspectives), and the rationale for the question and selected ≤7 sources is convincingly justified.',
         },
       ],
       examinerTips: [
-        'Pair one primary source and one secondary scholarly work (or two contrasting perspectives) and stay within the 7-source maximum across the entire IA.',
-        'Never write generic statements like "it is biased because it is secondary"; tie Origin (who/when/archives) and Purpose (audience/aim) directly to what it illuminates and distorts.',
+        'Anchor your question with exact start/end dates and a clear evaluative stem ("To what extent...", "How significant...").',
+        'Explain *why* you paired contrasting primary testimonies and peer-reviewed scholarship within the 7-source maximum.',
       ],
     },
     {
       code: 'B',
-      name: 'Investigation',
+      name: 'Section 2: Sources and Perspectives',
+      maxMarks: 6,
+      weightDescription: '25% of IA',
+      summary:
+        'Analyze origin, historical context, purpose, and perspectives across selected sources — synthesizing how different perspectives corroborate or diverge rather than writing disconnected OPCVL paragraphs.',
+      descriptors: [
+        {
+          marks: '0',
+          levelLabel: 'Not achieved',
+          descriptor: 'The work does not reach a standard described by the descriptors below.',
+        },
+        {
+          marks: '1-2',
+          levelLabel: 'Limited',
+          descriptor:
+            'Sources are summarized sequentially or judged using generic assertions ("biased") without connecting origin, purpose, and context to perspectives.',
+        },
+        {
+          marks: '3-4',
+          levelLabel: 'Good',
+          descriptor:
+            'Origin, purpose, and historical context are analyzed for key primary and secondary sources, identifying distinct perspectives and reliability limits relevant to the question.',
+        },
+        {
+          marks: '5-6',
+          levelLabel: 'Excellent',
+          descriptor:
+            'Perceptive, integrated analysis examines how authors’ context, purpose, and methodological tools shape competing perspectives across primary accounts and historians, directly clarifying what each source can and cannot substantiate.',
+        },
+      ],
+      examinerTips: [
+        'Examine `Sample 1.pdf` Section 2: compare an eyewitness primary chronicler’s wartime/political motives directly against modern multi-disciplinary historians writing with hindsight.',
+      ],
+    },
+    {
+      code: 'C',
+      name: 'Section 3: Synthesis and Evaluation',
       maxMarks: 12,
       weightDescription: '50% of IA',
       summary:
-        'Coherent, analytical historical investigation evaluating multiple causal factors, evidence from up to 7 sources, and competing historiographical perspectives.',
+        'Construct a sustained thematic argument weighing competing causal factors, evaluating diverse historiographical perspectives, and reaching a substantiated conclusion resolving the inquiry question.',
       descriptors: [
         {
           marks: '0',
@@ -830,66 +866,30 @@ export const HISTORY_IA_2028_RUBRIC: IBAssessmentRubric = {
           marks: '1-3',
           levelLabel: 'Limited',
           descriptor:
-            'The investigation lacks organization and coherence. It relies heavily on narrative or descriptive summary with minimal critical analysis or awareness of different perspectives.',
+            'The section reads largely as chronological narrative or description with sparse critical synthesis, minimal perspective weighing, and an unsupported conclusion.',
         },
         {
           marks: '4-6',
           levelLabel: 'Satisfactory',
           descriptor:
-            'The investigation is organized and includes some analytical commentary, though narrative description often dominates. Evidence is used unevenly and multiple perspectives are insufficiently explored.',
+            'Organized thematically with some analytical points, though narrative creeps in and historiographical perspectives or counter-arguments are only partially weighed.',
         },
         {
           marks: '7-9',
           levelLabel: 'Good',
           descriptor:
-            'The investigation is clear, coherent, and effectively structured around analytical themes focused on the question. Specific evidence from relevant sources supports the argument, and differing perspectives are evaluated.',
+            'Consistently structured analytical argument using specific source evidence and differing historical interpretations, leading to a clear, reasoned conclusion.',
         },
         {
           marks: '10-12',
           levelLabel: 'Excellent',
           descriptor:
-            'The investigation is consistently analytical, incisive, and tightly organized around the research question. A balanced range of exact empirical evidence and competing historiographical perspectives are critically synthesized and weighed throughout.',
+            'Incisive, sustained synthesis weighs multi-causal evidence and competing historical perspectives critically across the investigation, culminating in a nuanced, compelling judgment grounded directly in the evidence base (≤7 sources, Chicago NB).',
         },
       ],
       examinerTips: [
-        'Organize thematically rather than chronologically; weigh competing factors explicitly ("While X accelerated..., structural Y proved decisive...").',
-        'Cite precisely using Chicago NB footnotes and engage historians’ actual evidence rather than merely name-dropping.',
-      ],
-    },
-    {
-      code: 'C',
-      name: 'Conclusion and historical judgment',
-      maxMarks: 6,
-      weightDescription: '25% of IA',
-      summary:
-        'Formulating a well-substantiated conclusion directly answering the research question and demonstrating mature historical judgment grounded in the investigation.',
-      descriptors: [
-        {
-          marks: '0',
-          levelLabel: 'Not achieved',
-          descriptor: 'The work does not reach a standard described by the descriptors below.',
-        },
-        {
-          marks: '1-2',
-          levelLabel: 'Limited',
-          descriptor:
-            'A conclusion is present but appears disconnected from the body evidence or merely repeats points without offering reasoned historical judgment.',
-        },
-        {
-          marks: '3-4',
-          levelLabel: 'Good',
-          descriptor:
-            'A clear conclusion consistent with the evidence is presented, addressing the research question with reasonable historical judgment.',
-        },
-        {
-          marks: '5-6',
-          levelLabel: 'Excellent',
-          descriptor:
-            'A compelling, nuanced conclusion follows organically from the investigation’s evidence, directly resolving the research question while demonstrating sophisticated historical judgment on causation, perspective, and limits of historical certainty.',
-        },
-      ],
-      examinerTips: [
-        'Note the 2028 shift: instead of a separate reflection section, embed your critical awareness of historical evidence, perspective limits, and causal weight directly into your Criterion C historical judgment.',
+        'Organize Section 3 into thematic causal factors rather than a chronological story; weigh relative factor importance before concluding.',
+        'Format every citation strictly in Chicago Notes & Bibliography (`Purdue OWL`).',
       ],
     },
   ],

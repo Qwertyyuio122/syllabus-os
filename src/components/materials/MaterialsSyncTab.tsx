@@ -1,12 +1,14 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import {
   CheckSquare,
   ExternalLink,
   FileText,
   Loader2,
   Plus,
+  RefreshCw,
   Sparkles,
   Square,
   Trash2,
@@ -62,7 +64,9 @@ export function MaterialsSyncTab({
   onMaterialsChange,
   onSuiteGenerated,
 }: MaterialsSyncTabProps) {
+  const router = useRouter();
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [syncingPack, setSyncingPack] = React.useState(false);
   const [isDragging, setIsDragging] = React.useState(false);
   const [uploadTopicId, setUploadTopicId] = React.useState<string>('unassigned');
   const [uploading, setUploading] = React.useState(false);
@@ -349,6 +353,38 @@ export function MaterialsSyncTab({
     }
   };
 
+  const handleSyncPack = async () => {
+    if (syncingPack) return;
+    setSyncingPack(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const res = await fetch('/api/seed/sync', { method: 'POST' });
+      const json = (await res.json()) as {
+        error?: string;
+        synced?: boolean;
+        version?: number;
+        addedMaterials?: number;
+        upgradedNotes?: number;
+      };
+      if (!res.ok || !json.synced) {
+        throw new Error(json.error || 'Failed to sync Classroom Pack v2.');
+      }
+      setSuccessMsg(
+        `Classroom Pack v${json.version ?? 2} synced (${json.addedMaterials ?? 0} materials added, ${json.upgradedNotes ?? 0} notes updated; user progress preserved).`,
+      );
+      router.refresh();
+    } catch (err) {
+      setErrorMsg(
+        err instanceof Error
+          ? err.message
+          : 'Failed to sync Classroom Pack v2.',
+      );
+    } finally {
+      setSyncingPack(false);
+    }
+  };
+
   const resolvedTargetTopicId = React.useMemo(() => {
     if (targetTopicId !== 'auto') return targetTopicId;
     const selectedMats = materials.filter((m) => selectedIds.includes(m.id));
@@ -528,15 +564,35 @@ export function MaterialsSyncTab({
               problem sets directly into this subject.
             </p>
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setPasteOpen(true)}
-            className="w-full justify-center"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span>Paste Lecture / Drive Notes</span>
-          </Button>
+          <div className="space-y-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setPasteOpen(true)}
+              className="w-full justify-center"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Paste Lecture / Drive Notes</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={syncingPack}
+              onClick={() => void handleSyncPack()}
+              className="w-full justify-center"
+            >
+              {syncingPack ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5" />
+              )}
+              <span>
+                {syncingPack
+                  ? 'Syncing Classroom Pack…'
+                  : 'Sync Classroom Pack v2'}
+              </span>
+            </Button>
+          </div>
         </div>
       </div>
 

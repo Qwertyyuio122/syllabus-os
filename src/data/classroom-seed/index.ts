@@ -1,7 +1,12 @@
 import type { SubjectSlug } from '@/types/database';
 import { BIOLOGY_HL_SEED } from './biology-hl';
 import { CHEMISTRY_SL_SEED } from './chemistry-sl';
-import { CORE_CLASSROOM_RESOURCES, CORE_STARTER_OVERRIDES } from './core-ee-cas';
+import {
+  CORE_CLASSROOM_RESOURCES,
+  CORE_STARTER_OVERRIDES,
+  CRHS_2026_2028_MILESTONES,
+  type CrhsMilestoneItem,
+} from './core-ee-cas';
 import { ENGLISH_LIT_HL_SEED } from './english-lit-hl';
 import { FRENCH_B_SL_SEED } from './french-b-sl';
 import { HISTORY_HL_SEED } from './history-hl';
@@ -26,6 +31,8 @@ export {
   FRENCH_B_SL_SEED,
   CORE_CLASSROOM_RESOURCES,
   CORE_STARTER_OVERRIDES,
+  CRHS_2026_2028_MILESTONES,
+  type CrhsMilestoneItem,
 };
 
 export * from './types';

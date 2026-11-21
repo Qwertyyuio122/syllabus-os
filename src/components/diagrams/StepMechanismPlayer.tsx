@@ -662,11 +662,89 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
           </span>
         </div>
 
-        {currentStep.formulaLatex && (
-          <div className="glass-surface rounded-2xl px-4 py-3 text-center">
-            <InlineKaTeX latex={currentStep.formulaLatex} displayMode />
-          </div>
-        )}
+            {currentStep.formulaLatex && (
+              <div className="glass-surface rounded-2xl px-4 py-3 text-center">
+                <InlineKaTeX latex={currentStep.formulaLatex} displayMode />
+              </div>
+            )}
+
+            {currentStep.stepIllustration &&
+              currentStep.stepIllustration.length > 0 && (
+                <div className="glass-surface overflow-hidden rounded-2xl p-2">
+                  <svg
+                    viewBox="0 0 800 220"
+                    className="block h-auto max-h-44 w-full select-none text-[#1D1D1F] dark:text-[#F5F5F7]"
+                    role="img"
+                    aria-label={`${currentStep.title} illustration`}
+                  >
+                    {currentStep.stepIllustration.map((s, sIdx) => {
+                      if (s.kind === 'rect') {
+                        return (
+                          <rect
+                            key={sIdx}
+                            x={s.x}
+                            y={s.y}
+                            width={s.width}
+                            height={s.height}
+                            rx={s.rx ?? 0}
+                            fill={s.fill ?? 'rgba(120,119,116,0.12)'}
+                            stroke={s.stroke ?? 'currentColor'}
+                            strokeWidth={s.strokeWidth ?? 1.5}
+                            opacity={s.opacity ?? 1}
+                          />
+                        );
+                      }
+                      if (s.kind === 'circle') {
+                        return (
+                          <circle
+                            key={sIdx}
+                            cx={s.cx}
+                            cy={s.cy}
+                            r={s.r}
+                            fill={s.fill ?? 'rgba(120,119,116,0.16)'}
+                            stroke={s.stroke ?? 'currentColor'}
+                            strokeWidth={s.strokeWidth ?? 1.5}
+                            opacity={s.opacity ?? 1}
+                          />
+                        );
+                      }
+                      if (s.kind === 'line') {
+                        return (
+                          <line
+                            key={sIdx}
+                            x1={s.x1}
+                            y1={s.y1}
+                            x2={s.x2}
+                            y2={s.y2}
+                            stroke={s.stroke ?? 'currentColor'}
+                            strokeWidth={s.strokeWidth ?? 1.6}
+                            strokeDasharray={s.strokeDasharray}
+                            opacity={s.opacity ?? 1}
+                          />
+                        );
+                      }
+                      if (s.kind === 'text') {
+                        return (
+                          <text
+                            key={sIdx}
+                            x={s.x}
+                            y={s.y}
+                            fontSize={s.fontSize ?? 12}
+                            fontWeight={s.fontWeight ?? 600}
+                            textAnchor={s.textAnchor ?? 'start'}
+                            fill={s.fill ?? 'currentColor'}
+                            opacity={s.opacity ?? 1}
+                            style={{ fontFamily: 'var(--font-mono)' }}
+                          >
+                            {s.text}
+                          </text>
+                        );
+                      }
+                      return null;
+                    })}
+                  </svg>
+                </div>
+              )}
 
         <MarkdownMath
           content={currentStep.descriptionMarkdown}

@@ -3,12 +3,14 @@ import { redirect } from 'next/navigation';
 import {
   ArrowUpRight,
   BookOpen,
+  Calendar,
   FileText,
   FolderKanban,
   HelpCircle,
   Paperclip,
 } from 'lucide-react';
 import { APP_COHORT } from '@/config/brand';
+import { CRHS_2026_2028_MILESTONES } from '@/data/classroom-seed';
 import { createClient } from '@/lib/supabase/server';
 import { ensureUserSeeded } from '@/lib/seed-user';
 import { SubjectMotif } from '@/components/subjects/SubjectMotif';
@@ -261,10 +263,17 @@ export default async function DashboardOverviewPage() {
 
                   <CardContent className="relative z-10 flex h-full flex-col justify-between gap-4 p-5">
                     <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <Badge variant="subtle" className="font-mono">
-                          Group {subject.group_number} · {subject.level}
-                        </Badge>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Badge variant="subtle" className="font-mono">
+                            Group {subject.group_number} · {subject.level}
+                          </Badge>
+                          {subject.slug === 'history-hl' && (
+                            <Badge variant="outline" className="font-mono text-[10px]">
+                              Active Focus · IA &amp; Paper 3
+                            </Badge>
+                          )}
+                        </div>
                         <span
                           aria-hidden="true"
                           className="glass-pill flex h-7 w-7 items-center justify-center rounded-full text-[#6E6E73] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#1D1D1F] dark:text-[#98989D] dark:group-hover:text-[#F5F5F7]"
@@ -331,6 +340,57 @@ export default async function DashboardOverviewPage() {
               </GlassSpotlight>
             );
           })}
+        </div>
+      </section>
+
+      {/* CRHS Class of 2028 Upcoming IB Milestones */}
+      <section aria-labelledby="milestones-heading" className="mt-8">
+        <div className="mb-3.5 flex items-center justify-between gap-2 px-1">
+          <h2
+            id="milestones-heading"
+            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]"
+          >
+            <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>CRHS Class of 2028 — Upcoming IB Milestones</span>
+          </h2>
+          <Link
+            href="/dashboard/core"
+            className="text-xs font-medium text-[#6E6E73] transition-colors hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+          >
+            Full 2026–2028 Calendar →
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {CRHS_2026_2028_MILESTONES.filter((m) =>
+            [
+              'crhs-hist-mock-1',
+              'crhs-ee-bib',
+              'crhs-eng-mock-io',
+              'crhs-hist-mock-2',
+              'crhs-eng-final-io',
+              'crhs-tok-exh',
+            ].includes(m.id),
+          ).map((item) => (
+            <div
+              key={item.id}
+              className="glass-surface flex items-start justify-between gap-3 rounded-2xl px-4 py-3"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Badge variant="outline" className="font-mono text-[10px]">
+                    {item.dateLabel}
+                  </Badge>
+                  <span className="font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
+                    {item.subjectOrCore}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-xs font-medium leading-snug text-[#1D1D1F] dark:text-[#F5F5F7]">
+                  {item.title}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

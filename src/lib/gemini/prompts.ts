@@ -85,23 +85,24 @@ function getSubjectSpecificInstructions(subjectSlug: string): string {
     case 'history-hl':
       return [
         'Subject-specific IB History HL (May 2028 First Assessment) rules:',
-        '- Official exam papers ONLY: "Paper 1 (Focused Study)", "Paper 2 (Thematic Essay)", "Paper 3 (Regional Study — Europe)".',
-        '- Explicitly integrate the 4 redesigned 2028 History concepts: Cause & consequence, Continuity & change, Perspectives, Significance.',
-        '- Prefer "timeline_causality" (with distinct categories, primarySourceQuote where grounded, and significanceMarkdown) and "comparison_matrix".',
+        '- Current Year 1 Classroom Focus: May 2028 History IA (24 marks, 3 sections: Inquiry Question 6m, Sources & Perspectives 6m, Synthesis & Evaluation 12m, ≤7 sources, ≤2,200w, Chicago NB — standalone Reflection & old OPCVL removed) AND Paper 3 Regional Study — Europe (2 hours, 30 marks, two 15-mark essays from Pearson 2026 regional studies like European Totalitarianism 1918–41).',
+        '- Official exam papers ONLY: "Paper 3 (Regional Study — Europe)", "Internal Assessment (2028 History IA)", "Paper 1 (Focused Study)", "Paper 2 (Thematic Essay)".',
+        '- Explicitly integrate the 4 redesigned 2028 History concepts (Cause & consequence, Continuity & change, Perspectives, Significance) and 4 Skills (Using sources, Making connections, Evaluating arguments, Asking questions).',
+        '- Prefer "timeline_causality" (with conceptTags, primarySourceQuote, and historiographyNotes) and "comparison_matrix".',
       ].join('\n');
     case 'english-lit-hl':
       return [
         'Subject-specific IB English A: Literature HL rules:',
-        '- Official exam papers ONLY: "Paper 1 (Guided Literary Analysis)", "Paper 2 (Comparative Essay)".',
+        '- Official exam papers ONLY: "Paper 1 (Guided Literary Analysis)", "Paper 2 (Comparative Essay)", plus HL Essay (1,200–1,500w) & Individual Oral (1 English-original literary work + 1 translated work — NEVER non-literary bodies of work).',
         '- Ground questions and study notes in authorial choices, literary/stylistic devices, Global Issues, and close textual analysis.',
-        '- Prefer "comparison_matrix" and "step_mechanism" (e.g., close-reading / comparative thesis synthesis pipeline).',
+        '- Prefer "comparison_matrix", "labeled_explorer", and "step_mechanism".',
       ].join('\n');
     case 'french-b-sl':
       return [
         'Subject-specific IB French B SL rules:',
-        '- Official exam papers ONLY: "Paper 1 (Production écrite)", "Paper 2 (Compréhension écrite & orale)".',
-        '- Reference the 5 Prescribed Themes, authentic French idioms/vocabulary, register, and IB text types.',
-        '- Write French B SL prompts, reading passages, and flashcards in authentic French with clear English/French examiner markscheme criteria where appropriate.',
+        '- Official exam papers ONLY: "Paper 1 (Production écrite · 250–400 mots)", "Paper 2 (Compréhension écrite & orale)".',
+        '- Reference the 5 Prescribed Themes (*Identités, Expériences, Ingéniosité humaine, Organisation sociale, Partage de la planète*) per *Le Monde en Français* (Cambridge 2018) Chapitre 6 text types.',
+        '- Write French B SL prompts, reading passages, and flashcards in authentic French with clear English/French examiner markscheme criteria.',
         '- Prefer "comparison_matrix" (text types / register / grammar) and "step_mechanism".',
       ].join('\n');
     default:

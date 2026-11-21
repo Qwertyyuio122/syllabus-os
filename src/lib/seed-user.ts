@@ -7,6 +7,53 @@ import type {
 import { IB_SUBJECTS_CONFIG } from '@/data/ib-syllabi';
 import type { CoreMilestone, CoreProjectType, SubjectSlug } from '@/types/database';
 
+export const CLASSROOM_SEED_PACK_VERSION = 2;
+
+export interface ClassroomSyncSummary {
+  version: number;
+  addedMaterials: number;
+  upgradedNotes: number;
+  addedQuestions: number;
+  addedFlashcards: number;
+  updatedTopics: number;
+  updatedCoreProjects: number;
+}
+
+const V1_TO_V2_NOTE_TITLE_MAP: Record<string, string> = {
+  'Liberal Italy & Mussolini’s Rise to Dictatorship (1890–1929)':
+    'Paper 3 Spotlight — Liberal Italy & Mussolini’s Dictatorship (1890–1940)',
+  'European Totalitarianism Compared & May 2028 Paper 3 Method (P3.5)':
+    'Paper 3 Spotlight — Comparative European Totalitarianism (1918–1941) & Band 13–15 Essays',
+  'Emission Spectra, Orbitals & Electron Configurations (S1.3)':
+    'Emission Spectra, Orbital Boxes & Electron Configurations (S1.3)',
+  'Covalent Bonding, VSEPR Shapes, Network Solids & IMFs (S2.2)':
+    'Covalent Bonding, Bond Order & Interactive 3D VSEPR Polarity Lab (S2.2.1–S2.2.6)',
+  'Bonding Continuum, Alloys & Addition Polymerization (S2.4)':
+    'Bonding Continuum (van Arkel–Ketelaar), Alloys & Addition Polymers (S2.4)',
+  'Periodic Trends: Radii, Ionization Energy & Electronegativity (S3.1)':
+    'Periodic Trends: Radii, IE1 Anomalies, Pauling χ & Period 3 Oxides (S3.1)',
+  'Quadratics: Three Forms, Discriminant & Inequalities (2.6–2.7)':
+    'Quadratics: Three Forms, Discriminant Δ, Inequalities & Mock Tests (2.6–2.7)',
+  'Things Fall Apart: Cultural Cosmology, Family Power & IO Global Issues (AoE2)':
+    'Things Fall Apart: Family Power, Food Rituals, Cosmology & IO Global Issues (AoE2)',
+  'Paper 1 & Paper 2 HL Analytical Craft: Extract-to-Concept Architecture':
+    'English A Literature HL Craft: Paper 1, Paper 2, HL Essay & Mandatory IO Rules',
+  'Français B NM : 5 Thèmes prescrits & Stratégie Épreuve 1 / Oral individuel':
+    'Français B NM : 5 Thèmes prescrits (*Le monde en français*) & Oral individuel',
+  'Microscopy ($M=I/A$), Prokaryote vs Eukaryote & Endosymbiosis (A2.2)':
+    'Interactive Cell Ultrastructure Lab: Animal, Plant & Prokaryote (A2.2.4–A2.2.10)',
+  'Amino Acids, Peptide Bonds & Protein Folding Levels (B1.2)':
+    'Amino Acids, Peptide Bonds & HL 1°–4° Protein Folding (B1.2)',
+  'Organelles, Eukaryotic Compartmentalization & Clathrin Vesicles (B2.2)':
+    'Organelles, Compartmentalization, Clathrin & Ultracentrifugation (B2.2)',
+  'Nucleic Acids, Base Pairing, Hershey–Chase & Nucleosomes (A1.2)':
+    'Nucleic Acids, Base-Pairing, Hershey–Chase & Nucleosomes (A1.2)',
+  'Origin of Cells, Miller–Urey, RNA World & LUCA (A2.1 HL)':
+    'Origin of Cells, Miller–Urey Apparatus, RNA World & LUCA (A2.1 HL)',
+  'Carbohydrates, Polysaccharides & Cis/Trans Lipids (B1.1)':
+    'Carbohydrates, Glycogen vs Cellulose & Cis/Trans Lipids (B1.1)',
+};
+
 function mergeGuidanceNotes(base: string, classroomNote?: string): string {
   const trimmedBase = base.trim();
   const trimmedExtra = classroomNote?.trim();
@@ -237,10 +284,10 @@ const DEFAULT_CORE_PROJECTS: DefaultCoreProjectSpec[] = [
       'To what extent did [specific historical factor/actor] cause [bounded event/shift] between [start year] and [end year]?',
     wordCountTarget: 2200,
     milestones: [
-      { id: 'hist-ia-1', title: 'Bounded RQ & Source Audit (Max 7 Sources for 2028 Guide)', completed: false },
-      { id: 'hist-ia-2', title: 'Criterion A: OPCVL Evaluation of 2 Sources (6 marks)', completed: false },
-      { id: 'hist-ia-3', title: 'Criterion B: Analytical Investigation & Chicago NB Footnotes (12 marks)', completed: false },
-      { id: 'hist-ia-4', title: 'Criterion C: Conclusion & Historical Judgment (6 marks, ≤2,200w)', completed: false },
+      { id: 'hist-ia-1', title: 'Section 1: Bounded Historical Inquiry Question & Scope Rationale (6 marks)', completed: false },
+      { id: 'hist-ia-2', title: 'Section 2: Sources & Perspectives Comparison (Max 7 Sources, 6 marks)', completed: false },
+      { id: 'hist-ia-3', title: 'Section 3: Synthesis, Historiography & Evaluation w/ Chicago NB (12 marks)', completed: false },
+      { id: 'hist-ia-4', title: 'Final 2,200-Word IA Submission (Sections 1–3 = 24 Marks; No Standalone Reflection)', completed: false },
     ],
     draftExcerpt: '',
   },
@@ -395,6 +442,461 @@ export async function ensureUserSeeded(
   return runPromise;
 }
 
+export async function syncClassroomPackUpgrades(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<ClassroomSyncSummary> {
+  const [
+    subjectsRes,
+    topicsRes,
+    materialsRes,
+    notesRes,
+    questionsRes,
+    flashcardsRes,
+    coreRes,
+  ] = await Promise.all([
+    supabase.from('subjects').select('id, slug').eq('user_id', userId),
+    supabase
+      .from('syllabus_topics')
+      .select('id, subject_id, parent_id, code, title, guidance_notes')
+      .eq('user_id', userId),
+    supabase
+      .from('course_materials')
+      .select('id, subject_id, topic_id, file_name, storage_path, external_url, extracted_text')
+      .eq('user_id', userId),
+    supabase
+      .from('study_notes')
+      .select('id, subject_id, topic_id, title, version')
+      .eq('user_id', userId),
+    supabase
+      .from('questions')
+      .select('id, subject_id, question_markdown')
+      .eq('user_id', userId),
+    supabase
+      .from('flashcards')
+      .select('id, subject_id, front_markdown')
+      .eq('user_id', userId),
+    supabase
+      .from('core_projects')
+      .select('id, project_type, subject_slug, milestones, draft_excerpt')
+      .eq('user_id', userId),
+  ]);
+
+  const subjectIdBySlug = new Map<string, string>();
+  for (const row of subjectsRes.data ?? []) {
+    subjectIdBySlug.set(String(row.slug), String(row.id));
+  }
+
+  const topicIdLookup = new Map<string, string>();
+  const existingTopicBySubAndCode = new Map<
+    string,
+    { id: string; parent_id: string | null; guidance_notes: string | null; title: string }
+  >();
+
+  for (const row of topicsRes.data ?? []) {
+    const subId = String(row.subject_id);
+    const code = String(row.code);
+    const id = String(row.id);
+    registerTopicLookupKeys(topicIdLookup, subId, code, id);
+    existingTopicBySubAndCode.set(`${subId}::${code}`, {
+      id,
+      parent_id: row.parent_id ? String(row.parent_id) : null,
+      guidance_notes: typeof row.guidance_notes === 'string' ? row.guidance_notes : null,
+      title: String(row.title),
+    });
+  }
+
+  // 1) Non-destructively insert missing syllabus_topics & refresh stale guidance_notes
+  let updatedTopics = 0;
+  const missingParentTopics: Array<Record<string, unknown>> = [];
+
+  for (const subject of IB_SUBJECTS_CONFIG) {
+    const subjectId = subjectIdBySlug.get(subject.slug);
+    if (!subjectId) continue;
+    const seed = CLASSROOM_SEED_BY_SUBJECT[subject.slug] as SubjectClassroomSeed | undefined;
+    let sortOrder = 0;
+
+    for (const unit of subject.units) {
+      const classroomNote = findGuidanceOverride(seed?.topicGuidanceNotes, unit.code);
+      const nextGuidance = mergeGuidanceNotes(unit.guidanceNotes, classroomNote);
+      const existing = existingTopicBySubAndCode.get(`${subjectId}::${unit.code}`);
+      if (!existing) {
+        missingParentTopics.push({
+          user_id: userId,
+          subject_id: subjectId,
+          parent_id: null,
+          code: unit.code,
+          title: unit.title,
+          guidance_notes: nextGuidance,
+          sort_order: sortOrder,
+          is_completed: false,
+          confidence_level: 'unstarted',
+        });
+      } else if (
+        existing.guidance_notes !== nextGuidance ||
+        existing.title !== unit.title
+      ) {
+        await supabase
+          .from('syllabus_topics')
+          .update({ title: unit.title, guidance_notes: nextGuidance })
+          .eq('id', existing.id)
+          .eq('user_id', userId);
+        updatedTopics++;
+      }
+      sortOrder += 1 + unit.subtopics.length;
+    }
+  }
+
+  if (missingParentTopics.length > 0) {
+    const { data: insertedParents } = await supabase
+      .from('syllabus_topics')
+      .insert(missingParentTopics)
+      .select('id, subject_id, code');
+    for (const row of insertedParents ?? []) {
+      registerTopicLookupKeys(
+        topicIdLookup,
+        String(row.subject_id),
+        String(row.code),
+        String(row.id),
+      );
+      updatedTopics++;
+    }
+  }
+
+  const missingChildTopics: Array<Record<string, unknown>> = [];
+  for (const subject of IB_SUBJECTS_CONFIG) {
+    const subjectId = subjectIdBySlug.get(subject.slug);
+    if (!subjectId) continue;
+    const seed = CLASSROOM_SEED_BY_SUBJECT[subject.slug] as SubjectClassroomSeed | undefined;
+    let sortOrder = 0;
+
+    for (const unit of subject.units) {
+      const parentId =
+        topicIdLookup.get(`${subjectId}::${unit.code}`) ??
+        topicIdLookup.get(`${subjectId}::${unit.code.toUpperCase()}`) ??
+        null;
+      sortOrder += 1;
+
+      for (const subtopic of unit.subtopics) {
+        const classroomNote = findGuidanceOverride(seed?.topicGuidanceNotes, subtopic.code);
+        const nextGuidance = mergeGuidanceNotes(subtopic.guidanceNotes, classroomNote);
+        const existing = existingTopicBySubAndCode.get(`${subjectId}::${subtopic.code}`);
+        if (!existing) {
+          missingChildTopics.push({
+            user_id: userId,
+            subject_id: subjectId,
+            parent_id: parentId,
+            code: subtopic.code,
+            title: subtopic.title,
+            guidance_notes: nextGuidance,
+            sort_order: sortOrder,
+            is_completed: false,
+            confidence_level: 'unstarted',
+          });
+        } else if (
+          existing.guidance_notes !== nextGuidance ||
+          existing.title !== subtopic.title
+        ) {
+          await supabase
+            .from('syllabus_topics')
+            .update({ title: subtopic.title, guidance_notes: nextGuidance })
+            .eq('id', existing.id)
+            .eq('user_id', userId);
+          updatedTopics++;
+        }
+        sortOrder += 1;
+      }
+    }
+  }
+
+  if (missingChildTopics.length > 0) {
+    const { data: insertedChildren } = await supabase
+      .from('syllabus_topics')
+      .insert(missingChildTopics)
+      .select('id, subject_id, code');
+    for (const row of insertedChildren ?? []) {
+      registerTopicLookupKeys(
+        topicIdLookup,
+        String(row.subject_id),
+        String(row.code),
+        String(row.id),
+      );
+      updatedTopics++;
+    }
+  }
+
+  // 2) Non-destructively insert missing seed materials (textbooks/cheatsheets); preserve all user uploads (storage_path !== null)
+  const nowIso = new Date().toISOString();
+  const materialIdBySubjectAndFile = new Map<string, string>();
+  const existingMaterialByKey = new Map<
+    string,
+    { id: string; storage_path: string | null; extracted_text: string; external_url: string | null }
+  >();
+
+  for (const row of materialsRes.data ?? []) {
+    const key = `${String(row.subject_id)}::${String(row.file_name)}`;
+    materialIdBySubjectAndFile.set(key, String(row.id));
+    existingMaterialByKey.set(key, {
+      id: String(row.id),
+      storage_path: row.storage_path ? String(row.storage_path) : null,
+      extracted_text: String(row.extracted_text ?? ''),
+      external_url: row.external_url ? String(row.external_url) : null,
+    });
+  }
+
+  const missingMaterials: Array<Record<string, unknown>> = [];
+  for (const subject of IB_SUBJECTS_CONFIG) {
+    const subjectId = subjectIdBySlug.get(subject.slug);
+    const seed = CLASSROOM_SEED_BY_SUBJECT[subject.slug] as SubjectClassroomSeed | undefined;
+    if (!subjectId || !seed) continue;
+
+    for (const mat of seed.materials) {
+      const key = `${subjectId}::${mat.fileName}`;
+      const existing = existingMaterialByKey.get(key);
+      const nextTopicId = resolveTopicId(topicIdLookup, subjectId, mat.topicCode);
+      if (!existing) {
+        missingMaterials.push({
+          user_id: userId,
+          subject_id: subjectId,
+          topic_id: nextTopicId,
+          file_name: mat.fileName,
+          file_type: mat.fileType,
+          storage_path: null,
+          external_url: mat.externalUrl ?? null,
+          extracted_text: mat.extractedText,
+          generation_status: 'generated',
+          last_generated_at: nowIso,
+        });
+      } else if (
+        existing.storage_path === null &&
+        existing.extracted_text !== mat.extractedText
+      ) {
+        await supabase
+          .from('course_materials')
+          .update({
+            extracted_text: mat.extractedText,
+            topic_id: nextTopicId,
+            external_url: mat.externalUrl ?? existing.external_url ?? null,
+          })
+          .eq('id', existing.id)
+          .eq('user_id', userId);
+      }
+    }
+  }
+
+  for (let i = 0; i < missingMaterials.length; i += 40) {
+    const chunk = missingMaterials.slice(i, i + 40);
+    const { data: inserted } = await supabase
+      .from('course_materials')
+      .insert(chunk)
+      .select('id, subject_id, file_name');
+    for (const row of inserted ?? []) {
+      materialIdBySubjectAndFile.set(
+        `${String(row.subject_id)}::${String(row.file_name)}`,
+        String(row.id),
+      );
+    }
+  }
+
+  const resolveSourceIds = (subjectId: string, fileNames: string[]): string[] => {
+    const ids = new Set<string>();
+    for (const fileName of fileNames) {
+      const id = materialIdBySubjectAndFile.get(`${subjectId}::${fileName}`);
+      if (id) ids.add(id);
+    }
+    return Array.from(ids);
+  };
+
+  // 3) Upgrade v1 seed notes (version < 2) and add missing v2 seed notes without touching user/AI notes
+  const existingNoteBySubAndTitle = new Map<
+    string,
+    { id: string; version: number }
+  >();
+  for (const row of notesRes.data ?? []) {
+    existingNoteBySubAndTitle.set(
+      `${String(row.subject_id)}::${String(row.title)}`,
+      { id: String(row.id), version: Number(row.version ?? 1) },
+    );
+  }
+
+  const v1AliasesByV2Key = new Map<string, string[]>();
+  for (const [v1Title, v2Title] of Object.entries(V1_TO_V2_NOTE_TITLE_MAP)) {
+    const list = v1AliasesByV2Key.get(v2Title) ?? [];
+    list.push(v1Title);
+    v1AliasesByV2Key.set(v2Title, list);
+  }
+
+  let upgradedNotes = 0;
+  const missingNotes: Array<Record<string, unknown>> = [];
+
+  for (const subject of IB_SUBJECTS_CONFIG) {
+    const subjectId = subjectIdBySlug.get(subject.slug);
+    const seed = CLASSROOM_SEED_BY_SUBJECT[subject.slug] as SubjectClassroomSeed | undefined;
+    if (!subjectId || !seed) continue;
+
+    for (const note of seed.notes) {
+      const v2Key = `${subjectId}::${note.title}`;
+      const directMatch = existingNoteBySubAndTitle.get(v2Key);
+      let match: { id: string; version: number } | undefined = directMatch;
+
+      if (!match) {
+        const legacyTitles = v1AliasesByV2Key.get(note.title) ?? [];
+        for (const legacyTitle of legacyTitles) {
+          const found = existingNoteBySubAndTitle.get(`${subjectId}::${legacyTitle}`);
+          if (found) {
+            match = found;
+            break;
+          }
+        }
+      }
+
+      const resolvedTopicId = resolveTopicId(topicIdLookup, subjectId, note.topicCode);
+      const sourceMaterialIds = resolveSourceIds(subjectId, note.sourceFileNames);
+
+      if (match) {
+        if (match.version < CLASSROOM_SEED_PACK_VERSION) {
+          await supabase
+            .from('study_notes')
+            .update({
+              topic_id: resolvedTopicId,
+              title: note.title,
+              summary: note.summary,
+              blocks: note.blocks,
+              source_material_ids: sourceMaterialIds,
+              version: CLASSROOM_SEED_PACK_VERSION,
+            })
+            .eq('id', match.id)
+            .eq('user_id', userId);
+          upgradedNotes++;
+        }
+      } else {
+        missingNotes.push({
+          user_id: userId,
+          subject_id: subjectId,
+          topic_id: resolvedTopicId,
+          title: note.title,
+          summary: note.summary,
+          blocks: note.blocks,
+          source_material_ids: sourceMaterialIds,
+          version: CLASSROOM_SEED_PACK_VERSION,
+        });
+        upgradedNotes++;
+      }
+    }
+  }
+
+  if (missingNotes.length > 0) {
+    await insertInChunks(supabase, 'study_notes', missingNotes, 20);
+  }
+
+  // 4) Append missing questions and flashcards without deleting or resetting attempts/mastery
+  const existingQuestionKeys = new Set<string>(
+    (questionsRes.data ?? []).map(
+      (q) => `${String(q.subject_id)}::${String(q.question_markdown)}`,
+    ),
+  );
+  const existingFlashcardKeys = new Set<string>(
+    (flashcardsRes.data ?? []).map(
+      (f) => `${String(f.subject_id)}::${String(f.front_markdown)}`,
+    ),
+  );
+
+  const missingQuestions: Array<Record<string, unknown>> = [];
+  const missingFlashcards: Array<Record<string, unknown>> = [];
+
+  for (const subject of IB_SUBJECTS_CONFIG) {
+    const subjectId = subjectIdBySlug.get(subject.slug);
+    const seed = CLASSROOM_SEED_BY_SUBJECT[subject.slug] as SubjectClassroomSeed | undefined;
+    if (!subjectId || !seed) continue;
+
+    for (const q of seed.questions) {
+      const qKey = `${subjectId}::${q.questionMarkdown}`;
+      if (!existingQuestionKeys.has(qKey)) {
+        missingQuestions.push({
+          user_id: userId,
+          subject_id: subjectId,
+          topic_id: resolveTopicId(topicIdLookup, subjectId, q.topicCode),
+          paper_type: q.paperType,
+          command_term: q.commandTerm,
+          difficulty: q.difficulty,
+          max_marks: q.maxMarks,
+          stimulus_markdown: q.stimulusMarkdown ?? null,
+          question_markdown: q.questionMarkdown,
+          mcq_options: q.mcqOptions ?? null,
+          correct_mcq_option: q.correctMcqOption ?? null,
+          markscheme: q.markscheme,
+          source_material_ids: resolveSourceIds(subjectId, q.sourceFileNames),
+        });
+      }
+    }
+
+    for (const card of seed.flashcards) {
+      const fKey = `${subjectId}::${card.frontMarkdown}`;
+      if (!existingFlashcardKeys.has(fKey)) {
+        missingFlashcards.push({
+          user_id: userId,
+          subject_id: subjectId,
+          topic_id: resolveTopicId(topicIdLookup, subjectId, card.topicCode),
+          front_markdown: card.frontMarkdown,
+          back_markdown: card.backMarkdown,
+          mastered: false,
+        });
+      }
+    }
+  }
+
+  if (missingQuestions.length > 0) {
+    await insertInChunks(supabase, 'questions', missingQuestions, 35);
+  }
+  if (missingFlashcards.length > 0) {
+    await insertInChunks(supabase, 'flashcards', missingFlashcards, 60);
+  }
+
+  // 5) Refresh History IA starter milestones ONLY when user has not edited draft or completed milestones
+  let updatedCoreProjects = 0;
+  const historyIaOverride = CORE_STARTER_OVERRIDES.find(
+    (o) => o.projectType === 'IA' && o.subjectSlug === 'history-hl',
+  );
+  if (historyIaOverride) {
+    for (const proj of coreRes.data ?? []) {
+      if (
+        proj.project_type === 'IA' &&
+        proj.subject_slug === 'history-hl' &&
+        !String(proj.draft_excerpt ?? '').trim()
+      ) {
+        const milestones = Array.isArray(proj.milestones)
+          ? (proj.milestones as CoreMilestone[])
+          : [];
+        const hasCompleted = milestones.some((m) => m.completed);
+        const hasLegacyWording = milestones.some(
+          (m) =>
+            m.title.includes('OPCVL') ||
+            m.title.includes('Criteria A–C') ||
+            m.title.includes('Criterion A'),
+        );
+        if (!hasCompleted && hasLegacyWording) {
+          await supabase
+            .from('core_projects')
+            .update({ milestones: historyIaOverride.milestones })
+            .eq('id', String(proj.id))
+            .eq('user_id', userId);
+          updatedCoreProjects++;
+        }
+      }
+    }
+  }
+
+  return {
+    version: CLASSROOM_SEED_PACK_VERSION,
+    addedMaterials: missingMaterials.length,
+    upgradedNotes,
+    addedQuestions: missingQuestions.length,
+    addedFlashcards: missingFlashcards.length,
+    updatedTopics,
+    updatedCoreProjects,
+  };
+}
+
 async function runEnsureUserSeeded(
   supabase: SupabaseClient,
   userId: string,
@@ -415,6 +917,7 @@ async function runEnsureUserSeeded(
   const hasCoreProjects = (coreCheck.data?.length ?? 0) > 0;
 
   if (hasSubjects && hasCoreProjects) {
+    await syncClassroomPackUpgrades(supabase, userId);
     return;
   }
 
@@ -636,7 +1139,7 @@ async function runEnsureUserSeeded(
         summary: note.summary,
         blocks: note.blocks,
         source_material_ids: resolveSourceIds(subjectId, note.sourceFileNames),
-        version: 1,
+        version: CLASSROOM_SEED_PACK_VERSION,
       });
     }
 

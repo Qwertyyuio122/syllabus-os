@@ -245,7 +245,17 @@ export function SubjectWorkspaceClient({
             <Badge variant="outline" className="font-mono">
               Group {subject.group_number}
             </Badge>
+            {subject.slug === 'history-hl' && (
+              <Badge variant="subtle" className="font-mono">
+                Active Focus: May 2028 IA &amp; Paper 3
+              </Badge>
+            )}
           </div>
+          {subject.slug === 'history-hl' && (
+            <p className="mt-1.5 font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+              Active Class Focus: May 2028 24-Mark 3-Section IA &amp; Paper 3 Europe · Paper 1 &amp; Paper 2 remain indexed for Year 2.
+            </p>
+          )}
           {subject.description && (
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
               {subject.description}

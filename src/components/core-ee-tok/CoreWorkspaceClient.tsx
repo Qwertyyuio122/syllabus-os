@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { getRubricForProject } from '@/data/ib-rubrics';
+import { CRHS_2026_2028_MILESTONES } from '@/data/classroom-seed';
 import { createClient } from '@/lib/supabase/client';
 import { MarkdownMath } from '@/components/notes/MarkdownMath';
 import {
@@ -182,6 +183,7 @@ export function CoreWorkspaceClient({
   const [saving, setSaving] = React.useState(false);
   const [evaluating, setEvaluating] = React.useState(false);
   const [showAllResources, setShowAllResources] = React.useState(false);
+  const [calendarStage, setCalendarStage] = React.useState<'all' | 'g11' | 'g12'>('all');
   const [activeResourceId, setActiveResourceId] = React.useState<string | null>(
     null,
   );
@@ -1102,6 +1104,78 @@ export function CoreWorkspaceClient({
                   </p>
                 </div>
               )}
+
+              {/* CRHS Class of 2028 Full Assessment Calendar */}
+              <Card>
+                <CardContent className="space-y-3 p-4 sm:p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.06] pb-3 dark:border-white/[0.08]">
+                    <div>
+                      <h3 className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                        CRHS Class of 2028 — Master IB Assessment Calendar
+                      </h3>
+                      <p className="mt-0.5 text-xs text-[#6E6E73] dark:text-[#98989D]">
+                        Verified from IB Assessment Calendar 2026–2027.pdf &amp; Timeline 2028 cohort.docx.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {(
+                        [
+                          { id: 'all', label: 'All (33)' },
+                          { id: 'g11', label: 'Grade 11 (2026–27)' },
+                          { id: 'g12', label: 'Grade 12 (2027–28)' },
+                        ] as const
+                      ).map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setCalendarStage(tab.id)}
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer ${
+                            calendarStage === tab.id
+                              ? 'bg-[#1D1D1F] text-white dark:bg-[#F5F5F7] dark:text-[#111113]'
+                              : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    {CRHS_2026_2028_MILESTONES.filter((item) => {
+                      if (calendarStage === 'g11') {
+                        return item.cohortStage === 'Grade 11 (2026–2027)';
+                      }
+                      if (calendarStage === 'g12') {
+                        return item.cohortStage === 'Grade 12 (2027–2028)';
+                      }
+                      return true;
+                    }).map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-start justify-between gap-3 rounded-xl border border-black/[0.06] bg-white/50 px-3 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.02]"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="font-mono text-[11px] font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                              {item.dateLabel}
+                            </span>
+                            <Badge variant="outline" className="font-mono text-[10px]">
+                              {item.subjectOrCore}
+                            </Badge>
+                          </div>
+                          <div className="mt-1 text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                            {item.title}
+                          </div>
+                          <div className="mt-0.5 font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
+                            {item.cohortStage} · {item.sourceRef}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>

@@ -217,6 +217,9 @@ test.describe('SyllabusOS Smoke & Gate Verification', () => {
     });
     expect(apiResponse.status()).toBe(401);
 
+    const syncResponse = await request.post('/api/seed/sync');
+    expect(syncResponse.status()).toBe(401);
+
     errors.assertNoErrors();
   });
 
@@ -254,13 +257,19 @@ test.describe('SyllabusOS Smoke & Gate Verification', () => {
     }
     await expect(page.getByText('6 subjects')).toBeVisible();
     await expect(
-      page.locator('main').getByText('102', { exact: true }),
+      page.locator('main').getByText('107', { exact: true }),
     ).toBeVisible();
     await expect(
-      page.locator('main').getByText('19', { exact: true }),
+      page.locator('main').getByText('30', { exact: true }),
     ).toBeVisible();
     await expect(
-      page.locator('main').getByText('37', { exact: true }),
+      page.locator('main').getByText('94', { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText('CRHS Class of 2028 — Upcoming IB Milestones'),
+    ).toBeVisible();
+    await expect(
+      page.getByText('Active Focus · IA & Paper 3'),
     ).toBeVisible();
     await assertNoHorizontalOverflow(page, 'dashboard (1280x800)');
 
@@ -355,7 +364,7 @@ test.describe('SyllabusOS Smoke & Gate Verification', () => {
 
     // 4) Classroom Materials tab: verify pre-seeded Google Classroom materials & paste/upload controls
     await page.getByRole('tab', { name: /Classroom Materials/i }).click();
-    await expect(page.locator('table tbody tr')).toHaveCount(15);
+    await expect(page.locator('table tbody tr')).toHaveCount(16);
     await expect(
       page.getByText('2026 Bio 5HL Course Outline.docx'),
     ).toBeVisible();
@@ -419,6 +428,123 @@ test.describe('SyllabusOS Smoke & Gate Verification', () => {
       page.locator('main').getByRole('heading', { name: /DP Core/i }),
     ).toBeVisible();
     await assertNoHorizontalOverflow(page, 'core workspace (375x812)');
+
+    errors.assertNoErrors();
+  });
+
+  test('3. v2 realistic diagrams, History HL focus, and non-destructive /api/seed/sync preservation', async ({
+    page,
+    context,
+    request,
+    baseURL,
+  }) => {
+    const errors = attachErrorCollectors(page);
+    const origin = baseURL ?? 'http://localhost:3100';
+
+    if (!process.env.PLAYWRIGHT_BASE_URL) {
+      await request.post(`${MOCK_SUPABASE_URL}/__reset`);
+    }
+
+    await context.addCookies([
+      {
+        name: 'sb-127-auth-token',
+        value: createSupabaseSsrSessionCookieValue(),
+        url: origin,
+      },
+    ]);
+    await installAiRouteFixtures(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+
+    // Trigger seeding, mark a Biology checkbox, then sync via button & API while preserving progress
+    await page.goto('/dashboard/subjects/biology-hl');
+    const firstCheckbox = page.getByRole('checkbox').first();
+    await expect(firstCheckbox).toBeVisible();
+    if ((await firstCheckbox.getAttribute('aria-checked')) !== 'true') {
+      await firstCheckbox.click();
+    }
+    await expect(firstCheckbox).toHaveAttribute('aria-checked', 'true');
+
+    await page.getByRole('tab', { name: /Classroom Materials/i }).click();
+    const syncButton = page.getByRole('button', {
+      name: /Sync Classroom Pack v2/i,
+    });
+    await expect(syncButton).toBeVisible();
+    await syncButton.click();
+    await expect(page.getByText(/Classroom Pack v2 synced/i)).toBeVisible();
+
+    await page.reload();
+    await page.getByRole('tab', { name: /Syllabus Checklist/i }).click();
+    await expect(page.getByRole('checkbox').first()).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+
+    // Biology HL 5-View Cell Ultrastructure Lab
+    await page.getByRole('tab', { name: /Study Notes/i }).click();
+    await page
+      .getByRole('button', { name: /Interactive Cell Ultrastructure Lab/i })
+      .first()
+      .click();
+    await expect(
+      page.getByRole('tab', { name: 'Plant Cell' }),
+    ).toBeVisible();
+    await page.getByRole('tab', { name: 'Plant Cell' }).click();
+    await page.getByRole('tab', { name: 'Prokaryote' }).click();
+    const monoToggle = page.getByRole('button', { name: /Monochrome Ink/i }).first();
+    await monoToggle.click();
+    await expect(monoToggle).toHaveAttribute('aria-pressed', 'true');
+    await assertNoHorizontalOverflow(page, 'biology cell lab (1280x800)');
+
+    // Chemistry SL VSEPR & Bonding Continuum Labs
+    await page.goto('/dashboard/subjects/chemistry-sl?tab=notes');
+    await page
+      .getByRole('button', { name: /Interactive 3D VSEPR Polarity Lab/i })
+      .first()
+      .click();
+    await expect(page.getByRole('button', { name: /NH₃/i })).toBeVisible();
+    await page.getByRole('button', { name: /NH₃/i }).click();
+    await page.getByRole('button', { name: /Monochrome Ink/i }).first().click();
+
+    await page
+      .getByRole('button', { name: /Bonding Continuum \(van Arkel–Ketelaar\)/i })
+      .first()
+      .click();
+    await page
+      .getByRole('tab', { name: /Lattices & Allotropes Simulator/i })
+      .click();
+    await assertNoHorizontalOverflow(page, 'chemistry bonding lab (1280x800)');
+
+    // Math AA SL Inverse Reflection & Rational Asymptotes
+    await page.goto('/dashboard/subjects/math-aa-sl?tab=notes');
+    await page
+      .getByRole('button', { name: /Functions, Domain Restrictions/i })
+      .first()
+      .click();
+    await expect(
+      page.getByRole('button', { name: /Reflect y = x/i }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: /Reflect y = x/i }).click();
+    await page
+      .getByRole('button', { name: /Reciprocal & Linear-Rational/i })
+      .first()
+      .click();
+    await expect(page.getByText(/Vertical Asymptote/i).first()).toBeVisible();
+    await assertNoHorizontalOverflow(page, 'math rational graph (1280x800)');
+
+    // History HL Active Focus & May 2028 IA / Paper 3
+    await page.goto('/dashboard/subjects/history-hl?tab=notes');
+    await expect(
+      page.getByText('Active Focus: May 2028 IA & Paper 3'),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /Paper 3 Spotlight/i }).first(),
+    ).toBeVisible();
+    await page
+      .getByRole('button', { name: /IA Spotlight — May 2028/i })
+      .first()
+      .click();
+    await expect(page.getByText(/MAX 7 sources/i).first()).toBeVisible();
+    await assertNoHorizontalOverflow(page, 'history hl focus (1280x800)');
 
     errors.assertNoErrors();
   });

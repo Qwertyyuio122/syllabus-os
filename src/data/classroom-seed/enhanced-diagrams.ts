@@ -54,10 +54,11 @@ function downArrowShapes(
 export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
   type: 'labeled_explorer',
   id: 'bio-a1-1-water-explorer',
-  title: 'Water Dipole & Tetrahedral Hydrogen-Bond Network',
+  title: 'Water Dipole & Tetrahedral Hydrogen-Bond Network (A1.1)',
   caption:
-    'Select any interaction pin to isolate the 104.5° polar covalent O–H dipole, cohesion H-bonds, cellulose adhesion, or the tetrahedral thermal H-bond network.',
+    'Select any interaction pin or molecule part directly to isolate the 104.5° polar covalent O–H dipole, cohesion H-bonds, cellulose adhesion, or specific heat capacity.',
   viewBox: '0 0 800 440',
+  palette: 'scientific',
   shapes: [
     // Hydrophilic Cellulose Cell Wall Panel (Left)
     {
@@ -67,9 +68,10 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       width: 152,
       height: 332,
       rx: 14,
-      fill: 'rgba(120,119,116,0.08)',
-      stroke: 'currentColor',
-      strokeWidth: 1.6,
+      fill: '#DCE7DA',
+      stroke: '#386641',
+      strokeWidth: 1.8,
+      hotspotId: 'adhesion-wall',
       focusTags: ['adhesion-wall'],
     },
     {
@@ -289,9 +291,10 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
       cx: 390,
       cy: 210,
       r: 36,
-      fill: 'rgba(120,119,116,0.18)',
-      stroke: 'currentColor',
+      fill: '#E5A39B',
+      stroke: '#A33F37',
       strokeWidth: 2.2,
+      hotspotId: 'pol-cov',
       focusTags: ['pol-cov', 'h-bond-coh', 'adhesion-wall', 'specific-heat'],
     },
     {
@@ -687,10 +690,11 @@ export const ENHANCED_WATER_EXPLORER: LabeledExplorerSpec = {
 export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
   type: 'labeled_explorer',
   id: 'bio-b2-2-compartment-explorer',
-  title: 'Eukaryotic Secretory Pathway & Energetic Organelles',
+  title: 'Eukaryotic Secretory Pathway & Energetic Organelles (HL B2.2)',
   caption:
-    'Trace live secretory cargo flow (Nucleus → rER → cis/trans Golgi → Clathrin Vesicle) alongside mitochondrial cristae and chloroplast grana.',
+    'Click any organelle directly or select pins to trace live secretory cargo flow (Nucleus → rER → cis/trans Golgi → Clathrin Vesicle) plus mitochondrial cristae & chloroplast grana.',
   viewBox: '0 0 800 440',
+  palette: 'scientific',
   shapes: [
     {
       kind: 'rect',
@@ -699,10 +703,10 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       width: 768,
       height: 408,
       rx: 26,
-      fill: 'rgba(120,119,116,0.02)',
-      stroke: 'currentColor',
+      fill: '#FAF8F3',
+      stroke: '#6B7280',
       strokeWidth: 1.2,
-      opacity: 0.25,
+      opacity: 0.35,
     },
     // Nucleus & Pores
     {
@@ -710,8 +714,9 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       cx: 118,
       cy: 138,
       r: 72,
-      fill: 'rgba(120,119,116,0.08)',
+      fill: '#E3E7F1',
       stroke: 'none',
+      hotspotId: 'nuc',
       focusTags: ['nuc'],
     },
     {
@@ -977,17 +982,19 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       width: 286,
       height: 104,
       rx: 52,
-      fill: 'rgba(120,119,116,0.1)',
-      stroke: 'currentColor',
+      fill: '#F2DFD3',
+      stroke: '#A8583B',
       strokeWidth: 2,
+      hotspotId: 'mito',
       focusTags: ['mito'],
     },
     {
       kind: 'path',
       d: 'M 118 294 L 180 294 L 186 330 L 198 330 L 204 294 L 246 294 L 252 332 L 264 332 L 270 294 L 306 294 A 38 38 0 0 1 306 374 L 276 374 L 270 338 L 258 338 L 252 374 L 210 374 L 204 338 L 192 338 L 186 374 L 118 374 A 40 40 0 0 1 118 294 Z',
-      fill: 'rgba(120,119,116,0.08)',
-      stroke: 'currentColor',
+      fill: '#E7C8B5',
+      stroke: '#A8583B',
       strokeWidth: 1.5,
+      hotspotId: 'mito',
       focusTags: ['mito'],
     },
     {
@@ -1009,9 +1016,10 @@ export const ENHANCED_COMPARTMENT_EXPLORER: LabeledExplorerSpec = {
       cy: 334,
       rx: 148,
       ry: 52,
-      fill: 'rgba(120,119,116,0.1)',
-      stroke: 'currentColor',
+      fill: '#D1E5CE',
+      stroke: '#386641',
       strokeWidth: 2,
+      hotspotId: 'chloro',
       focusTags: ['chloro'],
     },
     {
@@ -1121,8 +1129,9 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
   id: 'chem-s1-3-hydrogen-spectrum',
   title: 'Hydrogen Quantized Energy Levels & Spectral Series (Day 1.3.3)',
   caption:
-    'Select Lyman (UV), Balmer (Visible), Paschen (IR), or Convergence Limit to isolate target shells, animate photon emission drops, and highlight the emission spectrum.',
+    'Select Lyman (UV), Balmer (Visible: 656/486/434/410 nm), Paschen (IR), or Convergence Limit to isolate shell drops and emission lines. ΔE = hν (h in J·s)!',
   viewBox: '0 0 800 440',
+  palette: 'scientific',
   shapes: [
     // Energy Vertical Axis
     {
@@ -1260,11 +1269,11 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       stroke: 'currentColor',
       strokeWidth: 1.2,
     },
-    { kind: 'line', x1: 302, y1: 398, x2: 302, y2: 420, stroke: 'currentColor', strokeWidth: 2.2, focusTags: ['paschen-ir', 'balmer-vis', 'lyman-uv'] },
-    { kind: 'line', x1: 392, y1: 398, x2: 392, y2: 420, stroke: 'currentColor', strokeWidth: 2, focusTags: ['paschen-ir', 'balmer-vis', 'lyman-uv'] },
-    { kind: 'line', x1: 468, y1: 398, x2: 468, y2: 420, stroke: 'currentColor', strokeWidth: 1.8, focusTags: ['paschen-ir', 'balmer-vis', 'lyman-uv'] },
-    { kind: 'line', x1: 530, y1: 398, x2: 530, y2: 420, stroke: 'currentColor', strokeWidth: 1.6, focusTags: ['balmer-vis', 'lyman-uv'] },
-    { kind: 'line', x1: 582, y1: 398, x2: 582, y2: 420, stroke: 'currentColor', strokeWidth: 1.5, focusTags: ['balmer-vis', 'lyman-uv', 'convergence'] },
+    { kind: 'line', x1: 302, y1: 398, x2: 302, y2: 420, stroke: '#9E4B3A', strokeWidth: 2.2, focusTags: ['paschen-ir'] },
+    { kind: 'line', x1: 392, y1: 398, x2: 392, y2: 420, stroke: '#C84B4B', strokeWidth: 2.6, focusTags: ['balmer-vis'] },
+    { kind: 'line', x1: 468, y1: 398, x2: 468, y2: 420, stroke: '#3C989E', strokeWidth: 2.4, focusTags: ['balmer-vis'] },
+    { kind: 'line', x1: 530, y1: 398, x2: 530, y2: 420, stroke: '#486BC4', strokeWidth: 2.2, focusTags: ['balmer-vis'] },
+    { kind: 'line', x1: 582, y1: 398, x2: 582, y2: 420, stroke: '#7B59BA', strokeWidth: 2.0, focusTags: ['balmer-vis', 'convergence'] },
     { kind: 'line', x1: 622, y1: 398, x2: 622, y2: 420, stroke: 'currentColor', strokeWidth: 1.3, focusTags: ['lyman-uv', 'convergence'] },
     { kind: 'line', x1: 654, y1: 398, x2: 654, y2: 420, stroke: 'currentColor', strokeWidth: 1.2, focusTags: ['lyman-uv', 'convergence'] },
     { kind: 'line', x1: 680, y1: 398, x2: 680, y2: 420, stroke: 'currentColor', strokeWidth: 1.1, focusTags: ['lyman-uv', 'convergence'] },
@@ -1288,10 +1297,10 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
       x: 478,
       y: 174,
       label: 'Balmer Series (Transitions → n = 2)',
-      category: 'Visible Light',
-      examKeyword: 'red 656 nm (n=3→2) to violet 410 nm',
+      category: 'Visible Light (Day 1.3.3)',
+      examKeyword: 'red 656 nm, cyan 486 nm, blue 434 nm, violet 410 nm · ΔE = hν (h in J·s)',
       detailMarkdown:
-        'Transitions terminating on $n=2$ fall within human visible wavelengths ($400–700\\ \\text{nm}$): $n=3\\to 2$ emits red, while higher drops emit cyan/blue/violet lines.',
+        'Transitions terminating on $n=2$ fall within human visible wavelengths ($400–700\\ \\text{nm}$): $n=3\\to 2$ emits red ($656\\text{ nm}$), stepping down through cyan ($486\\text{ nm}$), blue ($434\\text{ nm}$), and violet ($410\\text{ nm}$). **Classroom Slide Fixes (`Day 1.3.3`):** Planck’s constant unit is **$\\text{J}\\cdot\\text{s}$** (NOT J/s on slide 25), and lines correspond to the **energy gap $\\Delta E$ between levels** (slide 35 Answer B).',
     },
     {
       id: 'paschen-ir',
@@ -1315,3 +1324,7 @@ export const ENHANCED_HYDROGEN_SPECTRUM: LabeledExplorerSpec = {
     },
   ],
 };
+
+export * from './diagrams/biology-diagrams';
+export * from './diagrams/chemistry-diagrams';
+export * from './diagrams/math-humanities-diagrams';

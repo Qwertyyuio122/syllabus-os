@@ -3,9 +3,11 @@
 import React, { useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  Atom,
   Clock,
   Expand,
   GitBranch,
+  Layers,
   LineChart,
   MapPin,
   RotateCcw,
@@ -28,6 +30,8 @@ import { StepMechanismPlayer } from './StepMechanismPlayer';
 import { InteractiveFunctionGraph } from './InteractiveFunctionGraph';
 import { ConceptComparisonMatrix } from './ConceptComparisonMatrix';
 import { TimelineCausalityExplorer } from './TimelineCausalityExplorer';
+import { VseprPolarityLab } from './VseprPolarityLab';
+import { BondingContinuumLab } from './BondingContinuumLab';
 
 export interface InteractiveDiagramPlayerProps {
   spec: PlayableDiagramSpec;
@@ -111,6 +115,8 @@ const DIAGRAM_META: Record<
   function_graph: { label: 'Function Graph', Icon: LineChart },
   comparison_matrix: { label: 'Comparison Matrix', Icon: Table2 },
   timeline_causality: { label: 'Timeline & Causality', Icon: Clock },
+  vsepr_polarity_lab: { label: 'VSEPR & Polarity Lab', Icon: Atom },
+  bonding_continuum_lab: { label: 'Bonding Continuum Lab', Icon: Layers },
 };
 
 function renderValidatedPlayer(spec: PlayableDiagramSpec): React.ReactElement {
@@ -125,6 +131,10 @@ function renderValidatedPlayer(spec: PlayableDiagramSpec): React.ReactElement {
       return <ConceptComparisonMatrix spec={spec} />;
     case 'timeline_causality':
       return <TimelineCausalityExplorer spec={spec} />;
+    case 'vsepr_polarity_lab':
+      return <VseprPolarityLab spec={spec} />;
+    case 'bonding_continuum_lab':
+      return <BondingContinuumLab spec={spec} />;
   }
 }
 
