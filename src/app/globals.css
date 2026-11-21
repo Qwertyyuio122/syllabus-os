@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg-canvas: #ffffff;
+  --bg-surface: #fbfbfa;
+  --bg-hover: #f1f1ef;
+  --border-hairline: #e6e6e4;
+  --ink: #37352f;
+  --ink-muted: #787774;
+  --accent-solid: #37352f;
+  --accent-solid-fg: #ffffff;
+}
+
+.dark {
+  --bg-canvas: #191919;
+  --bg-surface: #202020;
+  --bg-hover: #2a2a2a;
+  --border-hairline: #2e2e2e;
+  --ink: #ebebeb;
+  --ink-muted: #9b9a97;
+  --accent-solid: #ebebeb;
+  --accent-solid-fg: #191919;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-background: var(--bg-canvas);
+  --color-foreground: var(--ink);
+  --color-surface: var(--bg-surface);
+  --color-border: var(--border-hairline);
+  --color-hover: var(--bg-hover);
+  --color-muted: var(--bg-hover);
+  --color-muted-foreground: var(--ink-muted);
+  --color-primary: var(--accent-solid);
+  --color-primary-foreground: var(--accent-solid-fg);
+}
+
+html,
+body {
+  background-color: var(--bg-canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  border-color: var(--border-hairline);
+}
+
+/* KaTeX clean integration inside monochrome Notion surfaces */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
+  margin: 0.5rem 0;
+}
+
+.katex {
+  font-size: 1em;
+}
+
+/* Subtle custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4d4d1;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a3a38;
+}

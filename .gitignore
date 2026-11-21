@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# Local env & secrets
+.env
+.env*.local
+
+# Temporary Drive downloads during ingestion
+.tmp-classroom/
+
+# Playwright artifacts
+playwright-report/
+test-results/
+
+# OS & Vercel
+.DS_Store
+.vercel/
