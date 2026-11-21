@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
   BookOpen,
   CheckSquare,
+  ChevronLeft,
   ChevronRight,
   FileText,
   FolderOpen,
@@ -195,30 +196,35 @@ export function SubjectWorkspaceClient({
     setSelectedNoteId(result.note.id);
   };
 
+  const selectedNoteIndex = React.useMemo(() => {
+    if (!selectedNote) return -1;
+    return notes.findIndex((n) => n.id === selectedNote.id);
+  }, [notes, selectedNote]);
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-8">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
       <nav
         aria-label="Breadcrumb"
-        className="mb-4 flex items-center gap-1.5 text-xs text-[#787774] dark:text-[#9B9A97]"
+        className="mb-4 flex items-center gap-1.5 text-xs text-[#6E6E73] dark:text-[#98989D]"
       >
         <Link
           href="/dashboard"
-          className="transition-colors hover:text-[#37352F] dark:hover:text-[#EBEBEB]"
+          className="transition-colors hover:text-[#1D1D1F] dark:hover:text-[#F5F5F7]"
         >
           Dashboard
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
-        <span className="font-medium text-[#37352F] dark:text-[#EBEBEB]">
+        <span className="font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
           {subject.name}
         </span>
       </nav>
 
       {/* Subject Header & Progress Bar */}
-      <div className="mb-6 flex flex-col gap-4 border-b border-[#E6E6E4] pb-5 lg:flex-row lg:items-end lg:justify-between dark:border-[#2E2E2E]">
+      <div className="glass-panel mb-6 flex flex-col gap-4 rounded-3xl p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-[#37352F] sm:text-3xl dark:text-[#EBEBEB]">
+            <h1 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] sm:text-3xl dark:text-[#F5F5F7]">
               {subject.name}
             </h1>
             <Badge variant="default" className="font-mono">
@@ -229,24 +235,24 @@ export function SubjectWorkspaceClient({
             </Badge>
           </div>
           {subject.description && (
-            <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
               {subject.description}
             </p>
           )}
         </div>
 
-        <div className="w-full shrink-0 rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] px-4 py-3 lg:w-72 dark:border-[#2E2E2E] dark:bg-[#202020]">
+        <div className="glass-surface w-full shrink-0 rounded-2xl px-4 py-3 lg:w-72">
           <div className="mb-1.5 flex items-center justify-between text-xs">
-            <span className="text-[#787774] dark:text-[#9B9A97]">
+            <span className="text-[#6E6E73] dark:text-[#98989D]">
               Syllabus Checklist
             </span>
-            <span className="font-mono font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+            <span className="font-mono font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
               {completedSubtopics} / {totalSubtopics} ({completionPct}%)
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#F1F1EF] dark:bg-[#2A2A2A]">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
             <div
-              className="h-full rounded-full bg-[#37352F] transition-all duration-300 dark:bg-[#EBEBEB]"
+              className="h-full rounded-full bg-[#1D1D1F] transition-all duration-300 dark:bg-[#F5F5F7]"
               style={{ width: `${completionPct}%` }}
             />
           </div>
@@ -255,6 +261,7 @@ export function SubjectWorkspaceClient({
 
       {/* 5 Notion Workspace Tabs */}
       <Tabs
+        idPrefix={`subject-tabs-${subject.slug}`}
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as SubjectWorkspaceTab)}
       >
@@ -262,7 +269,7 @@ export function SubjectWorkspaceClient({
           <TabsTrigger value="checklist">
             <CheckSquare className="h-3.5 w-3.5" />
             <span>Syllabus Checklist</span>
-            <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
               {completedSubtopics}/{totalSubtopics}
             </span>
           </TabsTrigger>
@@ -270,7 +277,7 @@ export function SubjectWorkspaceClient({
           <TabsTrigger value="notes">
             <FileText className="h-3.5 w-3.5" />
             <span>Study Notes</span>
-            <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
               {notes.length}
             </span>
           </TabsTrigger>
@@ -278,7 +285,7 @@ export function SubjectWorkspaceClient({
           <TabsTrigger value="qbank">
             <HelpCircle className="h-3.5 w-3.5" />
             <span>Question Bank</span>
-            <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
               {questions.length}
             </span>
           </TabsTrigger>
@@ -286,7 +293,7 @@ export function SubjectWorkspaceClient({
           <TabsTrigger value="materials">
             <FolderOpen className="h-3.5 w-3.5" />
             <span>Classroom Materials</span>
-            <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
               {materials.length}
             </span>
           </TabsTrigger>
@@ -294,7 +301,7 @@ export function SubjectWorkspaceClient({
           <TabsTrigger value="flashcards">
             <Layers className="h-3.5 w-3.5" />
             <span>Flashcards</span>
-            <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+            <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
               {flashcards.length}
             </span>
           </TabsTrigger>
@@ -314,13 +321,61 @@ export function SubjectWorkspaceClient({
 
         <TabsContent value="notes">
           {notes.length > 0 && selectedNote ? (
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
-              {/* Topic / Note Selector Sidebar */}
-              <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-64">
-                <div className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
-                  Study Guides ({notes.length})
+            <div className="space-y-4">
+              {/* Sleek Top Frosted Study Guide Switcher Bar (frees full horizontal width for notes & diagrams) */}
+              <div className="glass-surface flex flex-col gap-2.5 rounded-2xl p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+                      Study Guides
+                    </span>
+                    <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-[10.5px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                      {selectedNoteIndex >= 0 ? selectedNoteIndex + 1 : 1} of{' '}
+                      {notes.length}
+                    </span>
+                  </div>
+
+                  {notes.length > 1 && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={selectedNoteIndex <= 0}
+                        onClick={() => {
+                          if (selectedNoteIndex > 0) {
+                            setSelectedNoteId(notes[selectedNoteIndex - 1].id);
+                          }
+                        }}
+                        aria-label="Previous study guide"
+                        className="glass-pill inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#1D1D1F] transition-all hover:bg-white/95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                        <span>Prev</span>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={
+                          selectedNoteIndex < 0 ||
+                          selectedNoteIndex >= notes.length - 1
+                        }
+                        onClick={() => {
+                          if (
+                            selectedNoteIndex >= 0 &&
+                            selectedNoteIndex < notes.length - 1
+                          ) {
+                            setSelectedNoteId(notes[selectedNoteIndex + 1].id);
+                          }
+                        }}
+                        aria-label="Next study guide"
+                        className="glass-pill inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#1D1D1F] transition-all hover:bg-white/95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+
+                <div className="flex max-w-full items-center gap-2 overflow-x-auto pb-1">
                   {notes.map((note) => {
                     const topic = note.topic_id
                       ? topicMap[note.topic_id]
@@ -332,43 +387,47 @@ export function SubjectWorkspaceClient({
                         key={note.id}
                         type="button"
                         onClick={() => setSelectedNoteId(note.id)}
-                        className={`shrink-0 rounded-md border px-3 py-2 text-left transition-colors cursor-pointer lg:w-full ${
+                        className={`flex max-w-[260px] shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-left transition-all cursor-pointer ${
                           active
-                            ? 'border-[#37352F] bg-[#F1F1EF] text-[#37352F] dark:border-[#EBEBEB] dark:bg-[#2A2A2A] dark:text-[#EBEBEB]'
-                            : 'border-[#E6E6E4] bg-white text-[#787774] hover:bg-[#FBFBFA] hover:text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#202020] dark:hover:text-[#EBEBEB]'
+                            ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                            : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                         }`}
                       >
                         {topic && (
-                          <div className="font-mono text-[10px] uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+                          <span
+                            className={`shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase ${
+                              active
+                                ? 'bg-white/15 text-white dark:bg-black/15 dark:text-[#111113]'
+                                : 'bg-black/[0.05] text-[#6E6E73] dark:bg-white/[0.08] dark:text-[#98989D]'
+                            }`}
+                          >
                             {topic.code}
-                          </div>
+                          </span>
                         )}
-                        <div className="line-clamp-2 text-xs font-medium leading-snug text-[#37352F] dark:text-[#EBEBEB]">
+                        <span className="truncate text-xs font-medium">
                           {note.title}
-                        </div>
+                        </span>
                       </button>
                     );
                   })}
                 </div>
-              </aside>
-
-              {/* Read-Only Notion Study Note Viewer */}
-              <div className="min-w-0 flex-1">
-                <NotionNoteViewer
-                  note={selectedNote}
-                  topicLabel={selectedNoteTopicLabel}
-                />
               </div>
+
+              {/* Screen-Fitting Read-Only Notion Study Note Viewer */}
+              <NotionNoteViewer
+                note={selectedNote}
+                topicLabel={selectedNoteTopicLabel}
+              />
             </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-[#E6E6E4] px-6 py-12 text-center dark:border-[#2E2E2E]">
-              <BookOpen className="mx-auto mb-2.5 h-6 w-6 text-[#787774] dark:text-[#9B9A97]" />
-              <p className="text-sm font-medium text-[#37352F] dark:text-[#EBEBEB]">
+            <div className="glass-surface rounded-2xl border-dashed px-6 py-12 text-center">
+              <BookOpen className="mx-auto mb-2.5 h-6 w-6 text-[#6E6E73] dark:text-[#98989D]" />
+              <p className="text-sm font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
                 No study notes yet for {subject.name}.
               </p>
-              <p className="mt-1 text-xs text-[#787774] dark:text-[#9B9A97]">
+              <p className="mt-1 text-xs text-[#6E6E73] dark:text-[#98989D]">
                 Select classroom materials or paste lecture notes to generate a
-                Notion study guide with interactive diagrams.
+                study guide with interactive diagrams.
               </p>
               <Button
                 variant="outline"

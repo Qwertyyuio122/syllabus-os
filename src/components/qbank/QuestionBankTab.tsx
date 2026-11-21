@@ -102,7 +102,7 @@ export function QuestionBankTab({
   return (
     <div className="space-y-5">
       {/* Filter Bar */}
-      <div className="flex flex-col gap-3 rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] p-3 sm:flex-row sm:items-center sm:justify-between dark:border-[#2E2E2E] dark:bg-[#202020]">
+      <div className="glass-surface flex flex-col gap-3 rounded-2xl p-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-1 sm:flex-wrap sm:items-center">
           <div className="sm:w-52">
             <Select value={topicFilter} onValueChange={setTopicFilter}>
@@ -196,11 +196,11 @@ export function QuestionBankTab({
           })}
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-[#E6E6E4] px-6 py-10 text-center dark:border-[#2E2E2E]">
-          <p className="text-sm font-medium text-[#37352F] dark:text-[#EBEBEB]">
+        <div className="glass-surface rounded-2xl border-dashed px-6 py-10 text-center">
+          <p className="text-sm font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
             No questions match the current filters.
           </p>
-          <p className="mt-1 text-xs text-[#787774] dark:text-[#9B9A97]">
+          <p className="mt-1 text-xs text-[#6E6E73] dark:text-[#98989D]">
             Reset the filters above or generate new IB questions from Classroom
             Materials.
           </p>

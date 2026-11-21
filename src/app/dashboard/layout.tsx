@@ -83,13 +83,13 @@ export default async function DashboardLayout({
   });
 
   return (
-    <div className="min-h-screen bg-white text-[#37352F] lg:flex dark:bg-[#191919] dark:text-[#EBEBEB]">
+    <div className="liquid-canvas min-h-screen overflow-x-clip text-[#1D1D1F] lg:flex dark:text-[#F5F5F7]">
       <Sidebar
         profile={profile}
         userEmail={user.email ?? 'student@syllabus.os'}
         subjects={sidebarSubjects}
       />
-      <main className="min-w-0 flex-1 bg-white dark:bg-[#191919]">
+      <main className="min-w-0 flex-1">
         {children}
       </main>
     </div>

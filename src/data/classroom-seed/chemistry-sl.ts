@@ -1,4 +1,5 @@
 import type { SubjectClassroomSeed } from './types';
+import { ENHANCED_HYDROGEN_SPECTRUM } from './enhanced-diagrams';
 
 export const CHEMISTRY_SL_SEED: SubjectClassroomSeed = {
   slug: 'chemistry-sl',
@@ -446,76 +447,7 @@ export const CHEMISTRY_SL_SEED: SubjectClassroomSeed = {
         },
         {
           type: 'playable_diagram',
-          spec: {
-            type: 'labeled_explorer',
-            id: 'chem-s1-3-hydrogen-spectrum',
-            title: 'Hydrogen Quantized Energy Levels & Spectral Series (Day 1.3.3)',
-            caption:
-              'Click shell transitions to inspect Lyman (UV), Balmer (Visible), Paschen (IR), and the n = ∞ convergence limit.',
-            viewBox: '0 0 800 440',
-            shapes: [
-              { kind: 'line', x1: 80, y1: 380, x2: 720, y2: 380, stroke: 'currentColor', strokeWidth: 2.5 },
-              { kind: 'text', x: 52, y: 384, text: 'n=1', fontSize: 13, textAnchor: 'end', fill: 'currentColor' },
-              { kind: 'line', x1: 80, y1: 230, x2: 720, y2: 230, stroke: 'currentColor', strokeWidth: 2 },
-              { kind: 'text', x: 52, y: 234, text: 'n=2', fontSize: 13, textAnchor: 'end', fill: 'currentColor' },
-              { kind: 'line', x1: 80, y1: 155, x2: 720, y2: 155, stroke: 'currentColor', strokeWidth: 1.8 },
-              { kind: 'text', x: 52, y: 159, text: 'n=3', fontSize: 13, textAnchor: 'end', fill: 'currentColor' },
-              { kind: 'line', x1: 80, y1: 112, x2: 720, y2: 112, stroke: 'currentColor', strokeWidth: 1.4 },
-              { kind: 'text', x: 52, y: 116, text: 'n=4', fontSize: 12, textAnchor: 'end', fill: 'currentColor' },
-              { kind: 'line', x1: 80, y1: 86, x2: 720, y2: 86, stroke: 'currentColor', strokeWidth: 1.2 },
-              { kind: 'text', x: 52, y: 90, text: 'n=5', fontSize: 12, textAnchor: 'end', fill: 'currentColor' },
-              { kind: 'line', x1: 80, y1: 58, x2: 720, y2: 58, stroke: 'currentColor', strokeWidth: 1.4, strokeDasharray: '6 5' },
-              { kind: 'text', x: 52, y: 62, text: 'n=∞', fontSize: 13, textAnchor: 'end', fill: 'currentColor' },
-              { kind: 'line', x1: 185, y1: 230, x2: 185, y2: 380, stroke: 'currentColor', strokeWidth: 2.4 },
-              { kind: 'line', x1: 235, y1: 155, x2: 235, y2: 380, stroke: 'currentColor', strokeWidth: 2.4 },
-              { kind: 'line', x1: 380, y1: 155, x2: 380, y2: 230, stroke: 'currentColor', strokeWidth: 2.4 },
-              { kind: 'line', x1: 430, y1: 112, x2: 430, y2: 230, stroke: 'currentColor', strokeWidth: 2.4 },
-              { kind: 'line', x1: 585, y1: 112, x2: 585, y2: 155, stroke: 'currentColor', strokeWidth: 2.4 },
-              { kind: 'line', x1: 635, y1: 86, x2: 635, y2: 155, stroke: 'currentColor', strokeWidth: 2.4 },
-            ],
-            hotspots: [
-              {
-                id: 'lyman-uv',
-                x: 210,
-                y: 305,
-                label: 'Lyman Series (Transitions -> n = 1)',
-                category: 'Ultraviolet (UV)',
-                examKeyword: 'largest ΔE / highest frequency / shortest λ',
-                detailMarkdown:
-                  'Electrons dropping to ground state $n=1$ release the largest energy jumps ($\\Delta E$), producing **ultraviolet** emission lines converging toward $n=\\infty$ (used to calculate first ionization energy).',
-              },
-              {
-                id: 'balmer-vis',
-                x: 405,
-                y: 190,
-                label: 'Balmer Series (Transitions -> n = 2)',
-                category: 'Visible Light',
-                examKeyword: 'red 656 nm (n=3->2) to violet 410 nm',
-                detailMarkdown:
-                  'Transitions terminating on $n=2$ fall within human visible wavelengths ($400–700\\ \\text{nm}$): $n=3\\to 2$ emits red, while higher drops emit cyan/blue/violet lines.',
-              },
-              {
-                id: 'paschen-ir',
-                x: 610,
-                y: 120,
-                label: 'Paschen Series (Transitions -> n = 3)',
-                category: 'Infrared (IR)',
-                examKeyword: 'smallest ΔE / longest λ',
-                detailMarkdown:
-                  'Drops ending at $n=3$ correspond to small energy differences, emitting low-frequency **infrared** radiation.',
-              },
-              {
-                id: 'convergence',
-                x: 400,
-                y: 58,
-                label: 'Convergence Limit (n = ∞)',
-                category: 'Ionization Limit',
-                examKeyword: 'energy levels get closer as n increases',
-                detailMarkdown:
-                  'Lines pack closer together at higher frequency because shell energy separation shrinks with increasing $n$. The high-frequency convergence limit equals the ionization energy.',
-              },
-            ],
-          },
+          spec: ENHANCED_HYDROGEN_SPECTRUM,
         },
         { type: 'heading', level: 2, text: '2. Orbital Rules, Transition Exceptions & Cation Ionization' },
         {
@@ -997,7 +929,7 @@ export const CHEMISTRY_SL_SEED: SubjectClassroomSeed = {
       topicCode: 'S2.4',
       frontMarkdown: 'How does the **van Arkel–Ketelaar triangle** classify $\\text{AlCl}_3$ vs $\\text{CsF}$?',
       backMarkdown:
-        'It plots $\\Delta\\chi$ vs $\\overline{\\chi}$. **$\\text{CsF}$** ($\Delta\\chi \\approx 3.2$) lies at the top **ionic** vertex, whereas **$\\text{AlCl}_3$** ($\Delta\\chi \\approx 1.6$, higher $\\overline{\\chi}$) shifts into **polar covalent** bonding.',
+        'It plots $\\Delta\\chi$ vs $\\overline{\\chi}$. **$\\text{CsF}$** ($\\Delta\\chi \\approx 3.2$) lies at the top **ionic** vertex, whereas **$\\text{AlCl}_3$** ($\\Delta\\chi \\approx 1.6$, higher $\\overline{\\chi}$) shifts into **polar covalent** bonding.',
     },
     {
       topicCode: 'S3.1',

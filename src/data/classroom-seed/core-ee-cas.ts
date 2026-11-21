@@ -621,7 +621,7 @@ export const CORE_STARTER_OVERRIDES: CoreStarterProjectOverride[] = [
   {
     projectType: 'EE',
     subjectSlug: null,
-    title: 'Extended Essay (Class of 2028 · FA2027 30-Mark Rubric)',
+    title: 'Extended Essay (FA2027 30-Mark Rubric)',
     researchQuestionOrPrompt:
       'To what extent did [focused historical/scientific/literary variable] shape [specific bounded topic]?',
     wordCountTarget: 4000,
@@ -642,7 +642,7 @@ export const CORE_STARTER_OVERRIDES: CoreStarterProjectOverride[] = [
   {
     projectType: 'CAS',
     subjectSlug: null,
-    title: 'CAS Portfolio (CRHS Class of 2028 · 7 Learning Outcomes)',
+    title: 'CAS Portfolio (7 Learning Outcomes)',
     researchQuestionOrPrompt:
       'Balance Creativity, Activity, and Service over 18 months using CAS Approval Forms, 9 reflective formats (3-2-1, Rose/Bud/Thorn, audio/photo), and a ≥1-month collaborative CAS Project following the 5 Stages.',
     wordCountTarget: 0,

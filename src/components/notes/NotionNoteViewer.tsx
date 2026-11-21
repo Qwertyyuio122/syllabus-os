@@ -7,6 +7,8 @@ import {
   Compass,
   FileText,
   List,
+  Maximize2,
+  Minimize2,
   Sigma,
 } from 'lucide-react';
 import type { StudyNoteRow } from '@/types/database';
@@ -50,27 +52,29 @@ const CALLOUT_CONFIG: Record<
   definition: {
     label: 'Definition',
     Icon: BookOpen,
-    borderClass: 'border-l-[#787774] dark:border-l-[#9B9A97]',
+    borderClass: 'border-l-[#6E6E73] dark:border-l-[#98989D]',
   },
   examiner_warning: {
     label: 'Examiner Warning',
     Icon: AlertTriangle,
-    borderClass: 'border-l-[#37352F] dark:border-l-[#EBEBEB]',
+    borderClass: 'border-l-[#1D1D1F] dark:border-l-[#F5F5F7]',
   },
   key_formula: {
     label: 'Key Formula',
     Icon: Sigma,
-    borderClass: 'border-l-[#37352F] dark:border-l-[#EBEBEB]',
+    borderClass: 'border-l-[#1D1D1F] dark:border-l-[#F5F5F7]',
   },
   syllabus_link: {
     label: 'Syllabus Link',
     Icon: Compass,
-    borderClass: 'border-l-[#9B9A97] dark:border-l-[#787774]',
+    borderClass: 'border-l-[#98989D] dark:border-l-[#6E6E73]',
   },
 };
 
 export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
   const [fontMode, setFontMode] = useState<'sans' | 'serif'>('sans');
+  const [widthMode, setWidthMode] = useState<'focused' | 'full'>('focused');
+  const [outlineOpen, setOutlineOpen] = useState(false);
 
   const safeBlocks = useMemo(() => {
     if (!Array.isArray(note.blocks)) return [];
@@ -167,65 +171,124 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
     });
   }, [note.updated_at]);
 
+  const proseMeasureClass =
+    widthMode === 'focused' ? 'max-w-[74ch]' : 'max-w-none';
+
   return (
-    <div className="flex w-full items-start gap-8">
-      {/* Main Read-Only Notion Document Column */}
-      <article className="min-w-0 flex-1 rounded-lg border border-[#E6E6E4] bg-white px-5 py-6 sm:px-9 sm:py-8 dark:border-[#2E2E2E] dark:bg-[#191919]">
+    <div className="flex w-full items-start gap-6">
+      {/* Main Read-Only Liquid Glass Study Document */}
+      <article className="glass-panel min-w-0 flex-1 rounded-3xl px-5 py-6 sm:px-9 sm:py-8 lg:px-12 lg:py-10">
         {/* Top Header Bar */}
-        <header className="border-b border-[#E6E6E4] pb-6 dark:border-[#2E2E2E]">
+        <header className="border-b border-black/[0.06] pb-6 dark:border-white/[0.08]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {topicLabel && (
-                <span className="inline-flex items-center gap-1 rounded border border-[#E6E6E4] bg-[#FBFBFA] px-2 py-0.5 text-xs font-medium text-[#787774] dark:border-[#2E2E2E] dark:bg-[#202020] dark:text-[#9B9A97]">
+                <span className="glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
                   <FileText className="h-3 w-3" aria-hidden="true" />
                   {topicLabel}
                 </span>
               )}
-              <span className="rounded border border-[#E6E6E4] bg-[#FBFBFA] px-2 py-0.5 font-mono text-[11px] font-medium text-[#787774] dark:border-[#2E2E2E] dark:bg-[#202020] dark:text-[#9B9A97]">
+              <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
                 v{note.version}
               </span>
               {formattedUpdatedAt && (
-                <span className="text-xs text-[#787774] dark:text-[#9B9A97]">
+                <span className="text-xs text-[#6E6E73] dark:text-[#98989D]">
                   Updated {formattedUpdatedAt}
                 </span>
               )}
             </div>
 
-            {/* Sans / Serif Reader Font Toggle */}
-            <div
-              role="group"
-              aria-label="Reader font family"
-              className="inline-flex items-center rounded-md border border-[#E6E6E4] bg-[#FBFBFA] p-0.5 dark:border-[#2E2E2E] dark:bg-[#202020]"
-            >
-              <button
-                type="button"
-                aria-pressed={fontMode === 'sans'}
-                onClick={() => setFontMode('sans')}
-                className={`cursor-pointer rounded px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
-                  fontMode === 'sans'
-                    ? 'bg-white text-[#37352F] shadow-[0_1px_0_0_rgba(0,0,0,0.03)] dark:bg-[#2A2A2A] dark:text-[#EBEBEB]'
-                    : 'text-[#787774] hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:text-[#EBEBEB]'
-                }`}
+            {/* Reader Controls: Width Mode + Outline Toggle + Sans/Serif */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Width Toggle */}
+              <div
+                role="group"
+                aria-label="Reading width"
+                className="glass-surface inline-flex items-center rounded-full p-0.5"
               >
-                Sans
-              </button>
-              <button
-                type="button"
-                aria-pressed={fontMode === 'serif'}
-                onClick={() => setFontMode('serif')}
-                className={`cursor-pointer rounded px-2.5 py-1 font-serif text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
-                  fontMode === 'serif'
-                    ? 'bg-white text-[#37352F] shadow-[0_1px_0_0_rgba(0,0,0,0.03)] dark:bg-[#2A2A2A] dark:text-[#EBEBEB]'
-                    : 'text-[#787774] hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:text-[#EBEBEB]'
-                }`}
+                <button
+                  type="button"
+                  aria-pressed={widthMode === 'focused'}
+                  onClick={() => setWidthMode('focused')}
+                  title="Editorial measure for prose with full-width diagrams"
+                  className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
+                    widthMode === 'focused'
+                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
+                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                  }`}
+                >
+                  <Minimize2 className="h-3 w-3" aria-hidden="true" />
+                  <span>Focused</span>
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={widthMode === 'full'}
+                  onClick={() => setWidthMode('full')}
+                  title="Expand prose to fill entire container width"
+                  className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
+                    widthMode === 'full'
+                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
+                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                  }`}
+                >
+                  <Maximize2 className="h-3 w-3" aria-hidden="true" />
+                  <span>Full Width</span>
+                </button>
+              </div>
+
+              {/* Collapsible Outline Toggle */}
+              {tocItems.length > 0 && (
+                <button
+                  type="button"
+                  aria-expanded={outlineOpen}
+                  onClick={() => setOutlineOpen((v) => !v)}
+                  className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                    outlineOpen
+                      ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                      : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                  }`}
+                >
+                  <List className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>Outline</span>
+                </button>
+              )}
+
+              {/* Sans / Serif Reader Font Toggle */}
+              <div
+                role="group"
+                aria-label="Reader font family"
+                className="glass-surface inline-flex items-center rounded-full p-0.5"
               >
-                Serif
-              </button>
+                <button
+                  type="button"
+                  aria-pressed={fontMode === 'sans'}
+                  onClick={() => setFontMode('sans')}
+                  className={`cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                    fontMode === 'sans'
+                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
+                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                  }`}
+                >
+                  Sans
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={fontMode === 'serif'}
+                  onClick={() => setFontMode('serif')}
+                  className={`cursor-pointer rounded-full px-2.5 py-1 font-serif text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                    fontMode === 'serif'
+                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
+                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                  }`}
+                >
+                  Serif
+                </button>
+              </div>
             </div>
           </div>
 
           <h1
-            className={`mt-4 text-2xl font-semibold tracking-tight text-[#37352F] sm:text-[28px] dark:text-[#EBEBEB] ${
+            className={`mt-5 ${proseMeasureClass} text-2xl font-semibold tracking-tight text-[#1D1D1F] sm:text-[30px] sm:leading-[1.2] dark:text-[#F5F5F7] ${
               fontMode === 'serif' ? 'font-serif' : 'font-sans'
             }`}
           >
@@ -234,23 +297,58 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
 
           {note.summary && (
             <p
-              className={`mt-2.5 text-[15px] leading-relaxed text-[#787774] dark:text-[#9B9A97] ${
+              className={`mt-3 ${proseMeasureClass} text-[15.5px] leading-relaxed text-[#6E6E73] dark:text-[#98989D] ${
                 fontMode === 'serif' ? 'font-serif' : 'font-sans'
               }`}
             >
               {note.summary}
             </p>
           )}
+
+          {/* Inline Mobile / Tablet Collapsible Outline Drawer */}
+          {outlineOpen && tocItems.length > 0 && (
+            <nav
+              aria-label="Inline table of contents"
+              className="glass-surface mt-5 rounded-2xl p-4 xl:hidden"
+            >
+              <div className="mb-2 flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+                <List className="h-3.5 w-3.5" aria-hidden="true" />
+                On this page
+              </div>
+              <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+                {tocItems.map((item) => {
+                  const isActive = item.id === activeHeadingId;
+                  return (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        onClick={(e) => handleTocClick(e, item.id)}
+                        className={`block rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
+                          item.level === 3 ? 'pl-5' : 'font-medium'
+                        } ${
+                          isActive
+                            ? 'bg-white/95 text-[#1D1D1F] dark:bg-white/[0.12] dark:text-[#F5F5F7]'
+                            : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                        }`}
+                      >
+                        {item.text}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          )}
         </header>
 
         {/* Note Blocks Body (100% Read-Only) */}
         <div
-          className={`mt-6 space-y-5 ${
+          className={`mt-7 space-y-5 ${
             fontMode === 'serif' ? 'font-serif' : 'font-sans'
           }`}
         >
           {safeBlocks.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[#787774] dark:text-[#9B9A97]">
+            <p className="py-8 text-center text-sm text-[#6E6E73] dark:text-[#98989D]">
               This study note has no readable content blocks yet.
             </p>
           ) : (
@@ -263,7 +361,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                       <h2
                         key={`block-${index}`}
                         id={anchorId}
-                        className="mt-8 mb-2 scroll-mt-20 border-t border-[#F1F1EF] pt-4 text-xl font-semibold tracking-tight text-[#37352F] first:mt-0 first:border-t-0 first:pt-0 dark:border-[#262626] dark:text-[#EBEBEB]"
+                        className={`${proseMeasureClass} mt-9 mb-2 scroll-mt-20 border-t border-black/[0.06] pt-5 text-xl font-semibold tracking-tight text-[#1D1D1F] first:mt-0 first:border-t-0 first:pt-0 dark:border-white/[0.08] dark:text-[#F5F5F7]`}
                       >
                         {block.text}
                       </h2>
@@ -273,7 +371,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                     <h3
                       key={`block-${index}`}
                       id={anchorId}
-                      className="mt-6 mb-1.5 scroll-mt-20 text-[17px] font-semibold tracking-tight text-[#37352F] first:mt-0 dark:text-[#EBEBEB]"
+                      className={`${proseMeasureClass} mt-6 mb-1.5 scroll-mt-20 text-[17px] font-semibold tracking-tight text-[#1D1D1F] first:mt-0 dark:text-[#F5F5F7]`}
                     >
                       {block.text}
                     </h3>
@@ -285,7 +383,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                     <MarkdownMath
                       key={`block-${index}`}
                       content={block.markdown}
-                      className="text-[15.5px] leading-[1.72] text-[#37352F] dark:text-[#EBEBEB]"
+                      className={`${proseMeasureClass} text-[15.5px] leading-[1.74] text-[#1D1D1F] dark:text-[#F5F5F7]`}
                     />
                   );
 
@@ -295,23 +393,25 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   return (
                     <aside
                       key={`block-${index}`}
-                      className={`my-4 rounded-r-lg border border-[#E6E6E4] border-l-[3px] bg-[#FBFBFA] px-4 py-3.5 dark:border-[#2E2E2E] dark:bg-[#202020] ${cfg.borderClass}`}
+                      className={`${proseMeasureClass} glass-surface my-5 rounded-2xl border-l-[3px] px-5 py-4 ${cfg.borderClass}`}
                     >
                       <div className="flex items-center gap-2">
-                        <CalloutIcon
-                          className="h-4 w-4 shrink-0 text-[#37352F] dark:text-[#EBEBEB]"
-                          aria-hidden="true"
-                        />
-                        <span className="font-mono text-[10px] font-semibold tracking-wider text-[#787774] uppercase dark:text-[#9B9A97]">
+                        <span className="glass-pill flex h-6 w-6 items-center justify-center rounded-full">
+                          <CalloutIcon
+                            className="h-3.5 w-3.5 shrink-0 text-[#1D1D1F] dark:text-[#F5F5F7]"
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <span className="font-mono text-[10.5px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
                           {cfg.label}
                         </span>
                       </div>
-                      <div className="mt-1 text-sm font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                      <div className="mt-2 text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                         {block.title}
                       </div>
                       <MarkdownMath
                         content={block.markdown}
-                        className="mt-1.5 text-[14px] leading-relaxed text-[#37352F]/90 dark:text-[#EBEBEB]/90"
+                        className="mt-1.5 text-[14px] leading-relaxed text-[#1D1D1F]/90 dark:text-[#F5F5F7]/90"
                       />
                     </aside>
                   );
@@ -321,27 +421,27 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   return (
                     <div
                       key={`block-${index}`}
-                      className="my-4 grid grid-cols-1 gap-3 md:grid-cols-2"
+                      className="my-5 grid w-full grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3"
                     >
                       {block.items.map((item, itemIdx) => (
                         <div
                           key={`${item.term}-${itemIdx}`}
-                          className="rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] p-3.5 dark:border-[#2E2E2E] dark:bg-[#202020]"
+                          className="glass-surface glass-interactive rounded-2xl p-4"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-2">
-                            <dt className="text-sm font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                            <dt className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                               {item.term}
                             </dt>
                             {item.markschemeKeyword && (
-                              <span className="rounded border border-[#E6E6E4] bg-[#F1F1EF] px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-[#787774] dark:border-[#2E2E2E] dark:bg-[#2A2A2A] dark:text-[#9B9A97]">
+                              <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-[10px] font-medium text-[#6E6E73] dark:text-[#98989D]">
                                 {item.markschemeKeyword}
                               </span>
                             )}
                           </div>
-                          <dd className="mt-1.5">
+                          <dd className="mt-2">
                             <MarkdownMath
                               content={item.definitionMarkdown}
-                              className="text-[13.5px] leading-relaxed text-[#37352F]/90 dark:text-[#EBEBEB]/90"
+                              className="text-[13.5px] leading-relaxed text-[#1D1D1F]/90 dark:text-[#F5F5F7]/90"
                             />
                           </dd>
                         </div>
@@ -353,28 +453,28 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   return (
                     <div
                       key={`block-${index}`}
-                      className="my-4 rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] px-5 py-4 dark:border-[#2E2E2E] dark:bg-[#202020]"
+                      className="glass-surface my-5 w-full rounded-2xl px-6 py-5"
                     >
                       <div className="text-center">
                         <InlineKaTeX latex={block.latex} displayMode />
                       </div>
                       {block.caption && (
-                        <p className="mt-2 text-center text-xs text-[#787774] dark:text-[#9B9A97]">
+                        <p className="mt-2 text-center text-xs text-[#6E6E73] dark:text-[#98989D]">
                           {block.caption}
                         </p>
                       )}
                       {block.variableLegend &&
                         block.variableLegend.length > 0 && (
-                          <div className="mt-3 grid grid-cols-1 gap-x-5 gap-y-1.5 border-t border-[#E6E6E4] pt-3 sm:grid-cols-2 dark:border-[#2E2E2E]">
+                          <div className="mt-3.5 grid grid-cols-1 gap-x-6 gap-y-1.5 border-t border-black/[0.06] pt-3 sm:grid-cols-2 dark:border-white/[0.08]">
                             {block.variableLegend.map((entry, vIdx) => (
                               <div
                                 key={`${entry.symbol}-${vIdx}`}
                                 className="flex items-baseline gap-2 text-xs"
                               >
-                                <span className="shrink-0 font-mono font-medium text-[#37352F] dark:text-[#EBEBEB]">
+                                <span className="shrink-0 font-mono font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
                                   <InlineKaTeX latex={entry.symbol} />
                                 </span>
-                                <span className="text-[#787774] dark:text-[#9B9A97]">
+                                <span className="text-[#6E6E73] dark:text-[#98989D]">
                                   — {entry.meaning}
                                 </span>
                               </div>
@@ -386,10 +486,9 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
 
                 case 'playable_diagram':
                   return (
-                    <InteractiveDiagramPlayer
-                      key={`${note.id}-block-${index}-${block.spec.id}`}
-                      spec={block.spec}
-                    />
+                    <div key={`${note.id}-block-${index}-${block.spec.id}`} className="w-full">
+                      <InteractiveDiagramPlayer spec={block.spec} />
+                    </div>
                   );
               }
             })
@@ -397,19 +496,29 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
         </div>
       </article>
 
-      {/* Sticky Right-Hand Table of Contents (Desktop xl+) */}
-      {tocItems.length > 0 && (
+      {/* Collapsible Sticky Right-Hand Floating Glass Outline (Desktop xl+) */}
+      {outlineOpen && tocItems.length > 0 && (
         <aside
           aria-label="Table of contents"
-          className="sticky top-6 hidden w-56 shrink-0 flex-col xl:flex"
+          className="sticky top-6 hidden w-60 shrink-0 flex-col xl:flex"
         >
-          <div className="rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] p-3.5 dark:border-[#2E2E2E] dark:bg-[#202020]">
-            <div className="mb-2.5 flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-wider text-[#787774] uppercase dark:text-[#9B9A97]">
-              <List className="h-3.5 w-3.5" aria-hidden="true" />
-              On this page
+          <div className="glass-panel rounded-2xl p-4">
+            <div className="mb-2.5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+                <List className="h-3.5 w-3.5" aria-hidden="true" />
+                On this page
+              </div>
+              <button
+                type="button"
+                onClick={() => setOutlineOpen(false)}
+                aria-label="Collapse outline"
+                className="text-[11px] text-[#6E6E73] hover:text-[#1D1D1F] cursor-pointer dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+              >
+                Hide
+              </button>
             </div>
             <nav>
-              <ul className="space-y-1 border-l border-[#E6E6E4] dark:border-[#2E2E2E]">
+              <ul className="space-y-1 border-l border-black/[0.08] dark:border-white/[0.1]">
                 {tocItems.map((item) => {
                   const isActive = item.id === activeHeadingId;
                   return (
@@ -421,8 +530,8 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                           item.level === 3 ? 'pl-5' : 'pl-3 font-medium'
                         } ${
                           isActive
-                            ? 'border-[#37352F] text-[#37352F] dark:border-[#EBEBEB] dark:text-[#EBEBEB]'
-                            : 'border-transparent text-[#787774] hover:border-[#787774]/40 hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:border-[#9B9A97]/40 dark:hover:text-[#EBEBEB]'
+                            ? 'border-[#1D1D1F] text-[#1D1D1F] dark:border-[#F5F5F7] dark:text-[#F5F5F7]'
+                            : 'border-transparent text-[#6E6E73] hover:border-[#6E6E73]/40 hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:border-[#98989D]/40 dark:hover:text-[#F5F5F7]'
                         }`}
                       >
                         {item.text}

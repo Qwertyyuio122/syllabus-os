@@ -1,4 +1,8 @@
 import type { SubjectClassroomSeed } from './types';
+import {
+  ENHANCED_COMPARTMENT_EXPLORER,
+  ENHANCED_WATER_EXPLORER,
+} from './enhanced-diagrams';
 
 export const BIOLOGY_HL_SEED: SubjectClassroomSeed = {
   slug: 'biology-hl',
@@ -242,76 +246,7 @@ export const BIOLOGY_HL_SEED: SubjectClassroomSeed = {
         },
         {
           type: 'playable_diagram',
-          spec: {
-            type: 'labeled_explorer',
-            id: 'bio-a1-1-water-explorer',
-            title: 'Water Dipole & Tetrahedral Hydrogen-Bond Network',
-            caption:
-              'Click hotspots to inspect IB Paper 2 markscheme keywords for polarity, H-bonding, cohesion, adhesion, and solvation.',
-            viewBox: '0 0 800 440',
-            shapes: [
-              { kind: 'circle', cx: 360, cy: 205, r: 44, fill: 'rgba(120,119,116,0.16)', stroke: 'currentColor', strokeWidth: 2.2 },
-              { kind: 'text', x: 360, y: 212, text: 'O (δ−)', fontSize: 15, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'line', x1: 332, y1: 170, x2: 280, y2: 120, stroke: 'currentColor', strokeWidth: 3.5 },
-              { kind: 'line', x1: 392, y1: 174, x2: 452, y2: 128, stroke: 'currentColor', strokeWidth: 3.5 },
-              { kind: 'circle', cx: 266, cy: 106, r: 24, fill: 'rgba(120,119,116,0.08)', stroke: 'currentColor', strokeWidth: 1.8 },
-              { kind: 'text', x: 266, y: 111, text: 'H (δ+)', fontSize: 12, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'circle', cx: 468, cy: 114, r: 24, fill: 'rgba(120,119,116,0.08)', stroke: 'currentColor', strokeWidth: 1.8 },
-              { kind: 'text', x: 468, y: 119, text: 'H (δ+)', fontSize: 12, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'line', x1: 492, y1: 114, x2: 590, y2: 114, stroke: 'currentColor', strokeWidth: 2, strokeDasharray: '7 5' },
-              { kind: 'circle', cx: 632, cy: 114, r: 38, fill: 'rgba(120,119,116,0.12)', stroke: 'currentColor', strokeWidth: 1.8 },
-              { kind: 'text', x: 632, y: 119, text: 'O (δ−)', fontSize: 14, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'line', x1: 360, y1: 249, x2: 360, y2: 336, stroke: 'currentColor', strokeWidth: 2, strokeDasharray: '7 5' },
-              { kind: 'circle', cx: 360, cy: 364, r: 24, fill: 'rgba(120,119,116,0.08)', stroke: 'currentColor', strokeWidth: 1.8 },
-              { kind: 'text', x: 360, y: 369, text: 'H (δ+)', fontSize: 12, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'rect', x: 60, y: 240, width: 150, height: 150, rx: 12, fill: 'rgba(120,119,116,0.07)', stroke: 'currentColor', strokeWidth: 1.5 },
-              { kind: 'text', x: 135, y: 274, text: 'Polar Cell Wall', fontSize: 13, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'text', x: 135, y: 296, text: '(Cellulose -OH)', fontSize: 11, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'line', x1: 210, y1: 290, x2: 260, y2: 130, stroke: 'currentColor', strokeWidth: 1.8, strokeDasharray: '5 5' },
-            ],
-            hotspots: [
-              {
-                id: 'pol-cov',
-                x: 310,
-                y: 148,
-                label: 'Polar Covalent O–H Bond',
-                category: 'Intramolecular Bond',
-                examKeyword: 'unequal sharing of electrons / electronegativity',
-                detailMarkdown:
-                  'Oxygen pulls bonding electrons closer than hydrogen, generating permanent $\\delta^-$ (O) and $\\delta^+$ (H) dipoles within each molecule.',
-              },
-              {
-                id: 'h-bond-coh',
-                x: 540,
-                y: 114,
-                label: 'Intermolecular Hydrogen Bond (Cohesion)',
-                category: 'Cohesion',
-                examKeyword: 'electrostatic attraction between δ+ H and δ− O',
-                detailMarkdown:
-                  'Collectively strong network of transient dashed H-bonds pulls water molecules together into continuous xylem columns under tension and creates surface tension for pond skaters.',
-              },
-              {
-                id: 'adhesion-wall',
-                x: 135,
-                y: 315,
-                label: 'Adhesion to Polar Cellulose',
-                category: 'Adhesion',
-                examKeyword: 'capillary action against gravity',
-                detailMarkdown:
-                  'Hydrogen bonds between water molecules and polar $-\\text{OH}$ cellulose groups prevent xylem water columns from breaking and drive capillary movement in plant cell walls and soil.',
-              },
-              {
-                id: 'specific-heat',
-                x: 360,
-                y: 364,
-                label: 'Thermal Buffer (H-Bond Energy Sink)',
-                category: 'Thermal Physics',
-                examKeyword: 'specific heat capacity 4.18 J g^-1 °C^-1',
-                detailMarkdown:
-                  'Much heat energy is absorbed breaking H-bonds before kinetic temperature rises — stabilizing cytoplasmic enzymes and moderating ocean habitats (vs dry PEI beach sand heating rapidly).',
-              },
-            ],
-          },
+          spec: ENHANCED_WATER_EXPLORER,
         },
         { type: 'heading', level: 2, text: '2. Physical Contrast: Air vs Water in Vertebrate Adaptations' },
         {
@@ -754,86 +689,7 @@ export const BIOLOGY_HL_SEED: SubjectClassroomSeed = {
         },
         {
           type: 'playable_diagram',
-          spec: {
-            type: 'labeled_explorer',
-            id: 'bio-b2-2-compartment-explorer',
-            title: 'Eukaryotic Secretory Pathway & Energetic Organelles',
-            caption: 'Click compartments to examine structural adaptations from B2.2 Learning Goals & Organelles notes.',
-            viewBox: '0 0 800 440',
-            shapes: [
-              { kind: 'circle', cx: 145, cy: 205, r: 90, fill: 'rgba(120,119,116,0.12)', stroke: 'currentColor', strokeWidth: 2 },
-              { kind: 'circle', cx: 145, cy: 205, r: 78, fill: 'none', stroke: 'currentColor', strokeWidth: 1.2, opacity: 0.45 },
-              { kind: 'text', x: 145, y: 202, text: 'Nucleus', fontSize: 15, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'text', x: 145, y: 222, text: 'Double Env + Pores', fontSize: 11, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'rect', x: 265, y: 120, width: 135, height: 110, rx: 12, fill: 'rgba(120,119,116,0.10)', stroke: 'currentColor', strokeWidth: 1.8 },
-              { kind: 'text', x: 332, y: 170, text: 'Rough ER', fontSize: 14, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'text', x: 332, y: 192, text: '80S Ribosomes', fontSize: 11, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'rect', x: 455, y: 115, width: 140, height: 125, rx: 18, fill: 'rgba(120,119,116,0.12)', stroke: 'currentColor', strokeWidth: 1.8 },
-              { kind: 'text', x: 525, y: 170, text: 'Golgi Stack', fontSize: 14, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'text', x: 525, y: 192, text: 'cis -> trans', fontSize: 11, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'circle', cx: 690, cy: 175, r: 34, fill: 'rgba(120,119,116,0.15)', stroke: 'currentColor', strokeWidth: 2, opacity: 0.85 },
-              { kind: 'text', x: 690, y: 173, text: 'Clathrin', fontSize: 12, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'text', x: 690, y: 189, text: 'Vesicle', fontSize: 11, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'ellipse', cx: 360, cy: 350, rx: 105, ry: 52, fill: 'rgba(120,119,116,0.12)', stroke: 'currentColor', strokeWidth: 2 },
-              { kind: 'text', x: 360, y: 346, text: 'Mitochondrion', fontSize: 14, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'text', x: 360, y: 365, text: 'Cristae + Matrix', fontSize: 11, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'ellipse', cx: 635, cy: 350, rx: 105, ry: 52, fill: 'rgba(120,119,116,0.10)', stroke: 'currentColor', strokeWidth: 2 },
-              { kind: 'text', x: 635, y: 346, text: 'Chloroplast', fontSize: 14, textAnchor: 'middle', fill: 'currentColor' },
-              { kind: 'text', x: 635, y: 365, text: 'Thylakoids + Stroma', fontSize: 11, textAnchor: 'middle', fill: 'currentColor' },
-            ],
-            hotspots: [
-              {
-                id: 'nuc',
-                x: 145,
-                y: 205,
-                label: 'Nucleus & Nuclear Pores (HL B2.2.2/2.6)',
-                category: 'Genetic Control',
-                examKeyword: 'post-transcriptional modification (splicing)',
-                detailMarkdown:
-                  'Double nuclear envelope pierced by nuclear pores isolates pre-mRNA splicing (intron removal) from cytosolic 80S ribosomes and protects DNA from cytosolic enzymes.',
-              },
-              {
-                id: 'rer-golgi',
-                x: 525,
-                y: 175,
-                label: 'rER -> cis-Golgi -> trans-Golgi (HL B2.2.7–2.8)',
-                category: 'Secretion',
-                examKeyword: 'bound 80S ribosomes / glycosylation / exocytosis',
-                detailMarkdown:
-                  'rER-bound ribosomes synthesize secretory/membrane proteins directly into the ER lumen; vesicles deliver cargo to the *cis*-Golgi, undergo modification, and exit at the *trans* face.',
-              },
-              {
-                id: 'clathrin',
-                x: 690,
-                y: 175,
-                label: 'Clathrin-Coated Vesicles (HL B2.2.9)',
-                category: 'Vesicle Trafficking',
-                examKeyword: 'triskelion lattice pulls membrane into budding vesicle',
-                detailMarkdown:
-                  'Three-legged clathrin triskelion proteins polymerize around cargo receptors to curve the bilayer into a coated vesicle, then uncoat before target membrane fusion.',
-              },
-              {
-                id: 'mito',
-                x: 360,
-                y: 350,
-                label: 'Mitochondrial Cristae & Intermembrane Space (HL B2.2.4)',
-                category: 'Bioenergetics',
-                examKeyword: 'steep H+ chemiosmotic gradient / large surface area',
-                detailMarkdown:
-                  'Folded inner cristae maximize ETC & ATP synthase surface area; ultra-thin intermembrane space lets pumped $\\text{H}^+$ reach high concentration rapidly; matrix houses Krebs cycle & 70S ribosomes.',
-              },
-              {
-                id: 'chloro',
-                x: 635,
-                y: 350,
-                label: 'Chloroplast Grana & Stroma (HL B2.2.5)',
-                category: 'Photosynthesis',
-                examKeyword: 'thylakoid lumen H+ + stroma Calvin cycle',
-                detailMarkdown:
-                  'Stacked thylakoid discs maximize chlorophyll light absorption and trap $\\text{H}^+$ inside a tiny lumen; surrounding stroma concentrates Rubisco and Calvin cycle intermediates.',
-              },
-            ],
-          },
+          spec: ENHANCED_COMPARTMENT_EXPLORER,
         },
         {
           type: 'callout',

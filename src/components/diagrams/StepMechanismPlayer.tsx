@@ -15,20 +15,113 @@ interface NodeBox {
   cy: number;
   w: number;
   h: number;
+  labelLines: string[];
+  sublabelLines: string[];
 }
+
+const CANVAS_W = 920;
+const CANVAS_H = 420;
 
 function clamp(val: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, val));
 }
 
-function buildNodeBox(node: StepMechanismNode): NodeBox {
-  const labelLen = node.label.length;
-  const subLen = node.sublabel ? node.sublabel.length : 0;
-  const w = clamp(Math.max(labelLen * 7.8 + 30, subLen * 6.5 + 26), 116, 210);
-  const h = node.sublabel ? 54 : 40;
-  const cx = clamp(node.x, w / 2 + 10, 800 - w / 2 - 10);
-  const cy = clamp(node.y, h / 2 + 10, 400 - h / 2 - 10);
-  return { node, cx, cy, w, h };
+function wrapLines(text: string, maxCharsPerLine: number, maxLines = 2): string[] {
+  const words = text.trim().split(/\s+/);
+  if (words.length === 0) return [''];
+  const lines: string[] = [];
+  let current = '';
+
+  for (const word of words) {
+    if (!current) {
+      current = word;
+    } else if (current.length + 1 + word.length <= maxCharsPerLine) {
+      current = `${current} ${word}`;
+    } else {
+      lines.push(current);
+      current = word;
+      if (lines.length === maxLines) break;
+    }
+  }
+  if (lines.length < maxLines && current) {
+    lines.push(current);
+  }
+  // If text still overflowed maxLines, gently trim last line
+  const joinedLen = lines.join(' ').length;
+  if (joinedLen < text.trim().length && lines.length === maxLines) {
+    const last = lines[maxLines - 1];
+    lines[maxLines - 1] =
+      last.length > 2 ? `${last.slice(0, Math.max(1, maxCharsPerLine - 1))}…` : last;
+  }
+  return lines;
+}
+
+function buildNodeBoxes(nodes: StepMechanismNode[]): Map<string, NodeBox> {
+  // Scale original 800x400 coordinates into wider 920x420 breathing room
+  const boxes: NodeBox[] = nodes.map((node) => {
+    const labelLines = wrapLines(node.label, 20, 2);
+    const sublabelLines = node.sublabel ? wrapLines(node.sublabel, 24, 2) : [];
+
+    const maxLabelLen = Math.max(...labelLines.map((l) => l.length), 10);
+    const maxSubLen = sublabelLines.length
+      ? Math.max(...sublabelLines.map((l) => l.length))
+      : 0;
+
+    const w = clamp(
+      Math.max(maxLabelLen * 7.6 + 34, maxSubLen * 6.5 + 30),
+      144,
+      212,
+    );
+    const h =
+      26 +
+      labelLines.length * 15 +
+      (sublabelLines.length > 0 ? 6 + sublabelLines.length * 13 : 0);
+
+    const scaledX = (node.x / 800) * CANVAS_W;
+    const scaledY = (node.y / 400) * CANVAS_H;
+
+    return {
+      node,
+      cx: clamp(scaledX, w / 2 + 16, CANVAS_W - w / 2 - 16),
+      cy: clamp(scaledY, h / 2 + 16, CANVAS_H - h / 2 - 16),
+      w,
+      h,
+      labelLines,
+      sublabelLines,
+    };
+  });
+
+  // Gentle iterative collision-separation pass so boxes never overlap each other
+  for (let iter = 0; iter < 10; iter += 1) {
+    for (let i = 0; i < boxes.length; i += 1) {
+      for (let j = i + 1; j < boxes.length; j += 1) {
+        const a = boxes[i];
+        const b = boxes[j];
+        const overlapX = (a.w + b.w) / 2 + 18 - Math.abs(b.cx - a.cx);
+        const overlapY = (a.h + b.h) / 2 + 16 - Math.abs(b.cy - a.cy);
+
+        if (overlapX > 0 && overlapY > 0) {
+          if (overlapX <= overlapY) {
+            const dir = b.cx >= a.cx ? 1 : -1;
+            const shift = overlapX / 2 + 1;
+            a.cx = clamp(a.cx - dir * shift, a.w / 2 + 14, CANVAS_W - a.w / 2 - 14);
+            b.cx = clamp(b.cx + dir * shift, b.w / 2 + 14, CANVAS_W - b.w / 2 - 14);
+          } else {
+            const dir = b.cy >= a.cy ? 1 : -1;
+            const shift = overlapY / 2 + 1;
+            a.cy = clamp(a.cy - dir * shift, a.h / 2 + 14, CANVAS_H - a.h / 2 - 14);
+            b.cy = clamp(b.cy + dir * shift, b.h / 2 + 14, CANVAS_H - b.h / 2 - 14);
+          }
+        }
+      }
+    }
+  }
+
+  const map = new Map<string, NodeBox>();
+  for (const box of boxes) {
+    map.set(box.node.id, box);
+  }
+  return map;
 }
 
 function intersectRectBoundary(
@@ -69,12 +162,13 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
   const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, '');
   const activeMarkerId = `arrow-active-${safeId}`;
   const mutedMarkerId = `arrow-muted-${safeId}`;
+  const gridPatternId = `mech-grid-${safeId}`;
 
   useEffect(() => {
     if (!isPlaying || sortedSteps.length <= 1) return;
     const timer = window.setInterval(() => {
       setStepIndex((prev) => (prev + 1) % sortedSteps.length);
-    }, 2500);
+    }, 2600);
     return () => window.clearInterval(timer);
   }, [isPlaying, sortedSteps.length]);
 
@@ -90,13 +184,7 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
     [currentStep],
   );
 
-  const nodeBoxes = useMemo(() => {
-    const map = new Map<string, NodeBox>();
-    for (const node of spec.nodes) {
-      map.set(node.id, buildNodeBox(node));
-    }
-    return map;
-  }, [spec.nodes]);
+  const nodeBoxes = useMemo(() => buildNodeBoxes(spec.nodes), [spec.nodes]);
 
   const edgePairs = useMemo(() => {
     const pairCounts = new Map<string, number>();
@@ -131,35 +219,55 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const tag = (e.target as HTMLElement | null)?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      handlePrev();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      handleNext();
+    }
+  };
+
   if (!currentStep) {
     return null;
   }
 
+  const progressPct =
+    sortedSteps.length > 0
+      ? Math.round(((safeIndex + 1) / sortedSteps.length) * 100)
+      : 0;
+
   return (
-    <div className="[--diagram-surface:#FFFFFF] dark:[--diagram-surface:#191919] [--diagram-node:#FBFBFA] dark:[--diagram-node:#202020]">
+    <div
+      onKeyDown={handleKeyDown}
+      className="[--diagram-surface:#FFFFFF] dark:[--diagram-surface:#1A1A1D] [--diagram-node:#FBFBFA] dark:[--diagram-node:#222226]"
+    >
       {/* Playback Controls & Step Pills */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E6E6E4] bg-[#FBFBFA] px-4 py-2.5 dark:border-[#2E2E2E] dark:bg-[#202020]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[0.06] bg-white/30 px-4 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.02]">
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setIsPlaying((p) => !p)}
             disabled={sortedSteps.length <= 1}
             aria-label={isPlaying ? 'Pause mechanism' : 'Play mechanism'}
-            className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded border px-2.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
+            className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
               isPlaying
-                ? 'border-[#37352F] bg-[#37352F] text-white dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:text-[#191919]'
-                : 'border-[#E6E6E4] bg-white text-[#37352F] hover:bg-[#F1F1EF] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]'
+                ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
             }`}
           >
             {isPlaying ? (
               <>
                 <Pause className="h-3 w-3" aria-hidden="true" />
-                Pause
+                <span>Pause</span>
               </>
             ) : (
               <>
                 <Play className="h-3 w-3" aria-hidden="true" />
-                Play
+                <span>Play</span>
               </>
             )}
           </button>
@@ -169,9 +277,10 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
             onClick={handlePrev}
             disabled={safeIndex === 0}
             aria-label="Previous step"
-            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-[#E6E6E4] bg-white text-[#37352F] transition-colors hover:bg-[#F1F1EF] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+            className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
           >
             <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="hidden sm:inline">Prev</span>
           </button>
 
           <button
@@ -179,8 +288,9 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
             onClick={handleNext}
             disabled={safeIndex === sortedSteps.length - 1}
             aria-label="Next step"
-            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-[#E6E6E4] bg-white text-[#37352F] transition-colors hover:bg-[#F1F1EF] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+            className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
           >
+            <span>Next</span>
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
         </div>
@@ -201,10 +311,10 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                 title={step.title}
                 aria-label={`Step ${step.stepNumber}: ${step.title}`}
                 aria-current={isCurrent ? 'step' : undefined}
-                className={`inline-flex h-7 min-w-7 cursor-pointer items-center justify-center rounded border px-2 font-mono text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
+                className={`inline-flex h-7 min-w-7 cursor-pointer items-center justify-center rounded-full px-2.5 font-mono text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
                   isCurrent
-                    ? 'border-[#37352F] bg-[#37352F] text-white dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:text-[#191919]'
-                    : 'border-[#E6E6E4] bg-white text-[#787774] hover:bg-[#F1F1EF] hover:text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#2A2A2A] dark:hover:text-[#EBEBEB]'
+                    ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                    : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                 }`}
               >
                 {step.stepNumber}
@@ -215,15 +325,29 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
       </div>
 
       {/* Interactive Node-Edge SVG Canvas */}
-      <div className="border-b border-[#E6E6E4] bg-white p-4 dark:border-[#2E2E2E] dark:bg-[#191919]">
-        <div className="overflow-hidden rounded-md border border-[#E6E6E4] bg-[#FBFBFA] dark:border-[#2E2E2E] dark:bg-[#202020]">
+      <div className="border-b border-black/[0.06] p-4 dark:border-white/[0.08]">
+        <div className="glass-surface overflow-hidden rounded-2xl">
           <svg
-            viewBox="0 0 800 400"
-            className="block h-auto w-full select-none text-[#37352F] dark:text-[#EBEBEB]"
+            viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+            className="block h-auto w-full select-none text-[#1D1D1F] dark:text-[#F5F5F7]"
             role="img"
             aria-label={`${spec.title} — Step ${currentStep.stepNumber}: ${currentStep.title}`}
           >
             <defs>
+              <pattern
+                id={gridPatternId}
+                width="22"
+                height="22"
+                patternUnits="userSpaceOnUse"
+              >
+                <circle
+                  cx="2"
+                  cy="2"
+                  r="0.85"
+                  fill="currentColor"
+                  opacity="0.11"
+                />
+              </pattern>
               <marker
                 id={activeMarkerId}
                 viewBox="0 0 10 10"
@@ -247,10 +371,18 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                 <path
                   d="M 0 1.5 L 9 5 L 0 8.5 z"
                   fill="currentColor"
-                  opacity="0.35"
+                  opacity="0.32"
                 />
               </marker>
             </defs>
+
+            <rect
+              x="0"
+              y="0"
+              width={CANVAS_W}
+              height={CANVAS_H}
+              fill={`url(#${gridPatternId})`}
+            />
 
             {/* Edges */}
             <g>
@@ -271,8 +403,11 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                         d={loopPath}
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth={isActive ? 2.2 : 1.3}
-                        strokeDasharray={edge.dashed ? '5 4' : undefined}
+                        strokeWidth={isActive ? 2.3 : 1.3}
+                        strokeDasharray={
+                          isActive ? '6 4' : edge.dashed ? '5 4' : undefined
+                        }
+                        className={isActive ? 'animate-diagram-flow' : undefined}
                         opacity={isActive ? 1 : 0.3}
                         markerEnd={markerEnd}
                       />
@@ -281,18 +416,18 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                           transform={`translate(${fromBox.cx}, ${fromBox.cy - fromBox.h / 2 - 36})`}
                         >
                           <rect
-                            x={-Math.min(72, edge.label.length * 3.6 + 8)}
+                            x={-Math.min(76, edge.label.length * 3.6 + 10)}
                             y={-10}
-                            width={Math.min(144, edge.label.length * 7.2 + 16)}
-                            height={18}
-                            rx={4}
+                            width={Math.min(152, edge.label.length * 7.2 + 20)}
+                            height={20}
+                            rx={10}
                             fill="var(--diagram-surface, #ffffff)"
                             stroke="currentColor"
-                            strokeWidth={0.75}
-                            opacity={isActive ? 0.95 : 0.6}
+                            strokeOpacity={isActive ? 0.45 : 0.2}
+                            strokeWidth={0.8}
                           />
                           <text
-                            y={3}
+                            y={3.5}
                             textAnchor="middle"
                             fontSize={10.5}
                             fontWeight={isActive ? 600 : 400}
@@ -319,7 +454,7 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                   fromBox.h,
                   dx,
                   dy,
-                  1,
+                  2,
                 );
                 const end = intersectRectBoundary(
                   toBox.cx,
@@ -328,22 +463,24 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                   toBox.h,
                   -dx,
                   -dy,
-                  4,
+                  5,
                 );
 
                 const midX = (start.x + end.x) / 2;
                 const midY = (start.y + end.y) / 2;
                 const perpX = -dy / dist;
                 const perpY = dx / dist;
-                const curveOffset = hasReverse ? 24 : 0;
+                const curveOffset = hasReverse ? 28 : 0;
                 const ctrlX = midX + perpX * curveOffset;
                 const ctrlY = midY + perpY * curveOffset;
-                const labelX = hasReverse ? midX + perpX * 14 : midX;
-                const labelY = hasReverse ? midY + perpY * 14 : midY;
+                const labelX = hasReverse ? midX + perpX * 16 : midX;
+                const labelY = hasReverse ? midY + perpY * 16 : midY;
 
                 const d = hasReverse
                   ? `M ${start.x} ${start.y} Q ${ctrlX} ${ctrlY} ${end.x} ${end.y}`
-                  : `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
+                  : Math.abs(dy) > 35 && Math.abs(dx) > 45
+                    ? `M ${start.x} ${start.y} C ${(start.x + end.x) / 2} ${start.y}, ${(start.x + end.x) / 2} ${end.y}, ${end.x} ${end.y}`
+                    : `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
 
                 return (
                   <g key={edge.id}>
@@ -351,23 +488,30 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                       d={d}
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth={isActive ? 2.2 : 1.3}
-                      strokeDasharray={edge.dashed ? '5 4' : undefined}
-                      opacity={isActive ? 1 : 0.3}
+                      strokeWidth={isActive ? 2.4 : 1.3}
+                      strokeDasharray={
+                        isActive
+                          ? '8 5'
+                          : edge.dashed
+                            ? '5 4'
+                            : undefined
+                      }
+                      className={isActive ? 'animate-diagram-flow' : undefined}
+                      opacity={isActive ? 1 : 0.28}
                       markerEnd={markerEnd}
                     />
                     {edge.label && (
                       <g transform={`translate(${labelX}, ${labelY})`}>
                         <rect
-                          x={-Math.min(82, edge.label.length * 3.5 + 8)}
-                          y={-9}
-                          width={Math.min(164, edge.label.length * 7 + 16)}
-                          height={18}
-                          rx={4}
+                          x={-Math.min(82, edge.label.length * 3.5 + 10)}
+                          y={-10}
+                          width={Math.min(164, edge.label.length * 7 + 20)}
+                          height={20}
+                          rx={10}
                           fill="var(--diagram-surface, #ffffff)"
                           stroke="currentColor"
-                          strokeOpacity={isActive ? 0.45 : 0.18}
-                          strokeWidth={0.8}
+                          strokeOpacity={isActive ? 0.5 : 0.18}
+                          strokeWidth={0.85}
                         />
                         <text
                           y={3.5}
@@ -393,6 +537,8 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                 const box = nodeBoxes.get(node.id);
                 if (!box) return null;
                 const isActive = activeNodeSet.has(node.id);
+                const topTextY =
+                  box.cy - box.h / 2 + 19;
 
                 return (
                   <g
@@ -411,15 +557,15 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                   >
                     {isActive && (
                       <rect
-                        x={box.cx - box.w / 2 - 4}
-                        y={box.cy - box.h / 2 - 4}
-                        width={box.w + 8}
-                        height={box.h + 8}
-                        rx={10}
+                        x={box.cx - box.w / 2 - 5}
+                        y={box.cy - box.h / 2 - 5}
+                        width={box.w + 10}
+                        height={box.h + 10}
+                        rx={16}
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth={1.25}
-                        opacity={0.35}
+                        strokeWidth={1.4}
+                        opacity={0.38}
                       />
                     )}
                     <rect
@@ -427,39 +573,48 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                       y={box.cy - box.h / 2}
                       width={box.w}
                       height={box.h}
-                      rx={7}
+                      rx={12}
                       fill={
                         isActive
                           ? 'currentColor'
                           : 'var(--diagram-surface, #ffffff)'
                       }
                       stroke="currentColor"
-                      strokeWidth={isActive ? 2 : 1.2}
-                      strokeOpacity={isActive ? 1 : 0.32}
+                      strokeWidth={isActive ? 2 : 1.25}
+                      strokeOpacity={isActive ? 1 : 0.3}
                     />
-                    <text
-                      x={box.cx}
-                      y={node.sublabel ? box.cy - 4 : box.cy + 4}
-                      textAnchor="middle"
-                      fontSize={12}
-                      fontWeight={600}
-                      fill={
-                        isActive
-                          ? 'var(--diagram-surface, #ffffff)'
-                          : 'currentColor'
-                      }
-                      opacity={isActive ? 1 : 0.72}
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      {truncateText(node.label, 24)}
-                    </text>
-                    {node.sublabel && (
+                    {box.labelLines.map((line, lineIdx) => (
                       <text
+                        key={`lbl-${lineIdx}`}
                         x={box.cx}
-                        y={box.cy + 13}
+                        y={topTextY + lineIdx * 15}
+                        textAnchor="middle"
+                        fontSize={12}
+                        fontWeight={600}
+                        fill={
+                          isActive
+                            ? 'var(--diagram-surface, #ffffff)'
+                            : 'currentColor'
+                        }
+                        opacity={isActive ? 1 : 0.78}
+                        style={{
+                          fontFamily: 'var(--font-sans)',
+                          pointerEvents: 'none',
+                        }}
+                      >
+                        {line}
+                      </text>
+                    ))}
+                    {box.sublabelLines.map((line, subIdx) => (
+                      <text
+                        key={`sub-${subIdx}`}
+                        x={box.cx}
+                        y={
+                          topTextY +
+                          box.labelLines.length * 15 +
+                          3 +
+                          subIdx * 13
+                        }
                         textAnchor="middle"
                         fontSize={10}
                         fontWeight={400}
@@ -468,15 +623,15 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                             ? 'var(--diagram-surface, #ffffff)'
                             : 'currentColor'
                         }
-                        opacity={isActive ? 0.85 : 0.52}
+                        opacity={isActive ? 0.85 : 0.56}
                         style={{
                           fontFamily: 'var(--font-mono)',
                           pointerEvents: 'none',
                         }}
                       >
-                        {truncateText(node.sublabel, 26)}
+                        {line}
                       </text>
-                    )}
+                    ))}
                   </g>
                 );
               })}
@@ -486,40 +641,50 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
       </div>
 
       {/* Step Description, Formula, and Live Metrics */}
-      <div className="space-y-3 bg-[#FBFBFA] p-4 dark:bg-[#202020]">
+      <div className="space-y-3.5 bg-white/25 p-5 dark:bg-white/[0.015]">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
+          <div
+            className="h-full rounded-full bg-[#1D1D1F] transition-all duration-300 dark:bg-[#F5F5F7]"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="rounded border border-[#E6E6E4] bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]">
+          <div className="flex items-center gap-2.5">
+            <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
               Step {currentStep.stepNumber} / {sortedSteps.length}
             </span>
-            <h4 className="text-sm font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+            <h4 className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
               {currentStep.title}
             </h4>
           </div>
+          <span className="hidden font-mono text-[10.5px] text-[#6E6E73] sm:inline dark:text-[#98989D]">
+            Use ← / → or click any node
+          </span>
         </div>
 
         {currentStep.formulaLatex && (
-          <div className="rounded-md border border-[#E6E6E4] bg-white px-4 py-2.5 text-center dark:border-[#2E2E2E] dark:bg-[#191919]">
+          <div className="glass-surface rounded-2xl px-4 py-3 text-center">
             <InlineKaTeX latex={currentStep.formulaLatex} displayMode />
           </div>
         )}
 
         <MarkdownMath
           content={currentStep.descriptionMarkdown}
-          className="text-[13.5px] leading-relaxed text-[#37352F] dark:text-[#EBEBEB]"
+          className="text-[13.5px] leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]"
         />
 
         {currentStep.metrics.length > 0 && (
-          <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2.5 pt-1 sm:grid-cols-2 md:grid-cols-3">
             {currentStep.metrics.map((metric, idx) => (
               <div
                 key={`${metric.label}-${idx}`}
-                className="rounded-md border border-[#E6E6E4] bg-white px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#191919]"
+                className="glass-surface rounded-2xl px-3.5 py-2.5"
               >
-                <div className="font-mono text-[10px] font-medium tracking-wider text-[#787774] uppercase dark:text-[#9B9A97]">
+                <div className="font-mono text-[10px] font-medium tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
                   {metric.label}
                 </div>
-                <div className="mt-0.5 font-mono text-xs font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                <div className="mt-0.5 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                   {metric.value}
                 </div>
               </div>

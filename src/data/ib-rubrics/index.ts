@@ -50,13 +50,13 @@ export const EE_FA2027_RUBRIC: IBAssessmentRubric = {
   projectType: 'EE',
   subjectSlug: null,
   variantKey: 'EE_FA2027_30',
-  title: 'Extended Essay (First Assessment 2027 — Class of 2028)',
-  cohortSession: 'May 2027+ / Class of 2028',
+  title: 'Extended Essay (First Assessment 2027 Guide)',
+  cohortSession: 'May 2027+ Guide',
   totalMaxMarks: 30,
   wordLimit: '4,000 words max + 500-word RPF (3 reflection sessions)',
   weightingNote: 'Combined with TOK on the 3-point IB Diploma Core Matrix',
   overview:
-    'Redesigned 30-mark Extended Essay rubric (First Assessment 2027 / applies to Class of 2028). Streamlines assessment into 5 criteria: Framework (6), Knowledge & Understanding (6), Analysis & Line of Argument (6), Discussion & Evaluation (8), and Reflection (4).',
+    'Redesigned 30-mark Extended Essay rubric (First Assessment 2027+). Streamlines assessment into 5 criteria: Framework (6), Knowledge & Understanding (6), Analysis & Line of Argument (6), Discussion & Evaluation (8), and Reflection (4).',
   examinerNotes: [
     'Formal academic presentation and referencing are now integrated directly into Criterion D (Discussion and evaluation) rather than scored in a standalone Presentation criterion.',
     'The 500-word Reflections on Planning and Progress Form (RPF) across three mandatory supervisor sessions accounts for 4 marks under Criterion E.',
@@ -259,7 +259,7 @@ export const EE_LEGACY_34: IBAssessmentRubric = {
   overview:
     'Legacy 34-mark Extended Essay rubric retained strictly for benchmarking pre-2027 exemplar essays: A Focus & Method (6), B Knowledge & Understanding (6), C Critical Thinking (12), D Presentation (4), E Engagement (6).',
   examinerNotes: [
-    'Class of 2028 students are assessed on the new 30-mark FA2027 rubric; use this 34-mark variant only when reviewing archived teacher exemplars.',
+    'Current IB Diploma cohorts (FA2027+) are assessed on the 30-mark rubric; use this 34-mark variant only when reviewing archived teacher exemplars.',
   ],
   criteria: [
     {
@@ -476,15 +476,15 @@ export const CAS_2028_RUBRIC: IBAssessmentRubric = {
   projectType: 'CAS',
   subjectSlug: null,
   variantKey: 'CAS_2028',
-  title: 'Creativity, Activity, Service (CAS) — Class of 2028 Cohort',
-  cohortSession: 'Class of 2028 (18-Month Core Requirement)',
+  title: 'Creativity, Activity, Service (CAS) Portfolio',
+  cohortSession: '18-Month DP Core Requirement',
   totalMaxMarks: 0,
   wordLimit: 'Portfolio Reflections + 3 Formal Interviews + 1-Month Collaborative Project',
   weightingNote: 'Mandatory ungraded IB Diploma Core requirement (Complete / Incomplete)',
   overview:
     'CAS requires continuous, balanced engagement across Creativity, Activity, and Service over 18 months, demonstrating all 7 IB CAS Learning Outcomes (LO1–LO7), completing at least one collaborative CAS Project (minimum 1 month using the 5 CAS Stages), and recording purposeful personal reflections.',
   examinerNotes: [
-    'Class of 2028 cohort guidance: focus on quality and meaningfulness of engagement and reflection rather than simply accumulating hours.',
+    'IB CAS guidance: focus on quality and meaningfulness of engagement and reflection rather than simply accumulating hours.',
     'Every CAS Project must last at least 1 month, involve collaboration, and explicitly document the 5 CAS Stages (Investigation, Preparation, Action, Reflection, Demonstration).',
     'Reflections must go beyond "what I did" to capture feelings, surprises, ethical questions, challenges overcome, and explicit evidence for targeted Learning Outcomes.',
   ],
@@ -596,7 +596,7 @@ export const SCIENCE_IA_2025_RUBRIC: IBAssessmentRubric = {
   subjectSlug: 'biology-hl',
   variantKey: 'SCIENCE_IA_2025',
   title: 'Scientific Investigation (2025+ Biology HL & Chemistry SL IA)',
-  cohortSession: 'May 2025+ / Class of 2028',
+  cohortSession: 'May 2025+ Guide',
   totalMaxMarks: 24,
   wordLimit: '3,000 words maximum',
   weightingNote: '20% of final Science grade (equally weighted across 4 criteria × 6 marks)',

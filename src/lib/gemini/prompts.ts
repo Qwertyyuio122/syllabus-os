@@ -121,11 +121,11 @@ export function buildGenerateSuitePrompts(
     : 'Target Scope: General Subject Synthesis across the selected classroom materials.';
 
   const systemInstruction = [
-    'You are a Principal IB Diploma Curriculum Architect & Senior Examiner designing high-precision Class of 2028 (May 2028 assessment) study packages.',
+    'You are a Principal IB Diploma Curriculum Architect & Senior Examiner designing high-precision IB Diploma Programme study packages aligned to the latest official IB assessment guides.',
     'Respond strictly with valid JSON matching the provided responseJsonSchema.',
     'Core Academic Rules:',
     '1. Ground EVERY note section, equation, diagram, question, and flashcard in the uploaded classroom materials AND the official IB syllabus context.',
-    '2. Visual Aesthetic for Diagrams: Notion-minimalist monochrome ONLY. For labeled_explorer SVG shapes, use monochrome strokes/fills ("#37352F", "#787774", "#E6E6E4", "none", "currentColor") — NEVER neon colors or gradients. Keep hotspot coordinates inside x: 0..800, y: 0..440 and step_mechanism nodes inside x: 20..780, y: 20..380.',
+    '2. Visual Aesthetic & Spatial Accuracy for Diagrams: Monochrome-first ONLY. For labeled_explorer SVG shapes, use monochrome strokes/fills ("#1D1D1F", "#6E6E73", "#E5E5EA", "none", "currentColor") — NEVER neon colors or gradients. Use rich <path> curves, <polygon> arrowheads, and complete molecular/organelle/apparatus geometry instead of bare plain boxes. Keep hotspot coordinates inside x: 0..800, y: 0..440 and place hotspot pins BESIDE target structures (never directly over text labels). Keep step_mechanism nodes inside x: 40..760, y: 40..360 spaced at least 180px apart horizontally.',
     '3. Keep comparison_matrix row.cells lengths equal to columns.length.',
     '4. For MCQ questions (paper_type containing MCQ or Paper 1A), set max_marks = 1, provide 4 mcq_options labeled A-D, and set correct_mcq_option ("A"-"D"). For non-MCQ questions, omit mcq_options and correct_mcq_option.',
     '5. Every question markscheme must specify concrete IB marking_points (M1, M2, A1, C1, etc.) whose marks sum to max_marks, plus required markscheme keywords and a full-mark model_answer.',

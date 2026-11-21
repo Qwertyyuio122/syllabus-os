@@ -111,18 +111,18 @@ export function EmbeddedTutorChat({
   };
 
   return (
-    <div className="mt-4 rounded-md border border-[#E6E6E4] bg-[#FBFBFA] dark:border-[#2E2E2E] dark:bg-[#202020]">
-      <div className="flex items-center justify-between px-3.5 py-2.5">
+    <div className="glass-panel mt-4 rounded-2xl">
+      <div className="flex items-center justify-between px-4 py-2.5">
         <button
           type="button"
           onClick={() => setIsOpen((v) => !v)}
           aria-expanded={isOpen}
-          className="flex items-center gap-2 text-xs font-medium text-[#37352F] hover:opacity-80 cursor-pointer dark:text-[#EBEBEB]"
+          className="flex items-center gap-2 text-xs font-medium text-[#1D1D1F] hover:opacity-80 cursor-pointer dark:text-[#F5F5F7]"
         >
-          <MessageSquare className="h-3.5 w-3.5 text-[#787774] dark:text-[#9B9A97]" />
+          <MessageSquare className="h-3.5 w-3.5 text-[#6E6E73] dark:text-[#98989D]" />
           <span>Embedded IB Tutor</span>
           {messages.length > 0 && (
-            <span className="rounded bg-[#F1F1EF] px-1.5 py-0.5 font-mono text-[10px] text-[#787774] dark:bg-[#2A2A2A] dark:text-[#9B9A97]">
+            <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
               {messages.length}
             </span>
           )}
@@ -141,7 +141,7 @@ export function EmbeddedTutorChat({
       </div>
 
       {isOpen && (
-        <div className="border-t border-[#E6E6E4] px-3.5 py-3 dark:border-[#2E2E2E]">
+        <div className="border-t border-black/[0.06] px-4 py-3 dark:border-white/[0.08]">
           {/* Quick starter prompts when empty */}
           {messages.length === 0 && (
             <div className="mb-3 flex flex-wrap gap-1.5">
@@ -151,7 +151,7 @@ export function EmbeddedTutorChat({
                   type="button"
                   disabled={sending}
                   onClick={() => void sendMessage(prompt)}
-                  className="rounded-md border border-[#E6E6E4] bg-white px-2.5 py-1 text-xs text-[#787774] transition-colors hover:bg-[#F1F1EF] hover:text-[#37352F] cursor-pointer disabled:opacity-50 dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#2A2A2A] dark:hover:text-[#EBEBEB]"
+                  className="glass-pill rounded-full px-3 py-1 text-xs text-[#6E6E73] transition-colors hover:bg-white/95 hover:text-[#1D1D1F] cursor-pointer disabled:opacity-50 dark:text-[#98989D] dark:hover:bg-white/[0.12] dark:hover:text-[#F5F5F7]"
                 >
                   {prompt}
                 </button>
@@ -165,20 +165,20 @@ export function EmbeddedTutorChat({
               {messages.map((msg, idx) => (
                 <div
                   key={`${msg.created_at}-${idx}`}
-                  className={`rounded-md border px-3 py-2 text-xs leading-relaxed ${
+                  className={`rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                     msg.role === 'user'
-                      ? 'ml-6 border-[#E6E6E4] bg-white text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]'
-                      : 'mr-4 border-[#E6E6E4] bg-[#F1F1EF]/60 text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#2A2A2A]/70 dark:text-[#EBEBEB]'
+                      ? 'glass-panel ml-6 text-[#1D1D1F] dark:text-[#F5F5F7]'
+                      : 'glass-surface mr-4 text-[#1D1D1F] dark:text-[#F5F5F7]'
                   }`}
                 >
-                  <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+                  <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
                     {msg.role === 'user' ? 'You' : 'IB Examiner Tutor'}
                   </div>
                   <MarkdownMath content={msg.content} />
                 </div>
               ))}
               {sending && (
-                <div className="mr-4 flex items-center gap-2 rounded-md border border-[#E6E6E4] bg-[#F1F1EF]/60 px-3 py-2 text-xs text-[#787774] dark:border-[#2E2E2E] dark:bg-[#2A2A2A]/70 dark:text-[#9B9A97]">
+                <div className="glass-surface mr-4 flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-xs text-[#6E6E73] dark:text-[#98989D]">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   <span>Reviewing your answer against the markscheme…</span>
                 </div>
@@ -189,7 +189,7 @@ export function EmbeddedTutorChat({
           {error && (
             <div
               role="alert"
-              className="mb-2.5 rounded-md border border-[#E6D0D0] bg-[#FAF2F2] px-2.5 py-1.5 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F] dark:text-[#E59898]"
+              className="mb-2.5 rounded-xl border border-[#E6D0D0] bg-[#FAF2F2]/90 px-3 py-2 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F]/90 dark:text-[#E59898]"
             >
               {error}
             </div>
@@ -210,7 +210,7 @@ export function EmbeddedTutorChat({
               disabled={sending}
               placeholder="Ask why a mark was missed or request a worked step…"
               aria-label="Ask IB Tutor a follow-up question"
-              className="h-8 flex-1 rounded-md border border-[#E6E6E4] bg-white px-2.5 text-xs text-[#37352F] placeholder:text-[#787774] focus:border-[#37352F] focus:outline-none disabled:opacity-50 dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:placeholder:text-[#9B9A97] dark:focus:border-[#EBEBEB]"
+              className="glass-pill h-8 flex-1 rounded-xl px-3 text-xs text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:ring-2 focus:ring-[#1D1D1F]/20 disabled:opacity-50 dark:text-[#F5F5F7] dark:placeholder:text-[#98989D] dark:focus:ring-[#F5F5F7]/20"
             />
             <Button
               type="submit"

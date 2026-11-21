@@ -22,7 +22,7 @@ export const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-50 bg-black/35 dark:bg-black/60',
+      'fixed inset-0 z-50 bg-black/25 backdrop-blur-md dark:bg-black/55',
       className,
     )}
     {...props}
@@ -39,7 +39,7 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[#E6E6E4] bg-white p-5 text-[#37352F] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]',
+        'glass-panel fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl p-6 text-[#1D1D1F] focus:outline-none dark:text-[#F5F5F7]',
         className,
       )}
       {...props}
@@ -47,9 +47,9 @@ export const DialogContent = React.forwardRef<
       {children}
       <DialogPrimitive.Close
         aria-label="Close dialog"
-        className="absolute top-3.5 right-3.5 inline-flex h-7 w-7 items-center justify-center rounded-md text-[#787774] transition-colors hover:bg-[#F1F1EF] hover:text-[#37352F] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:text-[#9B9A97] dark:hover:bg-[#2A2A2A] dark:hover:text-[#EBEBEB]"
+        className="glass-pill absolute top-4 right-4 inline-flex h-7 w-7 items-center justify-center rounded-full text-[#6E6E73] transition-colors hover:bg-white/95 hover:text-[#1D1D1F] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:text-[#98989D] dark:hover:bg-white/[0.15] dark:hover:text-[#F5F5F7]"
       >
-        <X className="h-4 w-4" />
+        <X className="h-3.5 w-3.5" />
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
@@ -61,7 +61,7 @@ export function DialogHeader({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('mb-3 flex flex-col gap-1 pr-6', className)} {...props} />
+    <div className={cn('mb-3 flex flex-col gap-1 pr-8', className)} {...props} />
   );
 }
 
@@ -71,7 +71,10 @@ export const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-base font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]', className)}
+    className={cn(
+      'text-base font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]',
+      className,
+    )}
     {...props}
   />
 ));
@@ -83,7 +86,7 @@ export const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-xs text-[#787774] dark:text-[#9B9A97]', className)}
+    className={cn('text-xs text-[#6E6E73] dark:text-[#98989D]', className)}
     {...props}
   />
 ));

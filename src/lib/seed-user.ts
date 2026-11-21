@@ -123,7 +123,7 @@ const DEFAULT_CORE_PROJECTS: DefaultCoreProjectSpec[] = [
   {
     projectType: 'EE',
     subjectSlug: null,
-    title: 'Extended Essay (Class of 2028 · FA2027 30-Mark Rubric)',
+    title: 'Extended Essay (FA2027 30-Mark Rubric)',
     researchQuestionOrPrompt:
       'To what extent did [specific causal factor / variable / literary mechanism] shape [focused IB subject investigation]?',
     wordCountTarget: 4000,
@@ -142,7 +142,7 @@ const DEFAULT_CORE_PROJECTS: DefaultCoreProjectSpec[] = [
     subjectSlug: null,
     title: 'TOK Essay (1,600 Words · 10 Marks)',
     researchQuestionOrPrompt:
-      'Select one of the May 2028 IB TOK Prescribed Titles and explore knowledge claims across two Areas of Knowledge.',
+      'Select an IB TOK Prescribed Title and explore knowledge claims across two Areas of Knowledge.',
     wordCountTarget: 1600,
     milestones: [
       { id: 'tok-e-1', title: 'Unpack Prescribed Title & Key Terms', completed: false },
@@ -171,7 +171,7 @@ const DEFAULT_CORE_PROJECTS: DefaultCoreProjectSpec[] = [
   {
     projectType: 'CAS',
     subjectSlug: null,
-    title: 'CAS Portfolio (Class of 2028 · 7 Learning Outcomes)',
+    title: 'CAS Portfolio (7 Learning Outcomes)',
     researchQuestionOrPrompt:
       'Maintain balanced Creativity, Activity, and Service engagement across 18 months, complete a ≥1-month collaborative CAS Project, and document reflections addressing LO1–LO7.',
     wordCountTarget: 0,
@@ -367,7 +367,7 @@ async function waitForCoreProjects(
 }
 
 /**
- * Idempotently provisions all 6 IB Class of 2028 subjects, hierarchical syllabus
+ * Idempotently provisions all 6 IB Diploma subjects, hierarchical syllabus
  * topics, pre-ingested classroom materials/notes/questions/flashcards, and starter
  * Core (EE/TOK/CAS/6×IA) projects for a newly authenticated user.
  *

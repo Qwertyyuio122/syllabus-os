@@ -65,7 +65,7 @@ const PROJECT_ORDER: {
     label: 'TOK Exhibition',
     shortTag: 'TOK',
   },
-  { projectType: 'CAS', subjectSlug: null, label: 'CAS 2028', shortTag: 'CAS' },
+  { projectType: 'CAS', subjectSlug: null, label: 'CAS Portfolio', shortTag: 'CAS' },
   {
     projectType: 'IA',
     subjectSlug: 'biology-hl',
@@ -435,12 +435,12 @@ export function CoreWorkspaceClient({
       </nav>
 
       {/* Page Title */}
-      <div className="mb-6 border-b border-[#E6E6E4] pb-5 dark:border-[#2E2E2E]">
-        <h1 className="text-2xl font-semibold tracking-tight text-[#37352F] sm:text-3xl dark:text-[#EBEBEB]">
+      <div className="glass-panel mb-6 rounded-3xl p-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-[#1D1D1F] sm:text-3xl dark:text-[#F5F5F7]">
           DP Core &amp; Internal Assessments
         </h1>
-        <p className="mt-1 text-sm text-[#787774] dark:text-[#9B9A97]">
-          Official Class of 2028 IB criteria, classroom reference toolkits,
+        <p className="mt-1.5 text-sm text-[#6E6E73] dark:text-[#98989D]">
+          Official IB Diploma criteria, classroom reference toolkits,
           milestone tracking, and examiner-calibrated rubric evaluation.
         </p>
       </div>
@@ -448,10 +448,10 @@ export function CoreWorkspaceClient({
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         {/* Left Project Selector */}
         <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-64">
-          <div className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+          <div className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
             Core &amp; Subject IAs
           </div>
-          <div className="flex gap-1.5 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+          <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
             {orderedProjects.map(({ project, label, shortTag }) => {
               const liveProj =
                 projects.find((p) => p.id === project.id) ?? project;
@@ -465,17 +465,17 @@ export function CoreWorkspaceClient({
                   key={liveProj.id}
                   type="button"
                   onClick={() => setSelectedProjectId(liveProj.id)}
-                  className={`flex shrink-0 items-center justify-between gap-2 rounded-md border px-3 py-2 text-left transition-colors cursor-pointer lg:w-full ${
+                  className={`flex shrink-0 items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 text-left transition-all cursor-pointer lg:w-full ${
                     isSelected
-                      ? 'border-[#37352F] bg-[#F1F1EF] text-[#37352F] dark:border-[#EBEBEB] dark:bg-[#2A2A2A] dark:text-[#EBEBEB]'
-                      : 'border-[#E6E6E4] bg-white text-[#787774] hover:bg-[#FBFBFA] hover:text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#202020] dark:hover:text-[#EBEBEB]'
+                      ? 'glass-panel border-[#1D1D1F]/30 text-[#1D1D1F] dark:border-white/25 dark:text-[#F5F5F7]'
+                      : 'glass-surface glass-interactive text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                   }`}
                 >
                   <div className="min-w-0">
-                    <div className="truncate text-xs font-medium text-[#37352F] dark:text-[#EBEBEB]">
+                    <div className="truncate text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
                       {label}
                     </div>
-                    <div className="mt-0.5 font-mono text-[10px] text-[#787774] dark:text-[#9B9A97]">
+                    <div className="mt-0.5 font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
                       {doneCount}/{liveProj.milestones.length} milestones
                     </div>
                   </div>
@@ -513,14 +513,14 @@ export function CoreWorkspaceClient({
 
                 {/* Variant Switchers (EE FA2027 30m vs Legacy 34m; English HL Essay vs IO) */}
                 {selectedProject.project_type === 'EE' && (
-                  <div className="flex items-center gap-1 rounded-md border border-[#E6E6E4] bg-[#FBFBFA] p-0.5 dark:border-[#2E2E2E] dark:bg-[#202020]">
+                  <div className="glass-surface inline-flex items-center gap-1 rounded-full p-1">
                     <button
                       type="button"
                       onClick={() => setEeVariant('EE_FA2027_30')}
-                      className={`rounded px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
                         eeVariant === 'EE_FA2027_30'
-                          ? 'bg-[#37352F] text-white dark:bg-[#EBEBEB] dark:text-[#191919]'
-                          : 'text-[#787774] hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:text-[#EBEBEB]'
+                          ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                          : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                       }`}
                     >
                       FA2027 (30m)
@@ -528,10 +528,10 @@ export function CoreWorkspaceClient({
                     <button
                       type="button"
                       onClick={() => setEeVariant('EE_LEGACY_34')}
-                      className={`rounded px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
                         eeVariant === 'EE_LEGACY_34'
-                          ? 'bg-[#37352F] text-white dark:bg-[#EBEBEB] dark:text-[#191919]'
-                          : 'text-[#787774] hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:text-[#EBEBEB]'
+                          ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                          : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                       }`}
                     >
                       Legacy (34m)
@@ -541,14 +541,14 @@ export function CoreWorkspaceClient({
 
                 {selectedProject.project_type === 'IA' &&
                   selectedProject.subject_slug === 'english-lit-hl' && (
-                    <div className="flex items-center gap-1 rounded-md border border-[#E6E6E4] bg-[#FBFBFA] p-0.5 dark:border-[#2E2E2E] dark:bg-[#202020]">
+                    <div className="glass-surface inline-flex items-center gap-1 rounded-full p-1">
                       <button
                         type="button"
                         onClick={() => setEnglishVariant('ENGLISH_HL_ESSAY')}
-                        className={`rounded px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
                           englishVariant === 'ENGLISH_HL_ESSAY'
-                            ? 'bg-[#37352F] text-white dark:bg-[#EBEBEB] dark:text-[#191919]'
-                            : 'text-[#787774] hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:text-[#EBEBEB]'
+                            ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                            : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                         }`}
                       >
                         HL Essay (20m)
@@ -556,10 +556,10 @@ export function CoreWorkspaceClient({
                       <button
                         type="button"
                         onClick={() => setEnglishVariant('IO')}
-                        className={`rounded px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
                           englishVariant === 'IO'
-                            ? 'bg-[#37352F] text-white dark:bg-[#EBEBEB] dark:text-[#191919]'
-                            : 'text-[#787774] hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:text-[#EBEBEB]'
+                            ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                            : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                         }`}
                       >
                         Individual Oral (40m)
@@ -594,6 +594,7 @@ export function CoreWorkspaceClient({
 
           {/* Core Workspace Sub-Tabs */}
           <Tabs
+            idPrefix="core-workspace-tabs"
             value={subTab}
             onValueChange={(v) =>
               setSubTab(v as 'draft' | 'rubric' | 'toolkit')
@@ -1011,15 +1012,15 @@ export function CoreWorkspaceClient({
                 >
                   <span>
                     {showAllResources
-                      ? 'Showing All Cohort Guides'
-                      : 'Show All Cohort Guides'}
+                      ? 'Showing All Reference Guides'
+                      : 'Show All Reference Guides'}
                   </span>
                 </Button>
               </div>
 
               {filteredResources.length > 0 && selectedResource ? (
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {filteredResources.map((res) => {
                       const active = res.id === selectedResource.id;
                       return (
@@ -1027,21 +1028,21 @@ export function CoreWorkspaceClient({
                           key={res.id}
                           type="button"
                           onClick={() => setActiveResourceId(res.id)}
-                          className={`w-full rounded-md border px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                          className={`w-full rounded-2xl px-3.5 py-3 text-left transition-all cursor-pointer ${
                             active
-                              ? 'border-[#37352F] bg-[#F1F1EF] text-[#37352F] dark:border-[#EBEBEB] dark:bg-[#2A2A2A] dark:text-[#EBEBEB]'
-                              : 'border-[#E6E6E4] bg-white text-[#787774] hover:bg-[#FBFBFA] hover:text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#202020] dark:hover:text-[#EBEBEB]'
+                              ? 'glass-panel border-[#1D1D1F]/30 text-[#1D1D1F] dark:border-white/25 dark:text-[#F5F5F7]'
+                              : 'glass-surface glass-interactive text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[10px] uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+                            <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
                               {res.category}
                             </span>
                           </div>
-                          <div className="mt-0.5 text-xs font-medium text-[#37352F] dark:text-[#EBEBEB]">
+                          <div className="mt-0.5 text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
                             {res.title}
                           </div>
-                          <div className="mt-0.5 line-clamp-2 text-[11px] text-[#787774] dark:text-[#9B9A97]">
+                          <div className="mt-0.5 line-clamp-2 text-[11px] text-[#6E6E73] dark:text-[#98989D]">
                             {res.summary}
                           </div>
                         </button>
@@ -1051,12 +1052,12 @@ export function CoreWorkspaceClient({
 
                   <Card className="lg:col-span-2">
                     <CardContent className="space-y-3 p-4 sm:p-5">
-                      <div className="flex flex-wrap items-start justify-between gap-2 border-b border-[#E6E6E4] pb-3 dark:border-[#2E2E2E]">
+                      <div className="flex flex-wrap items-start justify-between gap-2 border-b border-black/[0.06] pb-3 dark:border-white/[0.08]">
                         <div>
                           <Badge variant="subtle" className="font-mono">
                             {selectedResource.sourceFileName}
                           </Badge>
-                          <h3 className="mt-1.5 text-base font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                          <h3 className="mt-1.5 text-base font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                             {selectedResource.title}
                           </h3>
                         </div>
@@ -1065,7 +1066,7 @@ export function CoreWorkspaceClient({
                             href={selectedResource.externalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 rounded-md border border-[#E6E6E4] px-2.5 py-1 text-xs font-medium text-[#37352F] hover:bg-[#F1F1EF] dark:border-[#2E2E2E] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+                            className="glass-pill inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-medium text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
                           >
                             <span>Open in Drive</span>
                             <ExternalLink className="h-3 w-3" />
@@ -1073,7 +1074,7 @@ export function CoreWorkspaceClient({
                         )}
                       </div>
 
-                      <div className="text-sm leading-relaxed text-[#37352F] dark:text-[#EBEBEB]">
+                      <div className="text-sm leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
                         <MarkdownMath
                           content={selectedResource.contentMarkdown}
                         />
@@ -1082,11 +1083,11 @@ export function CoreWorkspaceClient({
                   </Card>
                 </div>
               ) : (
-                <div className="rounded-lg border border-dashed border-[#E6E6E4] px-6 py-10 text-center dark:border-[#2E2E2E]">
-                  <p className="text-xs text-[#787774] dark:text-[#9B9A97]">
+                <div className="glass-surface rounded-2xl border-dashed px-6 py-10 text-center">
+                  <p className="text-xs text-[#6E6E73] dark:text-[#98989D]">
                     No classroom reference guide is scoped exclusively to this
-                    item. Click &ldquo;Show All Cohort Guides&rdquo; above to
-                    browse EE 2028, CAS 2028, Chemistry Lab Info, History
+                    item. Click &ldquo;Show All Reference Guides&rdquo; above to
+                    browse Extended Essay, CAS Portfolio, Chemistry Lab Info, History
                     Chicago Style, and English Assessment Calendar guides.
                   </p>
                 </div>

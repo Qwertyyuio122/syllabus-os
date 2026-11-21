@@ -5,7 +5,9 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Eye,
   Loader2,
+  Sigma,
   XCircle,
 } from 'lucide-react';
 import { MarkdownMath } from '@/components/notes/MarkdownMath';
@@ -22,38 +24,69 @@ interface QuestionCardProps {
   onAttemptSaved?: (attempt: QuestionAttemptRow) => void;
 }
 
-const MATH_INSERT_SNIPPETS: {
-  label: string;
+interface MathSymbolSnippet {
+  id: string;
+  display: string;
+  name: string;
   title: string;
   insert: string;
   wrap?: [string, string];
-}[] = [
+  cursorOffsetFromEnd?: number;
+}
+
+const MATH_SYMBOL_SNIPPETS: MathSymbolSnippet[] = [
   {
-    label: '$...$',
-    title: 'Wrap or insert inline LaTeX',
-    insert: '$x$',
-    wrap: ['$', '$'],
-  },
-  {
-    label: '\\rightarrow',
-    title: 'Insert reaction/implication arrow',
+    id: 'arrow',
+    display: '→',
+    name: 'Reaction arrow',
+    title: 'Insert reaction / implication arrow',
     insert: '$\\rightarrow$',
   },
   {
-    label: '\\Delta H^\\circ',
+    id: 'eq',
+    display: '⇌',
+    name: 'Equilibrium',
+    title: 'Insert reversible equilibrium arrow',
+    insert: '$\\rightleftharpoons$',
+  },
+  {
+    id: 'enthalpy',
+    display: 'ΔH°',
+    name: 'Enthalpy',
     title: 'Insert standard enthalpy change',
     insert: '$\\Delta H^\\circ$',
   },
   {
-    label: '\\frac{}{}',
-    title: 'Insert fraction',
+    id: 'fraction',
+    display: 'a/b',
+    name: 'Fraction',
+    title: 'Insert formatted fraction',
     insert: '$\\frac{}{}$',
+    cursorOffsetFromEnd: 3,
   },
   {
-    label: '\\ce{}',
-    title: 'Insert chemical formula via mhchem',
+    id: 'chem',
+    display: 'H₂O',
+    name: 'Formula',
+    title: 'Insert chemical formula',
     insert: '$\\ce{}$',
     wrap: ['$\\ce{', '}$'],
+    cursorOffsetFromEnd: 2,
+  },
+  {
+    id: 'pm',
+    display: '±',
+    name: 'Uncertainty',
+    title: 'Insert plus-minus symbol',
+    insert: '$\\pm$',
+  },
+  {
+    id: 'inline-math',
+    display: 'x²',
+    name: 'Math',
+    title: 'Wrap selection or insert inline math',
+    insert: '$x$',
+    wrap: ['$', '$'],
   },
 ];
 
@@ -79,13 +112,41 @@ export function QuestionCard({
   const [submitting, setSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [showModelAnswer, setShowModelAnswer] = React.useState(false);
+  const [symbolsOpen, setSymbolsOpen] = React.useState(false);
+  const [previewOpen, setPreviewOpen] = React.useState(false);
+
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const symbolsPopoverRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     setAttempt(initialAttempt);
   }, [initialAttempt]);
 
-  const insertLatexSnippet = (snippet: (typeof MATH_INSERT_SNIPPETS)[number]) => {
+  React.useEffect(() => {
+    if (!symbolsOpen) return;
+    const handlePointerDown = (e: MouseEvent) => {
+      if (
+        symbolsPopoverRef.current &&
+        !symbolsPopoverRef.current.contains(e.target as Node)
+      ) {
+        setSymbolsOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSymbolsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [symbolsOpen]);
+
+  const insertSymbolSnippet = (snippet: MathSymbolSnippet) => {
+    setSymbolsOpen(false);
     const textarea = textareaRef.current;
     if (!textarea) {
       setOpenResponse((prev) => `${prev}${prev ? ' ' : ''}${snippet.insert}`);
@@ -96,8 +157,9 @@ export function QuestionCard({
     const end = textarea.selectionEnd ?? openResponse.length;
     const selected = openResponse.slice(start, end);
 
+    const wrappedSelection = Boolean(selected && snippet.wrap);
     const replacement =
-      selected && snippet.wrap
+      wrappedSelection && snippet.wrap
         ? `${snippet.wrap[0]}${selected}${snippet.wrap[1]}`
         : snippet.insert;
 
@@ -107,7 +169,10 @@ export function QuestionCard({
 
     requestAnimationFrame(() => {
       textarea.focus();
-      const cursorPos = start + replacement.length;
+      const offsetFromEnd = wrappedSelection
+        ? 0
+        : (snippet.cursorOffsetFromEnd ?? 0);
+      const cursorPos = start + replacement.length - offsetFromEnd;
       textarea.setSelectionRange(cursorPos, cursorPos);
     });
   };
@@ -164,10 +229,10 @@ export function QuestionCard({
     question.markscheme.model_answer;
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="space-y-4 p-4 sm:p-5">
+    <Card className="overflow-visible">
+      <CardContent className="space-y-4 p-5 sm:p-6">
         {/* Header Metadata */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E6E6E4] pb-3 dark:border-[#2E2E2E]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.06] pb-3.5 dark:border-white/[0.08]">
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="default">{question.paper_type}</Badge>
             <Badge variant="outline" className="font-mono">
@@ -202,8 +267,8 @@ export function QuestionCard({
 
         {/* Stimulus */}
         {question.stimulus_markdown && (
-          <div className="rounded-md border border-[#E6E6E4] bg-[#FBFBFA] p-3.5 text-sm leading-relaxed text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#202020] dark:text-[#EBEBEB]">
-            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+          <div className="glass-surface rounded-2xl p-4 text-sm leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
               Stimulus / Data
             </div>
             <MarkdownMath content={question.stimulus_markdown} />
@@ -211,7 +276,7 @@ export function QuestionCard({
         )}
 
         {/* Question Prompt */}
-        <div className="text-sm leading-relaxed text-[#37352F] dark:text-[#EBEBEB]">
+        <div className="text-[15px] leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
           <MarkdownMath content={question.question_markdown} />
         </div>
 
@@ -224,10 +289,10 @@ export function QuestionCard({
               return (
                 <label
                   key={opt.label}
-                  className={`flex cursor-pointer items-start gap-3 rounded-md border px-3.5 py-2.5 text-sm transition-colors ${
+                  className={`flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3 text-sm transition-all ${
                     checked
-                      ? 'border-[#37352F] bg-[#F1F1EF] dark:border-[#EBEBEB] dark:bg-[#2A2A2A]'
-                      : 'border-[#E6E6E4] bg-white hover:bg-[#FBFBFA] dark:border-[#2E2E2E] dark:bg-[#191919] dark:hover:bg-[#202020]'
+                      ? 'glass-panel border-[#1D1D1F]/35 bg-white/95 dark:border-white/30 dark:bg-white/[0.12]'
+                      : 'glass-surface glass-interactive'
                   }`}
                 >
                   <input
@@ -236,12 +301,12 @@ export function QuestionCard({
                     value={opt.label}
                     checked={checked}
                     onChange={() => setSelectedMcq(opt.label)}
-                    className="mt-1 h-4 w-4 accent-[#37352F] dark:accent-[#EBEBEB]"
+                    className="mt-1 h-4 w-4 accent-[#1D1D1F] dark:accent-[#F5F5F7]"
                   />
-                  <span className="font-mono text-xs font-semibold text-[#787774] dark:text-[#9B9A97] mt-0.5">
+                  <span className="mt-0.5 font-mono text-xs font-semibold text-[#6E6E73] dark:text-[#98989D]">
                     {opt.label}.
                   </span>
-                  <div className="min-w-0 flex-1 text-[#37352F] dark:text-[#EBEBEB]">
+                  <div className="min-w-0 flex-1 text-[#1D1D1F] dark:text-[#F5F5F7]">
                     <MarkdownMath content={opt.text} />
                   </div>
                 </label>
@@ -250,33 +315,98 @@ export function QuestionCard({
           </fieldset>
         ) : (
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-medium text-[#787774] dark:text-[#9B9A97]">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
                 Your response
               </span>
-              <div className="flex flex-wrap items-center gap-1">
-                {MATH_INSERT_SNIPPETS.map((snippet) => (
+            </div>
+
+            <div className="glass-surface relative rounded-2xl transition-colors focus-within:border-[#1D1D1F]/35 dark:focus-within:border-white/25">
+              <textarea
+                ref={textareaRef}
+                value={openResponse}
+                onChange={(e) => setOpenResponse(e.target.value)}
+                rows={5}
+                placeholder={`Write your IB response addressing the command term "${question.command_term}"…`}
+                aria-label="Your answer"
+                className="w-full resize-y rounded-t-2xl bg-transparent p-3.5 text-sm leading-relaxed text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none dark:text-[#F5F5F7] dark:placeholder:text-[#98989D]"
+              />
+
+              {/* Clean Editor Footer: Symbol Popover & Preview Toggle */}
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] px-3 py-2 dark:border-white/[0.08]">
+                <div className="relative" ref={symbolsPopoverRef}>
                   <button
-                    key={snippet.label}
                     type="button"
-                    title={snippet.title}
-                    onClick={() => insertLatexSnippet(snippet)}
-                    className="rounded border border-[#E6E6E4] bg-[#FBFBFA] px-1.5 py-0.5 font-mono text-[11px] text-[#37352F] transition-colors hover:bg-[#F1F1EF] cursor-pointer dark:border-[#2E2E2E] dark:bg-[#202020] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+                    aria-expanded={symbolsOpen}
+                    onClick={() => setSymbolsOpen((v) => !v)}
+                    className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-[#6E6E73] transition-colors hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
                   >
-                    {snippet.label}
+                    <Sigma className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>fx Symbols</span>
                   </button>
-                ))}
+
+                  {symbolsOpen && (
+                    <div
+                      role="dialog"
+                      aria-label="Insert mathematical or chemical symbol"
+                      className="glass-panel absolute bottom-full left-0 z-30 mb-2 w-72 rounded-2xl p-2"
+                    >
+                      <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+                        Insert formatted notation
+                      </div>
+                      <div className="grid grid-cols-2 gap-1">
+                        {MATH_SYMBOL_SNIPPETS.map((snippet) => (
+                          <button
+                            key={snippet.id}
+                            type="button"
+                            title={snippet.title}
+                            onClick={() => insertSymbolSnippet(snippet)}
+                            className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-xs text-[#1D1D1F] transition-colors hover:bg-black/[0.05] cursor-pointer dark:text-[#F5F5F7] dark:hover:bg-white/[0.08]"
+                          >
+                            <span className="glass-pill inline-flex h-6 min-w-6 items-center justify-center rounded-lg px-1.5 font-medium">
+                              {snippet.display}
+                            </span>
+                            <span className="truncate text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                              {snippet.name}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  aria-pressed={previewOpen}
+                  onClick={() => setPreviewOpen((v) => !v)}
+                  className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-all ${
+                    previewOpen
+                      ? 'bg-[#1D1D1F] text-white dark:bg-[#F5F5F7] dark:text-[#111113]'
+                      : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                  }`}
+                >
+                  <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>{previewOpen ? 'Hide Preview' : 'Preview'}</span>
+                </button>
               </div>
             </div>
-            <textarea
-              ref={textareaRef}
-              value={openResponse}
-              onChange={(e) => setOpenResponse(e.target.value)}
-              rows={5}
-              placeholder={`Write your IB response addressing the command term "${question.command_term}"…`}
-              aria-label="Your answer"
-              className="w-full resize-y rounded-md border border-[#E6E6E4] bg-white p-3 text-sm leading-relaxed text-[#37352F] placeholder:text-[#787774] focus:border-[#37352F] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:placeholder:text-[#9B9A97] dark:focus:border-[#EBEBEB]"
-            />
+
+            {previewOpen && (
+              <div className="glass-surface rounded-2xl p-3.5 text-sm leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+                <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+                  Formatted Preview
+                </div>
+                {openResponse.trim() ? (
+                  <MarkdownMath content={openResponse} />
+                ) : (
+                  <p className="text-xs italic text-[#6E6E73] dark:text-[#98989D]">
+                    Start typing above to preview rendered equations and
+                    formulas.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -318,7 +448,7 @@ export function QuestionCard({
         {submitError && (
           <div
             role="alert"
-            className="rounded-md border border-[#E6D0D0] bg-[#FAF2F2] px-3 py-2 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F] dark:text-[#E59898]"
+            className="rounded-xl border border-[#E6D0D0] bg-[#FAF2F2]/90 px-3.5 py-2.5 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F]/90 dark:text-[#E59898]"
           >
             {submitError}
           </div>
@@ -328,13 +458,13 @@ export function QuestionCard({
         {attempt && attempt.grading_breakdown && (
           <div
             data-testid={`grading-breakdown-${question.id}`}
-            className="space-y-3 rounded-md border border-[#E6E6E4] bg-[#FBFBFA] p-3.5 dark:border-[#2E2E2E] dark:bg-[#202020]"
+            className="glass-surface space-y-3 rounded-2xl p-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-[#37352F] dark:text-[#EBEBEB]">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[#1D1D1F] dark:text-[#F5F5F7]">
                 IB Markscheme Breakdown
               </h4>
-              <span className="font-mono text-xs font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+              <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                 {attempt.awarded_marks} / {attempt.max_marks} marks awarded
               </span>
             </div>
@@ -346,32 +476,32 @@ export function QuestionCard({
                   return (
                     <li
                       key={`${pt.code}-${idx}`}
-                      className="rounded border border-[#E6E6E4] bg-white px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#191919]"
+                      className="glass-pill rounded-xl px-3.5 py-2.5 text-xs"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-2">
                           {awardedFull ? (
-                            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#2F5E44] dark:text-[#9FC3AD]" />
+                            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#27533B] dark:text-[#9FC3AD]" />
                           ) : (
                             <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#9B3B3B] dark:text-[#E59898]" />
                           )}
                           <div>
-                            <span className="mr-1.5 font-mono font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                            <span className="mr-1.5 font-mono font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                               [{pt.code}]
                             </span>
-                            <span className="text-[#37352F] dark:text-[#EBEBEB]">
+                            <span className="text-[#1D1D1F] dark:text-[#F5F5F7]">
                               {pt.criterion}
                             </span>
                           </div>
                         </div>
-                        <span className="shrink-0 font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+                        <span className="shrink-0 font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
                           {pt.awarded}
                           {pt.max_marks !== undefined ? `/${pt.max_marks}` : ''}{' '}
                           m
                         </span>
                       </div>
                       {pt.feedback && (
-                        <p className="mt-1 pl-5.5 text-[#787774] dark:text-[#9B9A97]">
+                        <p className="mt-1 pl-5.5 text-[#6E6E73] dark:text-[#98989D]">
                           {pt.feedback}
                         </p>
                       )}
@@ -382,9 +512,11 @@ export function QuestionCard({
             )}
 
             {attempt.grading_breakdown.command_term_feedback && (
-              <div className="rounded border border-[#E6E6E4] bg-white px-3 py-2 text-xs text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]">
-                <span className="font-semibold">Command term ({question.command_term}): </span>
-                <span className="text-[#787774] dark:text-[#9B9A97]">
+              <div className="glass-pill rounded-xl px-3.5 py-2.5 text-xs text-[#1D1D1F] dark:text-[#F5F5F7]">
+                <span className="font-semibold">
+                  Command term ({question.command_term}):{' '}
+                </span>
+                <span className="text-[#6E6E73] dark:text-[#98989D]">
                   {attempt.grading_breakdown.command_term_feedback}
                 </span>
               </div>
@@ -392,7 +524,7 @@ export function QuestionCard({
 
             {attempt.grading_breakdown.missing_keywords?.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-medium text-[#787774] dark:text-[#9B9A97]">
+                <span className="text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
                   Missing markscheme terms:
                 </span>
                 {attempt.grading_breakdown.missing_keywords.map((kw) => (
@@ -415,14 +547,14 @@ export function QuestionCard({
 
         {/* Toggleable Full-Mark Model Answer */}
         {showModelAnswer && (
-          <div className="rounded-md border border-[#E6E6E4] bg-[#FBFBFA] p-3.5 text-sm dark:border-[#2E2E2E] dark:bg-[#202020]">
-            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+          <div className="glass-surface rounded-2xl p-4 text-sm">
+            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
               Full-Mark Model Answer
             </div>
             <MarkdownMath content={modelAnswerText} />
             {question.markscheme.examiner_notes && (
-              <div className="mt-3 border-t border-[#E6E6E4] pt-2.5 text-xs text-[#787774] dark:border-[#2E2E2E] dark:text-[#9B9A97]">
-                <span className="font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+              <div className="mt-3 border-t border-black/[0.06] pt-2.5 text-xs text-[#6E6E73] dark:border-white/[0.08] dark:text-[#98989D]">
+                <span className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                   Examiner notes:{' '}
                 </span>
                 {question.markscheme.examiner_notes}

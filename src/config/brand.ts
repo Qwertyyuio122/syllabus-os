@@ -2,7 +2,7 @@ import React from 'react';
 
 export const APP_NAME = 'SyllabusOS';
 export const APP_TAGLINE = 'IB Diploma Revision & Markscheme Workspace';
-export const APP_COHORT = 'Class of 2028 · May 2028 Session';
+export const APP_COHORT = 'IB Diploma Programme · Open Workspace';
 
 export interface BrandMonogramProps {
   className?: string;

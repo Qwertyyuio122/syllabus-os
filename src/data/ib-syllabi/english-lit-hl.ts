@@ -6,7 +6,7 @@ export const ENGLISH_LIT_HL_CONFIG: IBSubjectConfig = {
   shortName: 'English Lit HL',
   level: 'HL',
   groupNumber: 1,
-  firstAssessment: 'May 2021 (Current through Class of 2028)',
+  firstAssessment: 'May 2021+ IB Diploma Guide',
   description:
     'IB Diploma Studies in Language and Literature — English A: Literature Higher Level, organized across the 3 Areas of Exploration (Readers, Writers and Texts; Time and Space; Intertextuality: Connecting Texts), 7 Key Concepts, Global Issues, and HL Assessment Components (Paper 1 both unseen texts / 40 marks, Paper 2 Comparative Essay, HL Essay, and Individual Oral).',
   examPaperTypes: [

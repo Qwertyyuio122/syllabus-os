@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     template: `%s · ${APP_NAME}`,
   },
   description:
-    'Notion-inspired IB Diploma Class of 2028 study workspace with official syllabi, interactive study guides, markscheme-calibrated question bank, and EE/TOK/CAS/IA rubric evaluation.',
+    'Liquid-glass minimalist IB Diploma study workspace with official syllabi, interactive study guides, markscheme-calibrated question bank, and EE/TOK/CAS/IA rubric evaluation.',
 };
 
 export default function RootLayout({
@@ -43,7 +43,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${newsreader.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="min-h-screen bg-white text-[#37352F] antialiased dark:bg-[#191919] dark:text-[#EBEBEB]">
+      <body className="liquid-canvas min-h-screen overflow-x-clip text-[#1D1D1F] antialiased dark:text-[#F5F5F7]">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

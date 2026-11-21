@@ -6,7 +6,7 @@ export const FRENCH_B_SL_CONFIG: IBSubjectConfig = {
   shortName: 'French B SL',
   level: 'SL',
   groupNumber: 2,
-  firstAssessment: 'May 2020 (Current through Class of 2028)',
+  firstAssessment: 'May 2020+ IB Diploma Guide',
   description:
     'IB Diploma Language B — French B Standard Level covering all 5 Prescribed Themes (Identités, Expériences, Ingéniosité humaine, Organisation sociale, Partage de la planète) and all official recommended subtopics alongside Paper 1 Production écrite, Paper 2 Compréhension écrite & orale, and the Individual Oral.',
   examPaperTypes: [

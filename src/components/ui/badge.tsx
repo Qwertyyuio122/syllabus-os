@@ -14,17 +14,17 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const badgeVariants: Record<BadgeVariant, string> = {
   default:
-    'bg-[#F1F1EF] text-[#37352F] border border-[#E6E6E4] dark:bg-[#2A2A2A] dark:text-[#EBEBEB] dark:border-[#2E2E2E]',
+    'glass-pill text-[#1D1D1F] dark:text-[#F5F5F7]',
   subtle:
-    'bg-[#FBFBFA] text-[#787774] border border-[#E6E6E4] dark:bg-[#202020] dark:text-[#9B9A97] dark:border-[#2E2E2E]',
+    'bg-black/[0.045] text-[#6E6E73] border border-black/[0.06] dark:bg-white/[0.06] dark:text-[#98989D] dark:border-white/[0.09]',
   outline:
-    'bg-transparent text-[#787774] border border-[#E6E6E4] dark:text-[#9B9A97] dark:border-[#2E2E2E]',
+    'bg-transparent text-[#6E6E73] border border-black/[0.1] dark:text-[#98989D] dark:border-white/[0.12]',
   solid:
-    'bg-[#37352F] text-white border border-[#37352F] dark:bg-[#EBEBEB] dark:text-[#191919] dark:border-[#EBEBEB]',
+    'bg-[#1D1D1F] text-white border border-[#1D1D1F] dark:bg-[#F5F5F7] dark:text-[#111113] dark:border-[#F5F5F7]',
   success:
-    'bg-[#F3F6F4] text-[#2F5E44] border border-[#DCE5DF] dark:bg-[#1E2621] dark:text-[#9FC3AD] dark:border-[#2D3B32]',
+    'bg-[#EEF5F0]/85 text-[#27533B] border border-[#CFE0D5] backdrop-blur-sm dark:bg-[#1C2A22]/85 dark:text-[#9FC3AD] dark:border-[#2E4336]',
   warning:
-    'bg-[#FAF7F0] text-[#785E2B] border border-[#EAE2CE] dark:bg-[#26221A] dark:text-[#D5BD88] dark:border-[#3A3325]',
+    'bg-[#FAF5EB]/85 text-[#755A25] border border-[#E6DBC2] backdrop-blur-sm dark:bg-[#2A2419]/85 dark:text-[#D5BD88] dark:border-[#423826]',
 };
 
 export function Badge({
@@ -35,7 +35,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium leading-tight tracking-tight',
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium leading-tight tracking-tight',
         badgeVariants[variant],
         className,
       )}

@@ -89,7 +89,7 @@ export function TimelineCausalityExplorer({
   return (
     <div onKeyDown={handleKeyDown}>
       {/* Category Pills & Step Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E6E6E4] bg-[#FBFBFA] px-4 py-2.5 dark:border-[#2E2E2E] dark:bg-[#202020]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.06] bg-white/30 px-4 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.02]">
         <div
           className="flex flex-wrap items-center gap-1.5"
           role="group"
@@ -103,10 +103,10 @@ export function TimelineCausalityExplorer({
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => handleSelectCategory(cat)}
-                className={`inline-flex h-6 cursor-pointer items-center rounded border px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
+                className={`inline-flex h-6 cursor-pointer items-center rounded-full px-2.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
                   isSelected
-                    ? 'border-[#37352F] bg-[#37352F] text-white dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:text-[#191919]'
-                    : 'border-[#E6E6E4] bg-white text-[#787774] hover:bg-[#F1F1EF] hover:text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#2A2A2A] dark:hover:text-[#EBEBEB]'
+                    ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                    : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
                 }`}
               >
                 {cat}
@@ -121,11 +121,11 @@ export function TimelineCausalityExplorer({
             onClick={() => handleStep(-1)}
             disabled={activeIndex <= 0}
             aria-label="Previous timeline event"
-            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-[#E6E6E4] bg-white text-[#37352F] transition-colors hover:bg-[#F1F1EF] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+            className="glass-pill inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
           >
             <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
-          <span className="min-w-[48px] text-center font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+          <span className="min-w-[48px] text-center font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
             {filteredEvents.length > 0
               ? `${activeIndex + 1} / ${filteredEvents.length}`
               : '0 / 0'}
@@ -135,7 +135,7 @@ export function TimelineCausalityExplorer({
             onClick={() => handleStep(1)}
             disabled={activeIndex < 0 || activeIndex >= filteredEvents.length - 1}
             aria-label="Next timeline event"
-            className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-[#E6E6E4] bg-white text-[#37352F] transition-colors hover:bg-[#F1F1EF] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+            className="glass-pill inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
           >
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
           </button>
@@ -144,12 +144,12 @@ export function TimelineCausalityExplorer({
 
       {/* Horizontal Timeline Nodes + Scrubber */}
       {filteredEvents.length > 0 && (
-        <div className="border-b border-[#E6E6E4] bg-white px-4 py-3.5 dark:border-[#2E2E2E] dark:bg-[#191919]">
+        <div className="border-b border-black/[0.06] px-4 py-4 dark:border-white/[0.08]">
           <div className="relative overflow-x-auto pb-2">
             <div className="relative inline-flex min-w-full items-start gap-3">
               {/* Horizontal Connecting Hairline */}
               <div
-                className="pointer-events-none absolute top-[23px] right-8 left-8 h-px bg-[#E6E6E4] dark:bg-[#2E2E2E]"
+                className="pointer-events-none absolute top-[23px] right-8 left-8 h-px bg-black/[0.1] dark:bg-white/[0.12]"
                 aria-hidden="true"
               />
 
@@ -161,13 +161,17 @@ export function TimelineCausalityExplorer({
                     type="button"
                     onClick={() => setSelectedEventId(ev.id)}
                     aria-current={isActive ? 'step' : undefined}
-                    className="group relative z-10 flex min-w-[120px] flex-1 cursor-pointer flex-col items-center rounded px-2 py-1 text-center transition-colors hover:bg-[#FBFBFA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:hover:bg-[#202020] dark:focus-visible:ring-[#EBEBEB]/30"
+                    className={`group relative z-10 flex min-w-[126px] flex-1 cursor-pointer flex-col items-center rounded-2xl px-2.5 py-1.5 text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                      isActive
+                        ? 'glass-surface'
+                        : 'hover:bg-black/[0.03] dark:hover:bg-white/[0.04]'
+                    }`}
                   >
                     <span
                       className={`font-mono text-[10px] font-medium ${
                         isActive
-                          ? 'text-[#37352F] dark:text-[#EBEBEB]'
-                          : 'text-[#787774] dark:text-[#9B9A97]'
+                          ? 'text-[#1D1D1F] dark:text-[#F5F5F7]'
+                          : 'text-[#6E6E73] dark:text-[#98989D]'
                       }`}
                     >
                       {ev.dateLabel}
@@ -176,8 +180,8 @@ export function TimelineCausalityExplorer({
                     <span
                       className={`my-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border transition-all ${
                         isActive
-                          ? 'scale-110 border-[#37352F] bg-[#37352F] ring-4 ring-[#37352F]/10 dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:ring-[#EBEBEB]/15'
-                          : 'border-[#787774]/60 bg-white group-hover:border-[#37352F] dark:border-[#9B9A97]/60 dark:bg-[#191919] dark:group-hover:border-[#EBEBEB]'
+                          ? 'scale-110 border-[#1D1D1F] bg-[#1D1D1F] ring-4 ring-[#1D1D1F]/12 dark:border-[#F5F5F7] dark:bg-[#F5F5F7] dark:ring-[#F5F5F7]/15'
+                          : 'border-[#6E6E73]/60 bg-white group-hover:border-[#1D1D1F] dark:border-[#98989D]/60 dark:bg-[#1A1A1D] dark:group-hover:border-[#F5F5F7]'
                       }`}
                     >
                       <span className="sr-only">{idx + 1}</span>
@@ -186,8 +190,8 @@ export function TimelineCausalityExplorer({
                     <span
                       className={`line-clamp-2 text-[11px] leading-tight ${
                         isActive
-                          ? 'font-semibold text-[#37352F] dark:text-[#EBEBEB]'
-                          : 'text-[#787774] dark:text-[#9B9A97]'
+                          ? 'font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]'
+                          : 'text-[#6E6E73] dark:text-[#98989D]'
                       }`}
                     >
                       {ev.title}
@@ -199,8 +203,8 @@ export function TimelineCausalityExplorer({
           </div>
 
           {filteredEvents.length > 1 && (
-            <div className="mt-1 flex items-center gap-3 px-1">
-              <span className="font-mono text-[10px] text-[#787774] uppercase dark:text-[#9B9A97]">
+            <div className="mt-1.5 flex items-center gap-3 px-1">
+              <span className="font-mono text-[10px] text-[#6E6E73] uppercase dark:text-[#98989D]">
                 Scrub
               </span>
               <input
@@ -215,7 +219,7 @@ export function TimelineCausalityExplorer({
                   const target = filteredEvents[idx];
                   if (target) setSelectedEventId(target.id);
                 }}
-                className="h-1.5 flex-1 cursor-pointer accent-[#37352F] dark:accent-[#EBEBEB]"
+                className="h-1.5 flex-1 cursor-pointer accent-[#1D1D1F] dark:accent-[#F5F5F7]"
               />
             </div>
           )}
@@ -223,52 +227,52 @@ export function TimelineCausalityExplorer({
       )}
 
       {/* Selected Event Card */}
-      <div className="bg-[#FBFBFA] p-4 dark:bg-[#202020]">
+      <div className="bg-white/25 p-5 dark:bg-white/[0.015]">
         {activeEvent ? (
           <div className="space-y-3.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded border border-[#E6E6E4] bg-white px-2 py-0.5 font-mono text-[11px] font-semibold text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]">
+              <span className="glass-pill inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                 <Calendar className="h-3 w-3" aria-hidden="true" />
                 {activeEvent.dateLabel}
               </span>
-              <span className="rounded border border-[#E6E6E4] bg-white px-2 py-0.5 text-[11px] font-medium text-[#787774] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97]">
+              <span className="glass-pill rounded-full px-2.5 py-0.5 text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
                 {activeEvent.category}
               </span>
             </div>
 
-            <h4 className="text-base font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]">
+            <h4 className="text-base font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
               {activeEvent.title}
             </h4>
 
             <MarkdownMath
               content={activeEvent.summaryMarkdown}
-              className="text-[13.5px] leading-relaxed text-[#37352F] dark:text-[#EBEBEB]"
+              className="text-[13.5px] leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]"
             />
 
             {activeEvent.primarySourceQuote && (
-              <blockquote className="rounded-r-md border border-[#E6E6E4] border-l-[3px] border-l-[#37352F] bg-white px-4 py-3 dark:border-[#2E2E2E] dark:border-l-[#EBEBEB] dark:bg-[#191919]">
-                <div className="mb-1 flex items-center gap-1.5 font-mono text-[10px] font-semibold tracking-wider text-[#787774] uppercase dark:text-[#9B9A97]">
+              <blockquote className="glass-surface rounded-2xl border-l-[3px] border-l-[#1D1D1F] px-4 py-3 dark:border-l-[#F5F5F7]">
+                <div className="mb-1 flex items-center gap-1.5 font-mono text-[10px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
                   <Quote className="h-3 w-3" aria-hidden="true" />
                   Primary Source
                 </div>
-                <p className="text-[13.5px] leading-relaxed text-[#37352F] italic dark:text-[#EBEBEB]">
+                <p className="text-[13.5px] leading-relaxed text-[#1D1D1F] italic dark:text-[#F5F5F7]">
                   {activeEvent.primarySourceQuote}
                 </p>
               </blockquote>
             )}
 
-            <div className="rounded-md border border-[#E6E6E4] bg-white p-3.5 dark:border-[#2E2E2E] dark:bg-[#191919]">
-              <div className="mb-1 font-mono text-[10px] font-semibold tracking-wider text-[#787774] uppercase dark:text-[#9B9A97]">
+            <div className="glass-surface rounded-2xl p-4">
+              <div className="mb-1 font-mono text-[10px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
                 Causality &amp; Historical Significance
               </div>
               <MarkdownMath
                 content={activeEvent.significanceMarkdown}
-                className="text-[13px] leading-relaxed text-[#37352F] dark:text-[#EBEBEB]"
+                className="text-[13px] leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]"
               />
             </div>
           </div>
         ) : (
-          <div className="py-6 text-center text-xs text-[#787774] dark:text-[#9B9A97]">
+          <div className="py-6 text-center text-xs text-[#6E6E73] dark:text-[#98989D]">
             No events match this category filter.
           </div>
         )}

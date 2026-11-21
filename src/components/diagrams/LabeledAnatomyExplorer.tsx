@@ -1,7 +1,16 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Eye, EyeOff, MapPin, RotateCcw } from 'lucide-react';
+import React, { useId, useMemo, useRef, useState } from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  MapPin,
+  Minus,
+  Plus,
+  RotateCcw,
+} from 'lucide-react';
 import type { LabeledExplorerSpec, SvgShape } from '@/types/diagrams';
 import { MarkdownMath } from '@/components/notes/MarkdownMath';
 
@@ -142,6 +151,7 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'line')}
           strokeWidth={shape.strokeWidth ?? 1.6}
           strokeDasharray={shape.strokeDasharray}
+          strokeLinecap="round"
           opacity={shape.opacity ?? 1}
         />
       );
@@ -154,6 +164,8 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'path')}
           strokeWidth={shape.stroke === 'none' ? 0 : (shape.strokeWidth ?? 1.6)}
           strokeDasharray={shape.strokeDasharray}
+          strokeLinecap="round"
+          strokeLinejoin="round"
           opacity={shape.opacity ?? 1}
         />
       );
@@ -178,7 +190,7 @@ function renderSvgShape(shape: SvgShape, index: number): React.ReactElement {
           fontWeight={shape.fontWeight ?? 500}
           textAnchor={shape.textAnchor ?? 'start'}
           fill={normalizeSvgPaint(shape.fill, 'fill', 'text')}
-          opacity={shape.opacity ?? 0.85}
+          opacity={shape.opacity ?? 0.88}
           style={{ fontFamily: 'var(--font-sans)' }}
         >
           {shape.text}
@@ -192,7 +204,22 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(
     spec.hotspots[0]?.id ?? null,
   );
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [revealedIds, setRevealedIds] = useState<Set<string>>(() => new Set());
+
+  // Interactive Zoom & Pan state
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef<{
+    clientX: number;
+    clientY: number;
+    panX: number;
+    panY: number;
+  } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const rawId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const gridPatternId = `plate-dots-${rawId}`;
 
   const vb = useMemo(() => parseViewBoxDimensions(spec.viewBox), [spec.viewBox]);
 
@@ -249,29 +276,86 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
     }
   };
 
+  const updateZoom = (nextZoom: number) => {
+    const clamped = Math.max(1, Math.min(2.25, Number(nextZoom.toFixed(2))));
+    setZoom(clamped);
+    if (clamped === 1) {
+      setPan({ x: 0, y: 0 });
+    }
+  };
+
+  const resetView = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const hoveredHotspot =
+    !selfTestMode && hoveredId
+      ? spec.hotspots.find((h) => h.id === hoveredId)
+      : undefined;
+
   return (
-    <div className="[--diagram-surface:#FFFFFF] dark:[--diagram-surface:#191919] [--diagram-subtle:#F1F1EF] dark:[--diagram-subtle:#2A2A2A]">
+    <div className="[--diagram-surface:#FFFFFF] dark:[--diagram-surface:#1A1A1D] [--diagram-subtle:#F1F1EF] dark:[--diagram-subtle:#2A2A2E]">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E6E6E4] bg-[#FBFBFA] px-4 py-2.5 dark:border-[#2E2E2E] dark:bg-[#202020]">
-        <div className="flex items-center gap-2 text-xs text-[#787774] dark:text-[#9B9A97]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.06] bg-white/30 px-4 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.02]">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-[#6E6E73] dark:text-[#98989D]">
           <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
           <span>
             {spec.hotspots.length} interactive{' '}
             {spec.hotspots.length === 1 ? 'pin' : 'pins'}
           </span>
           {selfTestMode && (
-            <span className="rounded border border-[#E6E6E4] bg-white px-2 py-0.5 font-mono text-[11px] font-medium text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]">
+            <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
               Revealed {revealedIds.size} / {spec.hotspots.length}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Zoom Controls */}
+          <div
+            role="group"
+            aria-label="Diagram zoom controls"
+            className="glass-pill inline-flex items-center rounded-full p-0.5"
+          >
+            <button
+              type="button"
+              onClick={() => updateZoom(zoom - 0.25)}
+              disabled={zoom <= 1}
+              aria-label="Zoom out"
+              className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-[#6E6E73] transition-colors hover:bg-black/[0.05] hover:text-[#1D1D1F] disabled:cursor-not-allowed disabled:opacity-35 dark:text-[#98989D] dark:hover:bg-white/[0.1] dark:hover:text-[#F5F5F7]"
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="min-w-[42px] text-center font-mono text-[10.5px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => updateZoom(zoom + 0.25)}
+              disabled={zoom >= 2.25}
+              aria-label="Zoom in"
+              className="inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-full text-[#6E6E73] transition-colors hover:bg-black/[0.05] hover:text-[#1D1D1F] disabled:cursor-not-allowed disabled:opacity-35 dark:text-[#98989D] dark:hover:bg-white/[0.1] dark:hover:text-[#F5F5F7]"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+
+          {(zoom > 1 || pan.x !== 0 || pan.y !== 0) && (
+            <button
+              type="button"
+              onClick={resetView}
+              className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+            >
+              Reset View
+            </button>
+          )}
+
           {selfTestMode && revealedIds.size > 0 && (
             <button
               type="button"
               onClick={resetSelfTestPins}
-              className="inline-flex h-7 cursor-pointer items-center gap-1 rounded border border-[#E6E6E4] bg-white px-2.5 text-xs font-medium text-[#787774] transition-colors hover:bg-[#F1F1EF] hover:text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#2A2A2A] dark:hover:text-[#EBEBEB]"
+              className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#6E6E73] transition-colors hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
             >
               <RotateCcw className="h-3 w-3" aria-hidden="true" />
               Mask All
@@ -281,10 +365,10 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
             type="button"
             aria-pressed={selfTestMode}
             onClick={toggleSelfTest}
-            className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded border px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
+            className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
               selfTestMode
-                ? 'border-[#37352F] bg-[#37352F] text-white dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:text-[#191919]'
-                : 'border-[#E6E6E4] bg-white text-[#37352F] hover:bg-[#F1F1EF] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]'
+                ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
             }`}
           >
             {selfTestMode ? (
@@ -298,98 +382,185 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
       </div>
 
       {/* Main Split Body */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1.45fr_1fr]">
+      <div className="grid grid-cols-1 xl:grid-cols-[1.6fr_1fr]">
         {/* SVG Stage */}
-        <div className="flex flex-col border-b border-[#E6E6E4] bg-white p-4 dark:border-[#2E2E2E] dark:bg-[#191919] lg:border-r lg:border-b-0">
-          <div className="relative w-full overflow-hidden rounded-md border border-[#E6E6E4] bg-[#FBFBFA] dark:border-[#2E2E2E] dark:bg-[#202020]">
+        <div className="flex flex-col border-b border-black/[0.06] p-4 dark:border-white/[0.08] xl:border-r xl:border-b-0">
+          <div
+            className={`glass-surface relative w-full overflow-hidden rounded-2xl ${
+              zoom > 1 ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''
+            }`}
+            onPointerDown={(e) => {
+              if (zoom <= 1) return;
+              if ((e.target as HTMLElement).closest('[role="button"]')) return;
+              setIsDragging(true);
+              dragStartRef.current = {
+                clientX: e.clientX,
+                clientY: e.clientY,
+                panX: pan.x,
+                panY: pan.y,
+              };
+            }}
+            onPointerMove={(e) => {
+              if (!isDragging || !dragStartRef.current) return;
+              const dx = e.clientX - dragStartRef.current.clientX;
+              const dy = e.clientY - dragStartRef.current.clientY;
+              const maxPanX = ((zoom - 1) * vb.width) / 2;
+              const maxPanY = ((zoom - 1) * vb.height) / 2;
+              setPan({
+                x: Math.max(-maxPanX, Math.min(maxPanX, dragStartRef.current.panX + dx)),
+                y: Math.max(-maxPanY, Math.min(maxPanY, dragStartRef.current.panY + dy)),
+              });
+            }}
+            onPointerUp={() => {
+              setIsDragging(false);
+              dragStartRef.current = null;
+            }}
+            onPointerLeave={() => {
+              setIsDragging(false);
+              dragStartRef.current = null;
+            }}
+          >
             <svg
               viewBox={vb.raw}
-              className="block h-auto w-full select-none text-[#37352F] dark:text-[#EBEBEB]"
+              className="block h-auto w-full select-none text-[#1D1D1F] dark:text-[#F5F5F7]"
               role="img"
               aria-label={spec.title}
             >
-              {/* Rendered Diagram Geometry */}
-              <g>{spec.shapes.map((shape, idx) => renderSvgShape(shape, idx))}</g>
+              <defs>
+                <pattern
+                  id={gridPatternId}
+                  width="20"
+                  height="20"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <circle
+                    cx="2"
+                    cy="2"
+                    r="0.85"
+                    fill="currentColor"
+                    opacity="0.12"
+                  />
+                </pattern>
+              </defs>
 
-              {/* Hotspot Pins */}
-              <g>
-                {spec.hotspots.map((hotspot, idx) => {
-                  const isSelected = hotspot.id === selectedId;
-                  const isRevealed =
-                    !selfTestMode || revealedIds.has(hotspot.id);
-                  const pinRadius = Math.max(12, Math.min(16, vb.width * 0.018));
+              <rect
+                x="0"
+                y="0"
+                width={vb.width}
+                height={vb.height}
+                fill={`url(#${gridPatternId})`}
+              />
 
-                  return (
-                    <g
-                      key={hotspot.id}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={
-                        isRevealed
-                          ? `Pin ${idx + 1}: ${hotspot.label}`
-                          : `Pin ${idx + 1} (hidden — activate to reveal)`
-                      }
-                      aria-pressed={isSelected}
-                      onClick={() => handleSelectHotspot(hotspot.id, true)}
-                      onMouseEnter={() => {
-                        if (!selfTestMode) {
-                          handleSelectHotspot(hotspot.id, false);
+              <g
+                transform={`translate(${vb.width / 2 + pan.x}, ${vb.height / 2 + pan.y}) scale(${zoom}) translate(${-vb.width / 2}, ${-vb.height / 2})`}
+              >
+                {/* Rendered Diagram Geometry */}
+                <g>
+                  {spec.shapes.map((shape, idx) => renderSvgShape(shape, idx))}
+                </g>
+
+                {/* Hotspot Pins */}
+                <g>
+                  {spec.hotspots.map((hotspot, idx) => {
+                    const isSelected = hotspot.id === selectedId;
+                    const isHovered = hotspot.id === hoveredId;
+                    const isRevealed =
+                      !selfTestMode || revealedIds.has(hotspot.id);
+                    const pinRadius = Math.max(
+                      12,
+                      Math.min(15, vb.width * 0.017),
+                    );
+
+                    return (
+                      <g
+                        key={hotspot.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={
+                          isRevealed
+                            ? `Pin ${idx + 1}: ${hotspot.label}`
+                            : `Pin ${idx + 1} (hidden — activate to reveal)`
                         }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleSelectHotspot(hotspot.id, true);
+                        aria-pressed={isSelected}
+                        onClick={() => handleSelectHotspot(hotspot.id, true)}
+                        onMouseEnter={() => {
+                          setHoveredId(hotspot.id);
+                          if (!selfTestMode) {
+                            handleSelectHotspot(hotspot.id, false);
+                          }
+                        }}
+                        onMouseLeave={() => setHoveredId(null)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSelectHotspot(hotspot.id, true);
+                          }
+                        }}
+                        className="cursor-pointer outline-none"
+                        opacity={
+                          selectedId && !isSelected && !isHovered ? 0.72 : 1
                         }
-                      }}
-                      className="cursor-pointer outline-none"
-                    >
-                      {isSelected && (
+                      >
+                        {isSelected && (
+                          <circle
+                            cx={hotspot.x}
+                            cy={hotspot.y}
+                            r={pinRadius + 5.5}
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={1.6}
+                            className="animate-pin-ripple"
+                          />
+                        )}
                         <circle
                           cx={hotspot.x}
                           cy={hotspot.y}
-                          r={pinRadius + 4.5}
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={1.5}
-                          opacity={0.4}
+                          r={pinRadius + 1.5}
+                          fill="var(--diagram-surface, #ffffff)"
+                          opacity={0.75}
                         />
-                      )}
-                      <circle
-                        cx={hotspot.x}
-                        cy={hotspot.y}
-                        r={pinRadius}
-                        fill={
-                          isSelected
-                            ? 'currentColor'
-                            : 'var(--diagram-surface, #ffffff)'
-                        }
-                        stroke="currentColor"
-                        strokeWidth={isSelected ? 2 : 1.6}
-                      />
-                      <text
-                        x={hotspot.x}
-                        y={hotspot.y + 4}
-                        textAnchor="middle"
-                        fontSize={11}
-                        fontWeight={600}
-                        fill={
-                          isSelected
-                            ? 'var(--diagram-surface, #ffffff)'
-                            : 'currentColor'
-                        }
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          pointerEvents: 'none',
-                        }}
-                      >
-                        {idx + 1}
-                      </text>
-                    </g>
-                  );
-                })}
+                        <circle
+                          cx={hotspot.x}
+                          cy={hotspot.y}
+                          r={pinRadius}
+                          fill={
+                            isSelected
+                              ? 'currentColor'
+                              : 'var(--diagram-surface, #ffffff)'
+                          }
+                          stroke="currentColor"
+                          strokeWidth={isSelected ? 2.1 : 1.6}
+                        />
+                        <text
+                          x={hotspot.x}
+                          y={hotspot.y + 4}
+                          textAnchor="middle"
+                          fontSize={11}
+                          fontWeight={700}
+                          fill={
+                            isSelected
+                              ? 'var(--diagram-surface, #ffffff)'
+                              : 'currentColor'
+                          }
+                          style={{
+                            fontFamily: 'var(--font-mono)',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          {idx + 1}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
               </g>
             </svg>
+
+            {hoveredHotspot && (
+              <div className="glass-panel pointer-events-none absolute bottom-3 left-3 rounded-full px-3 py-1 text-[11px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {hoveredHotspot.label}
+              </div>
+            )}
           </div>
 
           {/* Quick-Jump Pin Strip */}
@@ -403,10 +574,10 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
                   type="button"
                   onClick={() => handleSelectHotspot(hotspot.id, true)}
                   aria-pressed={isSelected}
-                  className={`inline-flex cursor-pointer items-center gap-1.5 rounded border px-2 py-1 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
+                  className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
                     isSelected
-                      ? 'border-[#37352F] bg-[#37352F] text-white dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:text-[#191919]'
-                      : 'border-[#E6E6E4] bg-[#FBFBFA] text-[#37352F] hover:bg-[#F1F1EF] dark:border-[#2E2E2E] dark:bg-[#202020] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]'
+                      ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                      : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
                   }`}
                 >
                   <span className="font-mono text-[11px] font-semibold">
@@ -422,29 +593,29 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
         </div>
 
         {/* Side Inspector Card */}
-        <div className="flex flex-col justify-between bg-[#FBFBFA] p-4 dark:bg-[#202020]">
+        <div className="flex flex-col justify-between bg-white/25 p-5 dark:bg-white/[0.015]">
           {isInspectorVisible && activeHotspot ? (
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex h-6 min-w-6 items-center justify-center rounded border border-[#E6E6E4] bg-white px-1.5 font-mono text-xs font-semibold text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]">
+                  <span className="glass-pill inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                     #{activeIndex + 1}
                   </span>
-                  <span className="rounded border border-[#E6E6E4] bg-white px-2 py-0.5 text-[11px] font-medium text-[#787774] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97]">
+                  <span className="glass-pill rounded-full px-2.5 py-0.5 text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
                     {activeHotspot.category}
                   </span>
                 </div>
               </div>
 
-              <h4 className="text-base font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]">
+              <h4 className="text-base font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
                 {activeHotspot.label}
               </h4>
 
-              <div className="rounded-md border border-[#E6E6E4] bg-white px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#191919]">
-                <div className="text-[10px] font-medium tracking-wider text-[#787774] uppercase dark:text-[#9B9A97]">
+              <div className="glass-surface rounded-2xl px-3.5 py-2.5">
+                <div className="text-[10px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
                   IB Markscheme Keyword
                 </div>
-                <div className="mt-0.5 font-mono text-xs font-medium text-[#37352F] dark:text-[#EBEBEB]">
+                <div className="mt-1 font-mono text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
                   {activeHotspot.examKeyword}
                 </div>
               </div>
@@ -452,20 +623,20 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
               <div className="pt-0.5">
                 <MarkdownMath
                   content={activeHotspot.detailMarkdown}
-                  className="text-[13.5px] leading-relaxed text-[#37352F] dark:text-[#EBEBEB]"
+                  className="text-[13.5px] leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]"
                 />
               </div>
             </div>
           ) : (
-            <div className="flex flex-1 flex-col items-center justify-center rounded-md border border-dashed border-[#E6E6E4] bg-white px-4 py-8 text-center dark:border-[#2E2E2E] dark:bg-[#191919]">
+            <div className="glass-surface flex flex-1 flex-col items-center justify-center rounded-2xl border-dashed px-4 py-8 text-center">
               <EyeOff
-                className="mb-2 h-5 w-5 text-[#787774] dark:text-[#9B9A97]"
+                className="mb-2 h-5 w-5 text-[#6E6E73] dark:text-[#98989D]"
                 aria-hidden="true"
               />
-              <p className="text-sm font-medium text-[#37352F] dark:text-[#EBEBEB]">
+              <p className="text-sm font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
                 Self-Test Pins Active
               </p>
-              <p className="mt-1 max-w-xs text-xs leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+              <p className="mt-1 max-w-xs text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
                 Click any numbered pin on the diagram or strip below to reveal
                 its anatomical/structural label and IB markscheme keyword.
               </p>
@@ -474,23 +645,23 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
 
           {/* Inspector Footer Stepper */}
           {spec.hotspots.length > 1 && (
-            <div className="mt-4 flex items-center justify-between border-t border-[#E6E6E4] pt-3 dark:border-[#2E2E2E]">
+            <div className="mt-5 flex items-center justify-between border-t border-black/[0.06] pt-3.5 dark:border-white/[0.08]">
               <button
                 type="button"
                 onClick={() => handleStep(-1)}
-                className="inline-flex h-7 cursor-pointer items-center gap-1 rounded border border-[#E6E6E4] bg-white px-2.5 text-xs font-medium text-[#37352F] transition-colors hover:bg-[#F1F1EF] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+                className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-3 text-xs font-medium text-[#1D1D1F] transition-colors hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
               >
                 <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
                 Prev Pin
               </button>
-              <span className="font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+              <span className="font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
                 {activeIndex >= 0 ? activeIndex + 1 : '—'} /{' '}
                 {spec.hotspots.length}
               </span>
               <button
                 type="button"
                 onClick={() => handleStep(1)}
-                className="inline-flex h-7 cursor-pointer items-center gap-1 rounded border border-[#E6E6E4] bg-white px-2.5 text-xs font-medium text-[#37352F] transition-colors hover:bg-[#F1F1EF] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]"
+                className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-3 text-xs font-medium text-[#1D1D1F] transition-colors hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
               >
                 Next Pin
                 <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />

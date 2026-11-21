@@ -177,7 +177,7 @@ export function FlashcardsTab({
   return (
     <div className="space-y-5">
       {/* Filter & Deck Stats */}
-      <div className="flex flex-col gap-3 rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] p-3 sm:flex-row sm:items-center sm:justify-between dark:border-[#2E2E2E] dark:bg-[#202020]">
+      <div className="glass-surface flex flex-col gap-3 rounded-2xl p-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="w-56">
             <Select value={topicFilter} onValueChange={setTopicFilter}>
@@ -204,7 +204,7 @@ export function FlashcardsTab({
           </Button>
         </div>
 
-        <div className="flex items-center gap-3 font-mono text-xs text-[#787774] dark:text-[#9B9A97]">
+        <div className="flex items-center gap-3 font-mono text-xs text-[#6E6E73] dark:text-[#98989D]">
           <span>
             {masteredTotal} / {flashcards.length} mastered overall
           </span>
@@ -214,7 +214,7 @@ export function FlashcardsTab({
       {errorMsg && (
         <div
           role="alert"
-          className="rounded-md border border-[#E6D0D0] bg-[#FAF2F2] px-3 py-2 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F] dark:text-[#E59898]"
+          className="rounded-xl border border-[#E6D0D0] bg-[#FAF2F2]/90 px-3.5 py-2.5 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F]/90 dark:text-[#E59898]"
         >
           {errorMsg}
         </div>
@@ -224,7 +224,7 @@ export function FlashcardsTab({
         <div className="mx-auto max-w-2xl space-y-4">
           {/* Progress bar */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between font-mono text-xs text-[#787774] dark:text-[#9B9A97]">
+            <div className="flex items-center justify-between font-mono text-xs text-[#6E6E73] dark:text-[#98989D]">
               <span>
                 Card {currentIndex + 1} of {filteredCards.length}
               </span>
@@ -232,9 +232,9 @@ export function FlashcardsTab({
                 {masteredFiltered} mastered in view
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#F1F1EF] dark:bg-[#2A2A2A]">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
               <div
-                className="h-full rounded-full bg-[#37352F] transition-all duration-200 dark:bg-[#EBEBEB]"
+                className="h-full rounded-full bg-[#1D1D1F] transition-all duration-200 dark:bg-[#F5F5F7]"
                 style={{ width: `${deckProgressPct}%` }}
               />
             </div>
@@ -257,7 +257,7 @@ export function FlashcardsTab({
               }
             }}
             data-testid="flashcard-surface"
-            className="flex min-h-[260px] cursor-pointer flex-col justify-between rounded-lg border border-[#E6E6E4] bg-white p-6 transition-colors hover:bg-[#FBFBFA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:border-[#2E2E2E] dark:bg-[#191919] dark:hover:bg-[#202020] dark:focus-visible:ring-[#EBEBEB]/30"
+            className="glass-panel glass-interactive flex min-h-[280px] cursor-pointer flex-col justify-between rounded-3xl p-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -277,7 +277,7 @@ export function FlashcardsTab({
               )}
             </div>
 
-            <div className="my-6 text-base leading-relaxed text-[#37352F] dark:text-[#EBEBEB]">
+            <div className="my-6 text-base leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
               <MarkdownMath
                 content={
                   flipped
@@ -287,7 +287,7 @@ export function FlashcardsTab({
               />
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-[#787774] dark:text-[#9B9A97]">
+            <div className="flex items-center justify-between text-[11px] text-[#6E6E73] dark:text-[#98989D]">
               <span>Click card or press Space to flip</span>
               <span className="font-mono">← / → navigate · M mastered</span>
             </div>

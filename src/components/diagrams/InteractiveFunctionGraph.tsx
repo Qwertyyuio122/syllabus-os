@@ -236,9 +236,9 @@ export function InteractiveFunctionGraph({
   );
 
   return (
-    <div className="[--diagram-surface:#FFFFFF] dark:[--diagram-surface:#191919]">
+    <div className="[--diagram-surface:#FFFFFF] dark:[--diagram-surface:#1A1A1D]">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E6E6E4] bg-[#FBFBFA] px-4 py-2.5 dark:border-[#2E2E2E] dark:bg-[#202020]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.06] bg-white/30 px-4 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.02]">
         <div className="flex flex-wrap items-center gap-3">
           {spec.curves.map((curve, idx) => {
             const dash = curve.dashed
@@ -248,7 +248,7 @@ export function InteractiveFunctionGraph({
             return (
               <div
                 key={curve.id}
-                className="inline-flex items-center gap-1.5 text-xs text-[#37352F] dark:text-[#EBEBEB]"
+                className="glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs text-[#1D1D1F] dark:text-[#F5F5F7]"
               >
                 <svg width="20" height="8" aria-hidden="true">
                   <line
@@ -272,10 +272,10 @@ export function InteractiveFunctionGraph({
           type="button"
           aria-pressed={tangentEnabled}
           onClick={() => setTangentEnabled((prev) => !prev)}
-          className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded border px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F]/30 dark:focus-visible:ring-[#EBEBEB]/30 ${
+          className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
             tangentEnabled
-              ? 'border-[#37352F] bg-[#37352F] text-white dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:text-[#191919]'
-              : 'border-[#E6E6E4] bg-white text-[#37352F] hover:bg-[#F1F1EF] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A]'
+              ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+              : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
           }`}
         >
           <Crosshair className="h-3.5 w-3.5" aria-hidden="true" />
@@ -283,14 +283,14 @@ export function InteractiveFunctionGraph({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 xl:grid-cols-[1.55fr_1fr]">
         {/* SVG Coordinate Grid */}
-        <div className="border-b border-[#E6E6E4] bg-white p-4 dark:border-[#2E2E2E] dark:bg-[#191919] lg:border-r lg:border-b-0">
-          <div className="overflow-hidden rounded-md border border-[#E6E6E4] bg-[#FBFBFA] dark:border-[#2E2E2E] dark:bg-[#202020]">
+        <div className="border-b border-black/[0.06] p-4 dark:border-white/[0.08] xl:border-r xl:border-b-0">
+          <div className="glass-surface overflow-hidden rounded-2xl">
             <svg
               ref={svgRef}
               viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-              className={`block h-auto w-full select-none text-[#37352F] dark:text-[#EBEBEB] ${
+              className={`block h-auto w-full select-none text-[#1D1D1F] dark:text-[#F5F5F7] ${
                 tangentEnabled ? 'cursor-crosshair' : ''
               }`}
               role="img"
@@ -471,9 +471,18 @@ export function InteractiveFunctionGraph({
                       x2={tangentStats.line.x2}
                       y2={tangentStats.line.y2}
                       stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeDasharray="4 3"
-                      opacity={0.7}
+                      strokeWidth={1.6}
+                      strokeDasharray="5 3"
+                      opacity={0.75}
+                    />
+                    <circle
+                      cx={tangentStats.line.px}
+                      cy={tangentStats.line.py}
+                      r={9.5}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.2}
+                      className="animate-pin-ripple"
                     />
                     <circle
                       cx={tangentStats.line.px}
@@ -481,7 +490,7 @@ export function InteractiveFunctionGraph({
                       r={5}
                       fill="var(--diagram-surface, #ffffff)"
                       stroke="currentColor"
-                      strokeWidth={2}
+                      strokeWidth={2.2}
                     />
                   </g>
                 )}
@@ -523,12 +532,12 @@ export function InteractiveFunctionGraph({
         </div>
 
         {/* Sliders & Live Readout Panel */}
-        <div className="flex flex-col justify-between gap-4 bg-[#FBFBFA] p-4 dark:bg-[#202020]">
+        <div className="flex flex-col justify-between gap-4 bg-white/25 p-5 dark:bg-white/[0.015]">
           <div className="space-y-4">
             {/* Parameter Sliders */}
             {spec.sliders.length > 0 && (
               <div className="space-y-3">
-                <div className="flex items-center gap-1.5 text-xs font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]">
+                <div className="flex items-center gap-1.5 text-xs font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
                   <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
                   Parameters
                 </div>
@@ -540,16 +549,16 @@ export function InteractiveFunctionGraph({
                     return (
                       <div
                         key={slider.key}
-                        className="rounded-md border border-[#E6E6E4] bg-white px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#191919]"
+                        className="glass-surface rounded-2xl px-3.5 py-2.5"
                       >
                         <div className="flex items-center justify-between gap-2 text-xs">
                           <label
                             htmlFor={`slider-${spec.id}-${slider.key}`}
-                            className="font-medium text-[#37352F] dark:text-[#EBEBEB]"
+                            className="font-medium text-[#1D1D1F] dark:text-[#F5F5F7]"
                           >
                             {slider.label}
                           </label>
-                          <span className="font-mono text-xs font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                          <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                             {Number(currentVal.toFixed(3))}
                           </span>
                         </div>
@@ -568,9 +577,9 @@ export function InteractiveFunctionGraph({
                               [slider.key]: nextVal,
                             }));
                           }}
-                          className="mt-1.5 h-1.5 w-full cursor-pointer accent-[#37352F] dark:accent-[#EBEBEB]"
+                          className="mt-2 h-1.5 w-full cursor-pointer accent-[#1D1D1F] dark:accent-[#F5F5F7]"
                         />
-                        <div className="mt-0.5 flex justify-between font-mono text-[10px] text-[#787774] dark:text-[#9B9A97]">
+                        <div className="mt-0.5 flex justify-between font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
                           <span>{slider.min}</span>
                           <span>{slider.max}</span>
                         </div>
@@ -584,20 +593,20 @@ export function InteractiveFunctionGraph({
             {/* Tangent & Derivative Readout */}
             {tangentEnabled && (
               <div className="space-y-2.5">
-                <div className="flex items-center gap-1.5 text-xs font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]">
+                <div className="flex items-center gap-1.5 text-xs font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
                   <Activity className="h-3.5 w-3.5" aria-hidden="true" />
                   Tangent Probe (Primary Curve)
                 </div>
 
-                <div className="rounded-md border border-[#E6E6E4] bg-white px-3 py-2.5 dark:border-[#2E2E2E] dark:bg-[#191919]">
+                <div className="glass-surface rounded-2xl px-3.5 py-3">
                   <div className="flex items-center justify-between gap-2 text-xs">
                     <label
                       htmlFor={`tangent-x-${spec.id}`}
-                      className="font-medium text-[#37352F] dark:text-[#EBEBEB]"
+                      className="font-medium text-[#1D1D1F] dark:text-[#F5F5F7]"
                     >
                       Tangent x₀
                     </label>
-                    <span className="font-mono text-xs font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                    <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                       {tangentX.toFixed(2)}
                     </span>
                   </div>
@@ -610,47 +619,58 @@ export function InteractiveFunctionGraph({
                     step={tangentStep}
                     value={Math.max(xMin, Math.min(xMax, tangentX))}
                     onChange={(e) => setTangentX(Number(e.target.value))}
-                    className="mt-1.5 h-1.5 w-full cursor-pointer accent-[#37352F] dark:accent-[#EBEBEB]"
+                    className="mt-2 h-1.5 w-full cursor-pointer accent-[#1D1D1F] dark:accent-[#F5F5F7]"
                   />
-                  <div className="mt-2.5 grid grid-cols-2 gap-2 border-t border-[#E6E6E4] pt-2 dark:border-[#2E2E2E]">
+                  <div className="mt-2.5 grid grid-cols-2 gap-2 border-t border-black/[0.06] pt-2.5 dark:border-white/[0.08]">
                     <div>
-                      <div className="font-mono text-[10px] text-[#787774] uppercase dark:text-[#9B9A97]">
+                      <div className="font-mono text-[10px] text-[#6E6E73] uppercase dark:text-[#98989D]">
                         f(x₀)
                       </div>
-                      <div className="font-mono text-xs font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                      <div className="font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                         {tangentStats?.valid
                           ? tangentStats.fx.toFixed(3)
                           : 'Undefined'}
                       </div>
                     </div>
                     <div>
-                      <div className="font-mono text-[10px] text-[#787774] uppercase dark:text-[#9B9A97]">
+                      <div className="font-mono text-[10px] text-[#6E6E73] uppercase dark:text-[#98989D]">
                         Slope f&apos;(x₀)
                       </div>
-                      <div className="font-mono text-xs font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                      <div className="font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                         {tangentStats?.valid
                           ? tangentStats.slope.toFixed(3)
                           : 'Undefined'}
                       </div>
                     </div>
                   </div>
+                  {tangentStats?.valid && (
+                    <div className="mt-2 border-t border-black/[0.06] pt-2 font-mono text-[11px] text-[#6E6E73] dark:border-white/[0.08] dark:text-[#98989D]">
+                      Tangent: y = {tangentStats.slope.toFixed(2)}x{' '}
+                      {tangentStats.fx - tangentStats.slope * tangentStats.x0 >= 0
+                        ? '+'
+                        : '−'}{' '}
+                      {Math.abs(
+                        tangentStats.fx - tangentStats.slope * tangentStats.x0,
+                      ).toFixed(2)}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
             {/* Equations Reference */}
-            <div className="rounded-md border border-[#E6E6E4] bg-white px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#191919]">
-              <div className="font-mono text-[10px] font-medium tracking-wider text-[#787774] uppercase dark:text-[#9B9A97]">
+            <div className="glass-surface rounded-2xl px-3.5 py-2.5">
+              <div className="font-mono text-[10px] font-medium tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
                 Expressions
               </div>
               <ul className="mt-1 space-y-1">
                 {spec.curves.map((curve) => (
                   <li
                     key={curve.id}
-                    className="truncate font-mono text-[11px] text-[#37352F] dark:text-[#EBEBEB]"
+                    className="truncate font-mono text-[11px] text-[#1D1D1F] dark:text-[#F5F5F7]"
                     title={`${curve.label}: ${curve.expression}`}
                   >
-                    <span className="text-[#787774] dark:text-[#9B9A97]">
+                    <span className="text-[#6E6E73] dark:text-[#98989D]">
                       {curve.label}:{' '}
                     </span>
                     {curve.expression}
@@ -661,7 +681,7 @@ export function InteractiveFunctionGraph({
           </div>
 
           {tangentEnabled && (
-            <p className="text-[11px] text-[#787774] dark:text-[#9B9A97]">
+            <p className="text-[11px] text-[#6E6E73] dark:text-[#98989D]">
               Tip: drag directly across the graph or scrub the Tangent x₀ slider
               to inspect instantaneous gradient.
             </p>

@@ -447,15 +447,15 @@ export function MaterialsSyncTab({
             setIsDragging(false);
             void handleFilesSelected(e.dataTransfer.files);
           }}
-          className={`lg:col-span-2 flex flex-col justify-between gap-3 rounded-lg border border-dashed p-4 transition-colors ${
+          className={`lg:col-span-2 flex flex-col justify-between gap-3 rounded-2xl border border-dashed p-5 transition-all ${
             isDragging
-              ? 'border-[#37352F] bg-[#F1F1EF] dark:border-[#EBEBEB] dark:bg-[#2A2A2A]'
-              : 'border-[#D3D2CE] bg-[#FBFBFA] dark:border-[#3A3A38] dark:bg-[#202020]'
+              ? 'glass-panel border-[#1D1D1F] dark:border-[#F5F5F7]'
+              : 'glass-surface border-black/15 dark:border-white/15'
           }`}
         >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#E6E6E4] bg-white text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]">
+              <div className="glass-pill mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[#1D1D1F] dark:text-[#F5F5F7]">
                 {uploading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -463,11 +463,11 @@ export function MaterialsSyncTab({
                 )}
               </div>
               <div>
-                <div className="text-sm font-medium text-[#37352F] dark:text-[#EBEBEB]">
+                <div className="text-sm font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
                   {uploadStatusText ||
                     'Drop teacher slides, worksheets, or board photos here'}
                 </div>
-                <p className="mt-0.5 text-xs text-[#787774] dark:text-[#9B9A97]">
+                <p className="mt-0.5 text-xs text-[#6E6E73] dark:text-[#98989D]">
                   Supports PDF, PPTX, DOCX, TXT/MD, and PNG/JPG/WEBP (files
                   &gt; 4 MB upload directly to encrypted Storage).
                 </p>
@@ -495,8 +495,8 @@ export function MaterialsSyncTab({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-[#E6E6E4] pt-2.5 dark:border-[#2E2E2E]">
-            <span className="text-xs text-[#787774] dark:text-[#9B9A97]">
+          <div className="flex flex-wrap items-center gap-2 border-t border-black/[0.06] pt-3 dark:border-white/[0.08]">
+            <span className="text-xs text-[#6E6E73] dark:text-[#98989D]">
               Tag new uploads to topic:
             </span>
             <div className="w-60">
@@ -518,12 +518,12 @@ export function MaterialsSyncTab({
         </div>
 
         {/* Paste Lecture / Drive Notes Card */}
-        <div className="flex flex-col justify-between gap-3 rounded-lg border border-[#E6E6E4] bg-white p-4 dark:border-[#2E2E2E] dark:bg-[#191919]">
+        <div className="glass-panel flex flex-col justify-between gap-3 rounded-2xl p-5">
           <div>
-            <div className="text-sm font-medium text-[#37352F] dark:text-[#EBEBEB]">
+            <div className="text-sm font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
               Paste Lecture / Drive Notes
             </div>
-            <p className="mt-1 text-xs leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+            <p className="mt-1 text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
               Paste Google Docs outlines, teacher announcements, or copied
               problem sets directly into this subject.
             </p>
@@ -559,7 +559,7 @@ export function MaterialsSyncTab({
       )}
 
       {/* AI Generation Controls Bar */}
-      <div className="flex flex-col gap-3 rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] p-3.5 lg:flex-row lg:items-center lg:justify-between dark:border-[#2E2E2E] dark:bg-[#202020]">
+      <div className="glass-surface flex flex-col gap-3 rounded-2xl p-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2.5">
           <Badge variant="outline" className="font-mono">
             {selectedIds.length} selected
@@ -625,11 +625,11 @@ export function MaterialsSyncTab({
       </div>
 
       {/* Materials Table */}
-      <div className="overflow-hidden rounded-lg border border-[#E6E6E4] bg-white dark:border-[#2E2E2E] dark:bg-[#191919]">
+      <div className="glass-panel overflow-hidden rounded-2xl">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-[#E6E6E4] bg-[#FBFBFA] text-[11px] font-medium uppercase tracking-wider text-[#787774] dark:border-[#2E2E2E] dark:bg-[#202020] dark:text-[#9B9A97]">
+              <tr className="border-b border-black/[0.06] bg-black/[0.025] text-[11px] font-medium uppercase tracking-wider text-[#6E6E73] dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-[#98989D]">
                 <th className="w-10 px-3 py-2.5">
                   <button
                     type="button"

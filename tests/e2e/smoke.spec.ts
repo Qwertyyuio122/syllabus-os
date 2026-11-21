@@ -358,7 +358,7 @@ test.describe('SyllabusOS Smoke & Gate Verification', () => {
     await expect(page).toHaveURL(/\/dashboard\/core/);
     await expect(page.getByText(/Extended Essay/i).first()).toBeVisible();
     await expect(page.getByText(/TOK Essay/i).first()).toBeVisible();
-    await expect(page.getByText(/CAS 2028/i).first()).toBeVisible();
+    await expect(page.getByText(/CAS Portfolio/i).first()).toBeVisible();
     await page.getByRole('tab', { name: /Official IB Rubric/i }).click();
     await expect(page.getByText(/Criterion/i).first()).toBeVisible();
     await page

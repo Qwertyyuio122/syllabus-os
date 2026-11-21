@@ -31,28 +31,36 @@ function GoogleMarkIcon() {
 
 function LoginCardShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full max-w-[400px] rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] p-8 dark:border-[#2E2E2E] dark:bg-[#202020]">
-      <div className="flex items-center gap-2.5">
-        <BrandMonogram
-          size={24}
-          className="text-[#37352F] dark:text-[#EBEBEB]"
-        />
-        <span className="text-lg font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]">
-          {APP_NAME}
+    <div className="glass-panel w-full max-w-[420px] rounded-3xl p-8 sm:p-9">
+      <div className="flex items-center gap-3">
+        <span className="glass-pill flex h-10 w-10 items-center justify-center rounded-2xl">
+          <BrandMonogram
+            size={22}
+            className="text-[#1D1D1F] dark:text-[#F5F5F7]"
+          />
         </span>
+        <div>
+          <span className="text-lg font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
+            {APP_NAME}
+          </span>
+          <p className="text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
+            {APP_COHORT}
+          </p>
+        </div>
       </div>
 
-      <h1 className="mt-6 text-xl font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]">
+      <h1 className="mt-7 text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
         Sign in to your workspace
       </h1>
-      <p className="mt-1.5 text-sm leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+      <p className="mt-1.5 text-sm leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
         {APP_TAGLINE}
       </p>
 
       {children}
 
-      <div className="mt-6 border-t border-[#E6E6E4] pt-4 text-xs text-[#787774] dark:border-[#2E2E2E] dark:text-[#9B9A97]">
-        {APP_COHORT}
+      <div className="mt-7 border-t border-black/[0.06] pt-4 text-xs text-[#6E6E73] dark:border-white/[0.08] dark:text-[#98989D]">
+        Open access for all IB Diploma students · Official syllabi, interactive
+        notes, and markscheme-calibrated grading.
       </div>
     </div>
   );
@@ -101,7 +109,7 @@ function LoginCardContent() {
       {errorMessage ? (
         <div
           role="alert"
-          className="mt-5 rounded-md border border-[#E6E6E4] bg-white px-3.5 py-2.5 text-xs leading-relaxed text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB]"
+          className="glass-surface mt-5 rounded-xl px-3.5 py-2.5 text-xs leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]"
         >
           {errorMessage}
         </div>
@@ -112,7 +120,7 @@ function LoginCardContent() {
         onClick={handleGoogleSignIn}
         disabled={isLoading}
         aria-busy={isLoading}
-        className="mt-6 flex h-10 w-full cursor-pointer items-center justify-center gap-2.5 rounded-md border border-[#E6E6E4] bg-white px-4 text-sm font-medium text-[#37352F] transition-colors duration-150 hover:bg-[#F1F1EF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#37352F] disabled:cursor-not-allowed disabled:opacity-60 dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:hover:bg-[#2A2A2A] dark:focus-visible:ring-[#EBEBEB]"
+        className="glass-pill glass-interactive mt-6 flex h-11 w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl px-4 text-sm font-medium text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 disabled:cursor-not-allowed disabled:opacity-60 dark:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25"
       >
         <GoogleMarkIcon />
         <span>
@@ -126,14 +134,14 @@ function LoginCardContent() {
 function LoginCardFallback() {
   return (
     <LoginCardShell>
-      <div className="mt-6 h-10 w-full rounded-md border border-[#E6E6E4] bg-white dark:border-[#2E2E2E] dark:bg-[#191919]" />
+      <div className="glass-pill mt-6 h-11 w-full rounded-2xl" />
     </LoginCardShell>
   );
 }
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-4 py-12 dark:bg-[#191919]">
+    <main className="liquid-canvas flex min-h-screen items-center justify-center px-4 py-12">
       <Suspense fallback={<LoginCardFallback />}>
         <LoginCardContent />
       </Suspense>

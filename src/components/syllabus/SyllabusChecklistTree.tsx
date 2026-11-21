@@ -323,16 +323,16 @@ export function SyllabusChecklistTree({
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="glass-surface flex flex-col gap-2.5 rounded-2xl p-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-xs">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-[#787774] dark:text-[#9B9A97]" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[#6E6E73] dark:text-[#98989D]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter by code, topic, or guidance…"
             aria-label="Filter syllabus topics"
-            className="h-8 w-full rounded-md border border-[#E6E6E4] bg-white pr-3 pl-8 text-xs text-[#37352F] placeholder:text-[#787774] focus:border-[#37352F] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:placeholder:text-[#9B9A97] dark:focus:border-[#EBEBEB]"
+            className="glass-pill h-8 w-full rounded-xl pr-3 pl-8 text-xs text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:ring-2 focus:ring-[#1D1D1F]/20 dark:text-[#F5F5F7] dark:placeholder:text-[#98989D] dark:focus:ring-[#F5F5F7]/20"
           />
         </div>
 
@@ -350,10 +350,10 @@ export function SyllabusChecklistTree({
               key={value}
               type="button"
               onClick={() => setStatusFilter(value)}
-              className={`rounded-md border px-2 py-1 text-xs transition-colors cursor-pointer ${
+              className={`rounded-full px-2.5 py-1 text-xs transition-all cursor-pointer ${
                 statusFilter === value
-                  ? 'border-[#37352F] bg-[#37352F] font-medium text-white dark:border-[#EBEBEB] dark:bg-[#EBEBEB] dark:text-[#191919]'
-                  : 'border-[#E6E6E4] bg-white text-[#787774] hover:bg-[#F1F1EF] hover:text-[#37352F] dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#9B9A97] dark:hover:bg-[#2A2A2A] dark:hover:text-[#EBEBEB]'
+                  ? 'bg-[#1D1D1F] font-medium text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                  : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
               }`}
             >
               {label}
@@ -382,7 +382,7 @@ export function SyllabusChecklistTree({
       {errorMsg && (
         <div
           role="alert"
-          className="rounded-md border border-[#E6D0D0] bg-[#FAF2F2] px-3 py-2 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F] dark:text-[#E59898]"
+          className="rounded-xl border border-[#E6D0D0] bg-[#FAF2F2]/90 px-3.5 py-2.5 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F]/90 dark:text-[#E59898]"
         >
           {errorMsg}
         </div>
@@ -414,7 +414,7 @@ export function SyllabusChecklistTree({
             return (
               <div
                 key={parent.id}
-                className="overflow-hidden rounded-lg border border-[#E6E6E4] bg-white dark:border-[#2E2E2E] dark:bg-[#191919]"
+                className="glass-panel overflow-hidden rounded-2xl"
               >
                 {renderTopicRow(parent, false)}
               </div>
@@ -424,7 +424,7 @@ export function SyllabusChecklistTree({
           return (
             <div
               key={parent.id}
-              className="overflow-hidden rounded-lg border border-[#E6E6E4] bg-white dark:border-[#2E2E2E] dark:bg-[#191919]"
+              className="glass-panel overflow-hidden rounded-2xl"
             >
               <button
                 type="button"
@@ -435,18 +435,18 @@ export function SyllabusChecklistTree({
                   }))
                 }
                 aria-expanded={isExpanded}
-                className="flex w-full items-center justify-between gap-3 bg-[#FBFBFA] px-3.5 py-2.5 text-left transition-colors hover:bg-[#F1F1EF] cursor-pointer dark:bg-[#202020] dark:hover:bg-[#2A2A2A]"
+                className="flex w-full items-center justify-between gap-3 bg-black/[0.02] px-4 py-3 text-left transition-colors hover:bg-black/[0.045] cursor-pointer dark:bg-white/[0.02] dark:hover:bg-white/[0.05]"
               >
-                <div className="flex min-w-0 items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2.5">
                   {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 shrink-0 text-[#787774] dark:text-[#9B9A97]" />
+                    <ChevronDown className="h-4 w-4 shrink-0 text-[#6E6E73] dark:text-[#98989D]" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 shrink-0 text-[#787774] dark:text-[#9B9A97]" />
+                    <ChevronRight className="h-4 w-4 shrink-0 text-[#6E6E73] dark:text-[#98989D]" />
                   )}
-                  <span className="font-mono text-xs font-medium text-[#787774] dark:text-[#9B9A97]">
+                  <span className="font-mono text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
                     {parent.code}
                   </span>
-                  <span className="truncate text-sm font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                  <span className="truncate text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
                     {parent.title}
                   </span>
                 </div>
@@ -456,7 +456,7 @@ export function SyllabusChecklistTree({
               </button>
 
               {parent.guidance_notes && isExpanded && (
-                <div className="border-t border-[#E6E6E4] bg-[#FBFBFA]/60 px-3.5 py-2 text-xs text-[#787774] dark:border-[#2E2E2E] dark:bg-[#202020]/60 dark:text-[#9B9A97]">
+                <div className="border-t border-black/[0.06] bg-black/[0.02] px-4 py-2.5 text-xs text-[#6E6E73] dark:border-white/[0.08] dark:bg-white/[0.02] dark:text-[#98989D]">
                   {parent.guidance_notes}
                 </div>
               )}
@@ -471,7 +471,7 @@ export function SyllabusChecklistTree({
         })}
 
         {parentTopics.length === 0 && (
-          <div className="rounded-lg border border-dashed border-[#E6E6E4] px-4 py-8 text-center text-sm text-[#787774] dark:border-[#2E2E2E] dark:text-[#9B9A97]">
+          <div className="glass-surface rounded-2xl border-dashed px-4 py-8 text-center text-sm text-[#6E6E73] dark:text-[#98989D]">
             No syllabus topics found for this subject yet.
           </div>
         )}

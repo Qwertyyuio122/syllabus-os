@@ -6,7 +6,7 @@ export const BIOLOGY_HL_CONFIG: IBSubjectConfig = {
   shortName: 'Bio HL',
   level: 'HL',
   groupNumber: 4,
-  firstAssessment: 'May 2025 (Class of 2028)',
+  firstAssessment: 'May 2025+ Guide',
   description:
     'IB Diploma Biology Higher Level (2025+ Guide): four overarching themes (Unity and diversity, Form and function, Interaction and interdependence, Continuity and change) spanning all 40 subtopics across molecules, cells, organisms, and ecosystems.',
   examPaperTypes: [

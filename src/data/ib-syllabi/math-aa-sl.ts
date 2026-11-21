@@ -6,7 +6,7 @@ export const MATH_AA_SL_CONFIG: IBSubjectConfig = {
   shortName: 'Math AA SL',
   level: 'SL',
   groupNumber: 5,
-  firstAssessment: 'May 2021 (Current through Class of 2028)',
+  firstAssessment: 'May 2021+ IB Diploma Guide',
   description:
     'IB Diploma Mathematics: Analysis and Approaches Standard Level covering Topics 1–5 (Number & Algebra, Functions, Geometry & Trigonometry, Statistics & Probability, and full Calculus 5.1–5.11) with Paper 1 Non-GDC analytic mastery and Paper 2 GDC modeling.',
   examPaperTypes: ['Paper 1 (Non-GDC)', 'Paper 2 (GDC)'],

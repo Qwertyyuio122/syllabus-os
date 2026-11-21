@@ -6,7 +6,7 @@ export const CHEMISTRY_SL_CONFIG: IBSubjectConfig = {
   shortName: 'Chem SL',
   level: 'SL',
   groupNumber: 4,
-  firstAssessment: 'May 2025 (Class of 2028)',
+  firstAssessment: 'May 2025+ Guide',
   description:
     'IB Diploma Chemistry Standard Level (2025+ Guide): organized around Structure 1–3 (Models of matter, bonding, and classification) and Reactivity 1–3 (Energetics, kinetics/equilibrium, and reaction mechanisms) across all 21 official SL subtopics. Strictly excludes HL-only R1.4 Entropy & spontaneity and Paper 3.',
   examPaperTypes: [
