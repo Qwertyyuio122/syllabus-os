@@ -161,9 +161,12 @@ export default async function DashboardOverviewPage() {
       <GlassReveal>
         <GlassSpotlight className="glass-panel relative mb-7 rounded-3xl p-6 sm:p-7">
           <LiquidArtwork
-            src="/images/hero-glass.png"
+            src="/images/hero-glass.webp"
             className="absolute -top-6 right-0 hidden h-56 w-96 sm:block lg:w-[440px]"
             imgClassName="opacity-75 dark:opacity-75"
+            priority
+            width={1280}
+            height={720}
           />
 
           <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">

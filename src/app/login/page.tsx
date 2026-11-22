@@ -37,9 +37,12 @@ function LoginCardShell({ children }: { children: React.ReactNode }) {
     <GlassReveal className="w-full max-w-[440px]">
       <GlassSpotlight className="glass-panel relative rounded-3xl p-8 sm:p-9">
         <LiquidArtwork
-          src="/images/hero-glass.png"
+          src="/images/hero-glass.webp"
           className="absolute -top-4 -right-6 h-44 w-68"
           imgClassName="opacity-70 dark:opacity-75"
+          priority
+          width={1280}
+          height={720}
         />
 
         <div className="relative z-10">

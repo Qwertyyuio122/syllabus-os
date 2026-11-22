@@ -217,9 +217,20 @@ async function saveShot(
     await target.evaluate(async () => {
       const imgs = Array.from(document.querySelectorAll('img'));
       await Promise.all(
-        imgs.map((img) =>
-          typeof img.decode === 'function' ? img.decode().catch(() => {}) : null,
-        ),
+        imgs.map((img) => {
+          const style = window.getComputedStyle(img);
+          // Hidden artwork (e.g. mobile-hidden heroes) may never load, so decoding it
+          // would hang forever. Only promote and await images that are actually shown.
+          if (style.display === 'none' || style.visibility === 'hidden') {
+            return null;
+          }
+          img.loading = 'eager';
+          if (typeof img.decode !== 'function') return null;
+          return Promise.race([
+            img.decode().catch(() => {}),
+            new Promise<void>((resolve) => window.setTimeout(resolve, 2000)),
+          ]);
+        }),
       );
     });
     if (options.fullPage ?? true) {

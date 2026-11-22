@@ -15,7 +15,7 @@
 - **Visual & Brand System (Apple Liquid Glass + Subtle Academic Tints):**
   - Translucent frosted glass architecture defined in `src/app/globals.css` (`#E9EFF7` light ambient canvas with `rgba(255, 255, 255, 0.62)` glass panels; `#0B0D12` dark obsidian-sapphire canvas with `rgba(22, 26, 34, 0.70)` glass panels; `blur(26px) saturate(190%) brightness(1.03)`, `1.5px` specular top rims, and layered soft shadows).
   - WCAG AA >= 4.5:1 ink tokens (`#111318` / `#525866` light; `#F5F7FA` / `#9AA3B2` dark).
-  - Subject-specific academic accent tints (`emerald`, `cobalt`, `indigo`, `amber`, `plum`, `sapphire`, `slate`) and bespoke studio glass artwork (`public/images/hero-glass.png`, `public/images/subjects/*.png`) live in `src/config/subject-themes.ts` and power `LiquidBackdrop` (`src/components/layout/LiquidBackdrop.tsx`).
+  - Subject-specific academic accent tints (`emerald`, `cobalt`, `indigo`, `amber`, `plum`, `sapphire`, `slate`) and bespoke studio glass artwork (`public/images/hero-glass.webp`, `public/images/subjects/*.webp`) live in `src/config/subject-themes.ts` and power `LiquidBackdrop` (`src/components/layout/LiquidBackdrop.tsx`).
   - Zero neon clutter, zero gamified badges; full `prefers-reduced-motion` and `prefers-reduced-transparency` fallbacks.
   - Typography: `Inter` for UI/prose, `Newsreader` for editorial headings & optional serif reader mode, `JetBrains Mono` for IB syllabus codes, command terms, LaTeX, and markscheme codes (`M1`, `A1`, `R1`).
   - Centralized branding lives in `src/config/brand.ts` (`APP_NAME`, `APP_TAGLINE`, `APP_COHORT`, `BrandMonogram`).
@@ -42,7 +42,7 @@
 - `src/data/` — Static IB syllabi (`ib-syllabi/`), IB Core/IA rubrics (`ib-rubrics/`), and Google Classroom seed packs (`classroom-seed/`).
 - `src/components/` — Feature UI (`layout/`, `syllabus/`, `notes/`, `diagrams/`, `qbank/`, `flashcards/`, `materials/`, `core-ee-tok/`, `subjects/`, `ui/`).
 - `docs/` — Design system specifications (`DESIGN_SYSTEM_RULES.md`).
-- `public/images/` — Bespoke Apple Liquid Glass studio artwork (`hero-glass.png`, `subjects/*.png`).
+- `public/images/` — Bespoke Apple Liquid Glass studio artwork (`hero-glass.webp`, `subjects/*.webp`).
 - `supabase/migrations/` — `001_initial_schema.sql` and `002_fk_indexes.sql`.
 - `tests/e2e/` — Playwright E2E suite (`smoke.spec.ts`) backed by `mock-supabase.ts`.
 

@@ -43,13 +43,13 @@ Every IB Diploma subject and Core workspace maps deterministically via `SUBJECT_
 
 | Key (`SubjectThemeKey`) | Accent Name | Light Accent | Dark Accent | Textbook / Scope Badge | Artwork Path |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `biology-hl` | Emerald | `#065F46` | `#34D399` | `Oxford Biology 2023 · Allott & Mindorff` | `/images/subjects/biology-hl.png` |
-| `chemistry-sl` | Cobalt | `#0369A1` | `#38BDF8` | `Oxford Chemistry 2023 · Bylikin` | `/images/subjects/chemistry-sl.png` |
-| `math-aa-sl` | Indigo | `#3730A3` | `#818CF8` | `Oxford Math AA SL 2019 · Topics 1–5` | `/images/subjects/math-aa-sl.png` |
-| `history-hl` | Amber | `#92400E` | `#FBBF24` | `Pearson 2026 Europe · May 2028 Guide` | `/images/subjects/history-hl.png` |
-| `english-lit-hl` | Plum | `#6B21A8` | `#C084FC` | `IB Lit HL · 3 AoEs & 7 Key Concepts` | `/images/subjects/english-lit-hl.png` |
-| `french-b-sl` | Sapphire | `#1E40AF` | `#60A5FA` | `Cambridge Le Monde en Français 2018` | `/images/subjects/french-b-sl.png` |
-| `core` | Slate | `#1E3A5F` | `#93C5FD` | `FA2027 EE (30m) · TOK · CAS · 6 IAs` | `/images/hero-glass.png` |
+| `biology-hl` | Emerald | `#065F46` | `#34D399` | `Oxford Biology 2023 · Allott & Mindorff` | `/images/subjects/biology-hl.webp` |
+| `chemistry-sl` | Cobalt | `#0369A1` | `#38BDF8` | `Oxford Chemistry 2023 · Bylikin` | `/images/subjects/chemistry-sl.webp` |
+| `math-aa-sl` | Indigo | `#3730A3` | `#818CF8` | `Oxford Math AA SL 2019 · Topics 1–5` | `/images/subjects/math-aa-sl.webp` |
+| `history-hl` | Amber | `#92400E` | `#FBBF24` | `Pearson 2026 Europe · May 2028 Guide` | `/images/subjects/history-hl.webp` |
+| `english-lit-hl` | Plum | `#6B21A8` | `#C084FC` | `IB Lit HL · 3 AoEs & 7 Key Concepts` | `/images/subjects/english-lit-hl.webp` |
+| `french-b-sl` | Sapphire | `#1E40AF` | `#60A5FA` | `Cambridge Le Monde en Français 2018` | `/images/subjects/french-b-sl.webp` |
+| `core` | Slate | `#1E3A5F` | `#93C5FD` | `FA2027 EE (30m) · TOK · CAS · 6 IAs` | `/images/hero-glass.webp` |
 
 > **Rule:** Never apply subject accents as opaque neon blocks. Use `theme.tintBg`, `theme.borderTint`, `theme.textAccent`, and `theme.progressBarClass` for delicate rims, micro-badges, active sidebar icons, SVG progress rings, and ambient refraction orbs (`glowOrbLight`, `glowOrbDark`).
 
@@ -112,13 +112,14 @@ Configured via `next/font/google` in `src/app/layout.tsx` and mapped via Tailwin
 
 ## 6. Bespoke Imagery & Dual-Theme Blending
 
-- **Asset Location:** `public/images/hero-glass.png` and `public/images/subjects/{biology-hl,chemistry-sl,math-aa-sl,history-hl,english-lit-hl,french-b-sl}.png`.
+- **Asset Location:** `public/images/hero-glass.webp` and `public/images/subjects/{biology-hl,chemistry-sl,math-aa-sl,history-hl,english-lit-hl,french-b-sl}.webp`.
+- **Asset Budget:** Ship pre-optimized WebP (`hero-glass.webp` <= 150 KB; subject art `512x512` <= 60 KB each; total `public/images` <= 600 KB). Regenerate with `npm run images:optimize`; CI enforces `npm run images:check`.
 - **Visual Constraints:** Generated on bright pearl-white studio backdrops with translucent crystal refraction and **zero embedded text, letters, or watermarks**.
 - **Seamless Blending (`LiquidArtwork` in `src/components/subjects/SubjectMotif.tsx`):**
   - **Non-Isolated Compositing:** Keep the positioning wrapper free of `opacity`, `mask-image`, or `z-index` so `<img>` blend modes composite directly against the parent `.glass-panel` surface.
   - **Light Mode:** `brightness-[1.04] contrast-[1.08] mix-blend-multiply` dissolves the bright studio backdrop cleanly into `.glass-panel` surfaces.
   - **Dark Mode:** `dark:invert dark:hue-rotate-180 dark:brightness-[0.9] dark:contrast-[1.35] dark:mix-blend-screen` clamps off-white studio background to transparent while preserving exact subject hue caustics.
-  - **Edge Feathering & Loading:** Apply a `radial-gradient(closest-side at 50% 50%, ...)` CSS `mask-image` directly on `<img loading="eager" />` so alpha reaches `0` cleanly inside every aspect ratio without rectangular clipping or lazy-load blanks.
+  - **Edge Feathering & Loading:** Apply a `radial-gradient(closest-side at 50% 50%, ...)` CSS `mask-image` directly on the `<img>` so alpha reaches `0` cleanly inside every aspect ratio without rectangular clipping. Heroes use `priority` (eager + `fetchPriority="high"`); subject cards lazy-load with `decoding="async"`.
 
 ---
 

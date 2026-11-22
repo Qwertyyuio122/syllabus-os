@@ -471,9 +471,12 @@ export function CoreWorkspaceClient({
       <GlassReveal>
         <GlassSpotlight className="glass-panel relative mb-6 flex flex-col gap-4 rounded-3xl p-6 sm:flex-row sm:items-end sm:justify-between">
           <LiquidArtwork
-            src="/images/hero-glass.png"
+            src="/images/hero-glass.webp"
             className="absolute -top-6 right-8 hidden h-48 w-80 sm:block"
             imgClassName="opacity-70 dark:opacity-75"
+            priority
+            width={1280}
+            height={720}
           />
 
           <div className="relative z-10 min-w-0">

@@ -190,6 +190,10 @@ interface LiquidArtworkProps {
   src: string;
   className?: string;
   imgClassName?: string;
+  /** Above-the-fold hero artwork: eager load + high fetch priority. */
+  priority?: boolean;
+  width?: number;
+  height?: number;
 }
 
 /**
@@ -205,6 +209,9 @@ export function LiquidArtwork({
   src,
   className = '',
   imgClassName = '',
+  priority = false,
+  width,
+  height,
 }: LiquidArtworkProps) {
   return (
     <div
@@ -215,8 +222,11 @@ export function LiquidArtwork({
       <img
         src={src}
         alt=""
-        loading="eager"
-        decoding="sync"
+        width={width}
+        height={height}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        decoding="async"
         style={{
           maskImage:
             'radial-gradient(closest-side at 50% 50%, rgba(0,0,0,1) 34%, rgba(0,0,0,0.45) 68%, rgba(0,0,0,0) 98%)',
