@@ -2,6 +2,9 @@
 
 import React, { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { LiquidArtwork } from '@/components/subjects/SubjectMotif';
+import { GlassSpotlight } from '@/components/ui/GlassSpotlight';
+import { GlassReveal } from '@/components/ui/MotionPrimitives';
 import {
   APP_COHORT,
   APP_NAME,
@@ -31,38 +34,48 @@ function GoogleMarkIcon() {
 
 function LoginCardShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="glass-panel w-full max-w-[420px] rounded-3xl p-8 sm:p-9">
-      <div className="flex items-center gap-3">
-        <span className="glass-pill flex h-10 w-10 items-center justify-center rounded-2xl">
-          <BrandMonogram
-            size={22}
-            className="text-[#1D1D1F] dark:text-[#F5F5F7]"
-          />
-        </span>
-        <div>
-          <span className="text-lg font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
-            {APP_NAME}
-          </span>
-          <p className="text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
-            {APP_COHORT}
+    <GlassReveal className="w-full max-w-[440px]">
+      <GlassSpotlight className="glass-panel relative rounded-3xl p-8 sm:p-9">
+        <LiquidArtwork
+          src="/images/hero-glass.png"
+          className="absolute -top-4 -right-6 h-44 w-68"
+          imgClassName="opacity-70 dark:opacity-75"
+        />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3">
+            <span className="glass-pill flex h-10 w-10 items-center justify-center rounded-2xl">
+              <BrandMonogram
+                size={22}
+                className="text-[#111318] dark:text-[#F5F7FA]"
+              />
+            </span>
+            <div>
+              <span className="text-lg font-semibold tracking-tight text-[#111318] dark:text-[#F5F7FA]">
+                {APP_NAME}
+              </span>
+              <p className="text-[11px] font-medium text-[#525866] dark:text-[#9AA3B2]">
+                {APP_COHORT}
+              </p>
+            </div>
+          </div>
+
+          <h1 className="mt-7 font-serif text-[28px] font-medium leading-[1.16] tracking-[-0.02em] text-[#111318] dark:text-[#F5F7FA]">
+            Sign in to your workspace
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-[#525866] dark:text-[#9AA3B2]">
+            {APP_TAGLINE}
           </p>
+
+          {children}
+
+          <div className="mt-7 border-t border-black/[0.06] pt-4 text-xs leading-relaxed text-[#525866] dark:border-white/[0.08] dark:text-[#9AA3B2]">
+            Open access for all IB Diploma students · Official syllabi,
+            interactive study guides, and markscheme-calibrated grading.
+          </div>
         </div>
-      </div>
-
-      <h1 className="mt-7 text-2xl font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
-        Sign in to your workspace
-      </h1>
-      <p className="mt-1.5 text-sm leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
-        {APP_TAGLINE}
-      </p>
-
-      {children}
-
-      <div className="mt-7 border-t border-black/[0.06] pt-4 text-xs text-[#6E6E73] dark:border-white/[0.08] dark:text-[#98989D]">
-        Open access for all IB Diploma students · Official syllabi, interactive
-        notes, and markscheme-calibrated grading.
-      </div>
-    </div>
+      </GlassSpotlight>
+    </GlassReveal>
   );
 }
 
@@ -109,7 +122,7 @@ function LoginCardContent() {
       {errorMessage ? (
         <div
           role="alert"
-          className="glass-surface mt-5 rounded-xl px-3.5 py-2.5 text-xs leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]"
+          className="glass-surface mt-5 rounded-xl px-3.5 py-2.5 text-xs leading-relaxed text-[#111318] dark:text-[#F5F7FA]"
         >
           {errorMessage}
         </div>
@@ -120,7 +133,7 @@ function LoginCardContent() {
         onClick={handleGoogleSignIn}
         disabled={isLoading}
         aria-busy={isLoading}
-        className="glass-pill glass-interactive mt-6 flex h-11 w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl px-4 text-sm font-medium text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 disabled:cursor-not-allowed disabled:opacity-60 dark:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25"
+        className="glass-pill glass-interactive mt-6 flex h-11 w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl px-4 text-sm font-medium text-[#111318] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 disabled:cursor-not-allowed disabled:opacity-60 dark:text-[#F5F7FA] dark:focus-visible:ring-[#F5F7FA]/25"
       >
         <GoogleMarkIcon />
         <span>
@@ -141,7 +154,7 @@ function LoginCardFallback() {
 
 export default function LoginPage() {
   return (
-    <main className="liquid-canvas flex min-h-screen items-center justify-center px-4 py-12">
+    <main className="flex min-h-screen items-center justify-center px-4 py-12">
       <Suspense fallback={<LoginCardFallback />}>
         <LoginCardContent />
       </Suspense>

@@ -13,7 +13,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'glass-panel rounded-2xl text-[#1D1D1F] dark:text-[#F5F5F7]',
+        'glass-panel rounded-2xl text-[#111318] dark:text-[#F5F7FA]',
         className,
       )}
       {...props}
@@ -43,7 +43,7 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        'text-sm font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]',
+        'text-sm font-semibold tracking-tight text-[#111318] dark:text-[#F5F7FA]',
         className,
       )}
       {...props}
@@ -58,7 +58,7 @@ export function CardDescription({
   return (
     <p
       className={cn(
-        'text-xs text-[#6E6E73] dark:text-[#98989D]',
+        'text-xs text-[#525866] dark:text-[#9AA3B2]',
         className,
       )}
       {...props}

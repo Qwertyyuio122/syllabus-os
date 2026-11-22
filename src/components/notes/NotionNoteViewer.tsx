@@ -3,14 +3,20 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  BookMarked,
   BookOpen,
+  Clock,
   Compass,
   FileText,
+  HelpCircle,
+  Layers,
   List,
   Maximize2,
   Minimize2,
   Sigma,
+  Sparkles,
 } from 'lucide-react';
+import { getSubjectTheme } from '@/config/subject-themes';
 import type { StudyNoteRow } from '@/types/database';
 import {
   StudyNoteBlockSchema,
@@ -22,6 +28,7 @@ import { InteractiveDiagramPlayer } from '@/components/diagrams/InteractiveDiagr
 export interface NotionNoteViewerProps {
   note: StudyNoteRow;
   topicLabel?: string;
+  subjectSlug?: string;
 }
 
 interface TocItem {
@@ -41,37 +48,82 @@ function slugifyHeading(text: string): string {
   return slug || 'section';
 }
 
+function countTextWords(text: string | null | undefined): number {
+  if (!text) return 0;
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
+type CalloutVariant = Extract<StudyNoteBlock, { type: 'callout' }>['variant'];
+
 const CALLOUT_CONFIG: Record<
-  Extract<StudyNoteBlock, { type: 'callout' }>['variant'],
+  CalloutVariant,
   {
     label: string;
     Icon: React.ComponentType<{ className?: string }>;
     borderClass: string;
+    tintClass: string;
+    iconAccentClass: string;
   }
 > = {
   definition: {
     label: 'Definition',
     Icon: BookOpen,
-    borderClass: 'border-l-[#6E6E73] dark:border-l-[#98989D]',
+    borderClass: 'border-l-slate-500 dark:border-l-slate-400',
+    tintClass: '',
+    iconAccentClass: 'text-[#111318] dark:text-[#F5F7FA]',
   },
   examiner_warning: {
     label: 'Examiner Warning',
     Icon: AlertTriangle,
-    borderClass: 'border-l-[#1D1D1F] dark:border-l-[#F5F5F7]',
+    borderClass: 'border-l-amber-700 dark:border-l-amber-400',
+    tintClass: 'bg-amber-500/[0.045] dark:bg-amber-400/[0.06]',
+    iconAccentClass: 'text-[#92400E] dark:text-[#FCD34D]',
   },
   key_formula: {
     label: 'Key Formula',
     Icon: Sigma,
-    borderClass: 'border-l-[#1D1D1F] dark:border-l-[#F5F5F7]',
+    borderClass: 'border-l-indigo-700 dark:border-l-indigo-400',
+    tintClass: 'bg-indigo-500/[0.04] dark:bg-indigo-400/[0.06]',
+    iconAccentClass: 'text-[#3730A3] dark:text-[#A5B4FC]',
   },
   syllabus_link: {
     label: 'Syllabus Link',
     Icon: Compass,
-    borderClass: 'border-l-[#98989D] dark:border-l-[#6E6E73]',
+    borderClass: 'border-l-sky-700 dark:border-l-sky-400',
+    tintClass: 'bg-sky-500/[0.04] dark:bg-sky-400/[0.06]',
+    iconAccentClass: 'text-[#0369A1] dark:text-[#7DD3FC]',
+  },
+  guiding_questions: {
+    label: 'IB Guiding Questions',
+    Icon: HelpCircle,
+    borderClass: 'border-l-blue-700 dark:border-l-blue-400',
+    tintClass: 'bg-blue-500/[0.045] dark:bg-blue-400/[0.06]',
+    iconAccentClass: 'text-[#1E40AF] dark:text-[#93C5FD]',
+  },
+  textbook_excerpt: {
+    label: 'Textbook Reference',
+    Icon: BookMarked,
+    borderClass: 'border-l-emerald-700 dark:border-l-emerald-400',
+    tintClass: 'bg-emerald-500/[0.045] dark:bg-emerald-400/[0.06]',
+    iconAccentClass: 'text-[#065F46] dark:text-[#6EE7B7]',
+  },
+  tok_nos: {
+    label: 'TOK & Nature of Science',
+    Icon: Sparkles,
+    borderClass: 'border-l-purple-700 dark:border-l-purple-400',
+    tintClass: 'bg-purple-500/[0.045] dark:bg-purple-400/[0.06]',
+    iconAccentClass: 'text-[#6B21A8] dark:text-[#D8B4FE]',
   },
 };
 
-export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
+export function NotionNoteViewer({
+  note,
+  topicLabel,
+  subjectSlug,
+}: NotionNoteViewerProps) {
+  const theme = getSubjectTheme(subjectSlug);
   const [fontMode, setFontMode] = useState<'sans' | 'serif'>('sans');
   const [widthMode, setWidthMode] = useState<'focused' | 'full'>('focused');
   const [outlineOpen, setOutlineOpen] = useState(false);
@@ -89,6 +141,50 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
     }
     return valid;
   }, [note.blocks]);
+
+  const { wordCount, readingMinutes, diagramCount } = useMemo(() => {
+    let words = countTextWords(note.title) + countTextWords(note.summary);
+    let diagrams = 0;
+
+    for (const block of safeBlocks) {
+      switch (block.type) {
+        case 'heading':
+          words += countTextWords(block.text);
+          break;
+        case 'paragraph':
+          words += countTextWords(block.markdown);
+          break;
+        case 'callout':
+          words +=
+            countTextWords(block.title) + countTextWords(block.markdown);
+          break;
+        case 'key_terms':
+          for (const item of block.items) {
+            words +=
+              countTextWords(item.term) +
+              countTextWords(item.definitionMarkdown);
+          }
+          break;
+        case 'equation':
+          words += countTextWords(block.caption);
+          if (block.variableLegend) {
+            for (const v of block.variableLegend) {
+              words += countTextWords(v.meaning);
+            }
+          }
+          break;
+        case 'playable_diagram':
+          diagrams += 1;
+          words +=
+            countTextWords(block.spec.title) +
+            countTextWords(block.spec.caption);
+          break;
+      }
+    }
+
+    const minutes = Math.max(1, Math.ceil(words / 210));
+    return { wordCount: words, readingMinutes: minutes, diagramCount: diagrams };
+  }, [note.title, note.summary, safeBlocks]);
 
   const { tocItems, headingIdByBlockIndex } = useMemo(() => {
     const items: TocItem[] = [];
@@ -222,13 +318,13 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
         className="glass-panel min-w-0 flex-1 rounded-3xl px-5 pb-8 sm:px-9 sm:pb-10 lg:px-12 lg:pb-12"
       >
         {/* Sticky Frosted Reader Bar + Hairline Reading Progress */}
-        <div className="glass-floating-bar sticky top-[108px] z-10 -mx-5 mb-6 rounded-t-3xl border-x-0 border-t-0 bg-white/88 px-5 pt-2.5 pb-0 sm:-mx-9 sm:px-9 lg:top-[62px] lg:-mx-12 lg:px-12 dark:bg-[#1E1E22]/88">
+        <div className="glass-floating-bar sticky top-[108px] z-10 -mx-5 mb-6 rounded-t-3xl border-x-0 border-t-0 px-5 pt-2.5 pb-0 sm:-mx-9 sm:px-9 lg:top-[62px] lg:-mx-12 lg:px-12">
           <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5">
             <div className="flex min-w-0 items-center gap-2.5">
-              <span className="max-w-[200px] truncate text-xs font-medium text-[#1D1D1F] sm:max-w-[280px] dark:text-[#F5F5F7]">
+              <span className="max-w-[200px] truncate text-xs font-medium text-[#111318] sm:max-w-[280px] dark:text-[#F5F7FA]">
                 {note.title}
               </span>
-              <span className="glass-pill shrink-0 rounded-full px-2 py-0.5 font-mono text-[10.5px] font-semibold tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+              <span className="glass-pill shrink-0 rounded-full px-2 py-0.5 font-mono text-[10.5px] font-semibold tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                 {readingProgress}% read
               </span>
             </div>
@@ -248,8 +344,8 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   title="Editorial measure for prose with full-width diagrams"
                   className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
                     widthMode === 'focused'
-                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
-                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                      ? 'bg-white/95 text-[#111318] shadow-sm dark:bg-white/[0.15] dark:text-[#F5F7FA]'
+                      : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                   }`}
                 >
                   <Minimize2 className="h-3 w-3" aria-hidden="true" />
@@ -262,8 +358,8 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   title="Expand prose to fill entire container width"
                   className={`inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
                     widthMode === 'full'
-                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
-                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                      ? 'bg-white/95 text-[#111318] shadow-sm dark:bg-white/[0.15] dark:text-[#F5F7FA]'
+                      : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                   }`}
                 >
                   <Maximize2 className="h-3 w-3" aria-hidden="true" />
@@ -279,8 +375,8 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   onClick={() => setOutlineOpen((v) => !v)}
                   className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all ${
                     outlineOpen
-                      ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-                      : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                      ? 'bg-[#111318] text-white shadow-sm dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                      : 'glass-pill text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                   }`}
                 >
                   <List className="h-3.5 w-3.5" aria-hidden="true" />
@@ -298,10 +394,10 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   type="button"
                   aria-pressed={fontMode === 'sans'}
                   onClick={() => setFontMode('sans')}
-                  className={`cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                  className={`cursor-pointer rounded-full px-2.5 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:focus-visible:ring-[#F5F7FA]/25 ${
                     fontMode === 'sans'
-                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
-                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                      ? 'bg-white/95 text-[#111318] shadow-sm dark:bg-white/[0.15] dark:text-[#F5F7FA]'
+                      : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                   }`}
                 >
                   Sans
@@ -310,10 +406,10 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   type="button"
                   aria-pressed={fontMode === 'serif'}
                   onClick={() => setFontMode('serif')}
-                  className={`cursor-pointer rounded-full px-2.5 py-1 font-serif text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                  className={`cursor-pointer rounded-full px-2.5 py-1 font-serif text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:focus-visible:ring-[#F5F7FA]/25 ${
                     fontMode === 'serif'
-                      ? 'bg-white/95 text-[#1D1D1F] shadow-sm dark:bg-white/[0.14] dark:text-[#F5F5F7]'
-                      : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                      ? 'bg-white/95 text-[#111318] shadow-sm dark:bg-white/[0.15] dark:text-[#F5F7FA]'
+                      : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                   }`}
                 >
                   Serif
@@ -325,7 +421,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
           {/* Hairline Reading Progress Track */}
           <div className="h-[2px] w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
             <div
-              className="h-full bg-[#1D1D1F] transition-[width] duration-150 ease-out motion-reduce:transition-none dark:bg-[#F5F5F7]"
+              className={`h-full transition-[width] duration-150 ease-out motion-reduce:transition-none ${theme.progressBarClass}`}
               style={{ width: `${readingProgress}%` }}
             />
           </div>
@@ -335,30 +431,45 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
         <header className="border-b border-black/[0.06] pb-6 dark:border-white/[0.08]">
           <div className="flex flex-wrap items-center gap-2">
             {topicLabel && (
-              <span className="glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
+              <span
+                className={`glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${theme.tintBg} ${theme.borderTint} ${theme.textAccent}`}
+              >
                 <FileText className="h-3 w-3" aria-hidden="true" />
                 {topicLabel}
               </span>
             )}
-            <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
+            <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#525866] dark:text-[#9AA3B2]">
               v{note.version}
             </span>
+            <span className="glass-pill inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium tabular-nums text-[#525866] dark:text-[#9AA3B2]">
+              <Clock className="h-3 w-3" aria-hidden="true" />
+              {wordCount.toLocaleString()} words · ~{readingMinutes} min read
+            </span>
+            {diagramCount > 0 && (
+              <span
+                className={`glass-pill inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium tabular-nums ${theme.tintBg} ${theme.borderTint} ${theme.textAccent}`}
+              >
+                <Layers className="h-3 w-3" aria-hidden="true" />
+                {diagramCount} interactive{' '}
+                {diagramCount === 1 ? 'lab' : 'labs'}
+              </span>
+            )}
             {formattedUpdatedAt && (
-              <span className="text-xs text-[#6E6E73] dark:text-[#98989D]">
+              <span className="text-xs text-[#525866] dark:text-[#9AA3B2]">
                 Updated {formattedUpdatedAt}
               </span>
             )}
           </div>
 
           <h1
-            className={`mt-4 ${proseMeasureClass} font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#1D1D1F] sm:text-[34px] sm:leading-[1.16] dark:text-[#F5F5F7]`}
+            className={`mt-4 ${proseMeasureClass} font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#111318] sm:text-[34px] sm:leading-[1.16] dark:text-[#F5F7FA]`}
           >
             {note.title}
           </h1>
 
           {note.summary && (
             <p
-              className={`mt-3 ${proseMeasureClass} text-[15.5px] leading-relaxed text-[#6E6E73] dark:text-[#98989D] ${
+              className={`mt-3 ${proseMeasureClass} text-[15.5px] leading-relaxed text-[#525866] dark:text-[#9AA3B2] ${
                 fontMode === 'serif' ? 'font-serif' : 'font-sans'
               }`}
             >
@@ -372,7 +483,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
               aria-label="Inline table of contents"
               className="glass-surface mt-5 rounded-2xl p-4 xl:hidden"
             >
-              <div className="mb-2 flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+              <div className="mb-2 flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-wider text-[#525866] uppercase dark:text-[#9AA3B2]">
                 <List className="h-3.5 w-3.5" aria-hidden="true" />
                 On this page
               </div>
@@ -388,8 +499,8 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                           item.level === 3 ? 'pl-5' : 'font-medium'
                         } ${
                           isActive
-                            ? 'bg-white/95 text-[#1D1D1F] dark:bg-white/[0.12] dark:text-[#F5F5F7]'
-                            : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                            ? 'bg-white/95 text-[#111318] dark:bg-white/[0.12] dark:text-[#F5F7FA]'
+                            : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                         }`}
                       >
                         {item.text}
@@ -409,7 +520,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
           }`}
         >
           {safeBlocks.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[#6E6E73] dark:text-[#98989D]">
+            <p className="py-8 text-center text-sm text-[#525866] dark:text-[#9AA3B2]">
               This study note has no readable content blocks yet.
             </p>
           ) : (
@@ -422,7 +533,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                       <h2
                         key={`block-${index}`}
                         id={anchorId}
-                        className={`${proseMeasureClass} mt-9 mb-2 scroll-mt-36 border-t border-black/[0.06] pt-5 text-xl font-semibold tracking-tight text-[#1D1D1F] first:mt-0 first:border-t-0 first:pt-0 dark:border-white/[0.08] dark:text-[#F5F5F7]`}
+                        className={`${proseMeasureClass} mt-9 mb-2 scroll-mt-36 border-t border-black/[0.06] pt-5 text-xl font-semibold tracking-tight text-[#111318] first:mt-0 first:border-t-0 first:pt-0 dark:border-white/[0.08] dark:text-[#F5F7FA]`}
                       >
                         {block.text}
                       </h2>
@@ -432,7 +543,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                     <h3
                       key={`block-${index}`}
                       id={anchorId}
-                      className={`${proseMeasureClass} mt-6 mb-1.5 scroll-mt-36 text-[17px] font-semibold tracking-tight text-[#1D1D1F] first:mt-0 dark:text-[#F5F5F7]`}
+                      className={`${proseMeasureClass} mt-6 mb-1.5 scroll-mt-36 text-[17px] font-semibold tracking-tight text-[#111318] first:mt-0 dark:text-[#F5F7FA]`}
                     >
                       {block.text}
                     </h3>
@@ -444,7 +555,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                     <MarkdownMath
                       key={`block-${index}`}
                       content={block.markdown}
-                      className={`${proseMeasureClass} text-[15.5px] leading-[1.74] text-[#1D1D1F] dark:text-[#F5F5F7]`}
+                      className={`${proseMeasureClass} text-[15.5px] leading-[1.74] text-[#111318] dark:text-[#F5F7FA]`}
                     />
                   );
 
@@ -454,25 +565,25 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                   return (
                     <aside
                       key={`block-${index}`}
-                      className={`${proseMeasureClass} glass-surface my-5 rounded-2xl border-l-[3px] px-5 py-4 ${cfg.borderClass}`}
+                      className={`${proseMeasureClass} glass-surface my-5 rounded-2xl border-l-[3px] px-5 py-4 ${cfg.borderClass} ${cfg.tintClass}`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="glass-pill flex h-6 w-6 items-center justify-center rounded-full">
                           <CalloutIcon
-                            className="h-3.5 w-3.5 shrink-0 text-[#1D1D1F] dark:text-[#F5F5F7]"
+                            className={`h-3.5 w-3.5 shrink-0 ${cfg.iconAccentClass}`}
                             aria-hidden="true"
                           />
                         </span>
-                        <span className="font-mono text-[10.5px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+                        <span className="font-mono text-[10.5px] font-semibold tracking-wider text-[#525866] uppercase dark:text-[#9AA3B2]">
                           {cfg.label}
                         </span>
                       </div>
-                      <div className="mt-2 text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                      <div className="mt-2 text-sm font-semibold text-[#111318] dark:text-[#F5F7FA]">
                         {block.title}
                       </div>
                       <MarkdownMath
                         content={block.markdown}
-                        className="mt-1.5 text-[14px] leading-relaxed text-[#1D1D1F]/90 dark:text-[#F5F5F7]/90"
+                        className="mt-1.5 text-[14px] leading-relaxed text-[#111318]/90 dark:text-[#F5F7FA]/90"
                       />
                     </aside>
                   );
@@ -490,11 +601,11 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                           className="glass-surface glass-interactive rounded-2xl p-4"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-2">
-                            <dt className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                            <dt className="text-sm font-semibold text-[#111318] dark:text-[#F5F7FA]">
                               {item.term}
                             </dt>
                             {item.markschemeKeyword && (
-                              <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-[10px] font-medium text-[#6E6E73] dark:text-[#98989D]">
+                              <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-[10px] font-medium text-[#525866] dark:text-[#9AA3B2]">
                                 {item.markschemeKeyword}
                               </span>
                             )}
@@ -502,7 +613,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                           <dd className="mt-2">
                             <MarkdownMath
                               content={item.definitionMarkdown}
-                              className="text-[13.5px] leading-relaxed text-[#1D1D1F]/90 dark:text-[#F5F5F7]/90"
+                              className="text-[13.5px] leading-relaxed text-[#111318]/90 dark:text-[#F5F7FA]/90"
                             />
                           </dd>
                         </div>
@@ -520,7 +631,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                         <InlineKaTeX latex={block.latex} displayMode />
                       </div>
                       {block.caption && (
-                        <p className="mt-2 text-center text-xs text-[#6E6E73] dark:text-[#98989D]">
+                        <p className="mt-2 text-center text-xs text-[#525866] dark:text-[#9AA3B2]">
                           {block.caption}
                         </p>
                       )}
@@ -532,10 +643,10 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                                 key={`${entry.symbol}-${vIdx}`}
                                 className="flex items-baseline gap-2 text-xs"
                               >
-                                <span className="shrink-0 font-mono font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                                <span className="shrink-0 font-mono font-medium text-[#111318] dark:text-[#F5F7FA]">
                                   <InlineKaTeX latex={entry.symbol} />
                                 </span>
-                                <span className="text-[#6E6E73] dark:text-[#98989D]">
+                                <span className="text-[#525866] dark:text-[#9AA3B2]">
                                   — {entry.meaning}
                                 </span>
                               </div>
@@ -547,7 +658,10 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
 
                 case 'playable_diagram':
                   return (
-                    <div key={`${note.id}-block-${index}-${block.spec.id}`} className="w-full">
+                    <div
+                      key={`${note.id}-block-${index}-${block.spec.id}`}
+                      className="w-full"
+                    >
                       <InteractiveDiagramPlayer spec={block.spec} />
                     </div>
                   );
@@ -565,7 +679,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
         >
           <div className="glass-panel rounded-2xl p-4">
             <div className="mb-2.5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
+              <div className="flex items-center gap-1.5 font-mono text-[10.5px] font-semibold tracking-wider text-[#525866] uppercase dark:text-[#9AA3B2]">
                 <List className="h-3.5 w-3.5" aria-hidden="true" />
                 On this page
               </div>
@@ -573,7 +687,7 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                 type="button"
                 onClick={() => setOutlineOpen(false)}
                 aria-label="Collapse outline"
-                className="text-[11px] text-[#6E6E73] hover:text-[#1D1D1F] cursor-pointer dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+                className="cursor-pointer text-[11px] text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]"
               >
                 Hide
               </button>
@@ -591,8 +705,8 @@ export function NotionNoteViewer({ note, topicLabel }: NotionNoteViewerProps) {
                           item.level === 3 ? 'pl-5' : 'pl-3 font-medium'
                         } ${
                           isActive
-                            ? 'border-[#1D1D1F] text-[#1D1D1F] dark:border-[#F5F5F7] dark:text-[#F5F5F7]'
-                            : 'border-transparent text-[#6E6E73] hover:border-[#6E6E73]/40 hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:border-[#98989D]/40 dark:hover:text-[#F5F5F7]'
+                            ? 'border-[#111318] text-[#111318] dark:border-[#F5F7FA] dark:text-[#F5F7FA]'
+                            : 'border-transparent text-[#525866] hover:border-[#525866]/40 hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:border-[#9AA3B2]/40 dark:hover:text-[#F5F7FA]'
                         }`}
                       >
                         {item.text}

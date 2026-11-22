@@ -267,8 +267,8 @@ export function QuestionCard({
 
         {/* Stimulus */}
         {question.stimulus_markdown && (
-          <div className="glass-surface rounded-2xl p-4 text-sm leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
-            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+          <div className="glass-surface rounded-2xl p-4 text-sm leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
+            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
               Stimulus / Data
             </div>
             <MarkdownMath content={question.stimulus_markdown} />
@@ -276,7 +276,7 @@ export function QuestionCard({
         )}
 
         {/* Question Prompt */}
-        <div className="text-[15px] leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+        <div className="text-[15px] leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
           <MarkdownMath content={question.question_markdown} />
         </div>
 
@@ -291,7 +291,7 @@ export function QuestionCard({
                   key={opt.label}
                   className={`flex cursor-pointer items-start gap-3 rounded-2xl px-4 py-3 text-sm transition-all ${
                     checked
-                      ? 'glass-panel border-[#1D1D1F]/35 bg-white/95 dark:border-white/30 dark:bg-white/[0.12]'
+                      ? 'glass-panel border-[#111318]/35 bg-white/95 dark:border-white/30 dark:bg-white/[0.13]'
                       : 'glass-surface glass-interactive'
                   }`}
                 >
@@ -301,12 +301,12 @@ export function QuestionCard({
                     value={opt.label}
                     checked={checked}
                     onChange={() => setSelectedMcq(opt.label)}
-                    className="mt-1 h-4 w-4 accent-[#1D1D1F] dark:accent-[#F5F5F7]"
+                    className="mt-1 h-4 w-4 accent-[#111318] dark:accent-[#F5F7FA]"
                   />
-                  <span className="mt-0.5 font-mono text-xs font-semibold text-[#6E6E73] dark:text-[#98989D]">
+                  <span className="mt-0.5 font-mono text-xs font-semibold text-[#525866] dark:text-[#9AA3B2]">
                     {opt.label}.
                   </span>
-                  <div className="min-w-0 flex-1 text-[#1D1D1F] dark:text-[#F5F5F7]">
+                  <div className="min-w-0 flex-1 text-[#111318] dark:text-[#F5F7FA]">
                     <MarkdownMath content={opt.text} />
                   </div>
                 </label>
@@ -316,12 +316,12 @@ export function QuestionCard({
         ) : (
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-medium text-[#6E6E73] dark:text-[#98989D]">
+              <span className="text-xs font-medium text-[#525866] dark:text-[#9AA3B2]">
                 Your response
               </span>
             </div>
 
-            <div className="glass-surface relative rounded-2xl transition-colors focus-within:border-[#1D1D1F]/35 dark:focus-within:border-white/25">
+            <div className="glass-surface relative rounded-2xl transition-colors focus-within:border-[#111318]/35 dark:focus-within:border-white/25">
               <textarea
                 ref={textareaRef}
                 value={openResponse}
@@ -329,7 +329,7 @@ export function QuestionCard({
                 rows={5}
                 placeholder={`Write your IB response addressing the command term "${question.command_term}"…`}
                 aria-label="Your answer"
-                className="w-full resize-y rounded-t-2xl bg-transparent p-3.5 text-sm leading-relaxed text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none dark:text-[#F5F5F7] dark:placeholder:text-[#98989D]"
+                className="w-full resize-y rounded-t-2xl bg-transparent p-3.5 text-sm leading-relaxed text-[#111318] placeholder:text-[#525866] focus:outline-none dark:text-[#F5F7FA] dark:placeholder:text-[#9AA3B2]"
               />
 
               {/* Clean Editor Footer: Symbol Popover & Preview Toggle */}
@@ -339,7 +339,7 @@ export function QuestionCard({
                     type="button"
                     aria-expanded={symbolsOpen}
                     onClick={() => setSymbolsOpen((v) => !v)}
-                    className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-[#6E6E73] transition-colors hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+                    className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-[#525866] transition-colors hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]"
                   >
                     <Sigma className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>fx Symbols</span>
@@ -351,7 +351,7 @@ export function QuestionCard({
                       aria-label="Insert mathematical or chemical symbol"
                       className="glass-panel absolute bottom-full left-0 z-30 mb-2 w-72 rounded-2xl p-2"
                     >
-                      <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+                      <div className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
                         Insert formatted notation
                       </div>
                       <div className="grid grid-cols-2 gap-1">
@@ -361,12 +361,12 @@ export function QuestionCard({
                             type="button"
                             title={snippet.title}
                             onClick={() => insertSymbolSnippet(snippet)}
-                            className="flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-xs text-[#1D1D1F] transition-colors hover:bg-black/[0.05] cursor-pointer dark:text-[#F5F5F7] dark:hover:bg-white/[0.08]"
+                            className="flex cursor-pointer items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-xs text-[#111318] transition-colors hover:bg-black/[0.05] dark:text-[#F5F7FA] dark:hover:bg-white/[0.08]"
                           >
                             <span className="glass-pill inline-flex h-6 min-w-6 items-center justify-center rounded-lg px-1.5 font-medium">
                               {snippet.display}
                             </span>
-                            <span className="truncate text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                            <span className="truncate text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                               {snippet.name}
                             </span>
                           </button>
@@ -382,8 +382,8 @@ export function QuestionCard({
                   onClick={() => setPreviewOpen((v) => !v)}
                   className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-xs font-medium transition-all ${
                     previewOpen
-                      ? 'bg-[#1D1D1F] text-white dark:bg-[#F5F5F7] dark:text-[#111113]'
-                      : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                      ? 'bg-[#111318] text-white dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                      : 'glass-pill text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                   }`}
                 >
                   <Eye className="h-3.5 w-3.5" aria-hidden="true" />
@@ -393,14 +393,14 @@ export function QuestionCard({
             </div>
 
             {previewOpen && (
-              <div className="glass-surface rounded-2xl p-3.5 text-sm leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
-                <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+              <div className="glass-surface rounded-2xl p-3.5 text-sm leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
+                <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
                   Formatted Preview
                 </div>
                 {openResponse.trim() ? (
                   <MarkdownMath content={openResponse} />
                 ) : (
-                  <p className="text-xs italic text-[#6E6E73] dark:text-[#98989D]">
+                  <p className="text-xs italic text-[#525866] dark:text-[#9AA3B2]">
                     Start typing above to preview rendered equations and
                     formulas.
                   </p>
@@ -448,7 +448,7 @@ export function QuestionCard({
         {submitError && (
           <div
             role="alert"
-            className="rounded-xl border border-[#E6D0D0] bg-[#FAF2F2]/90 px-3.5 py-2.5 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F]/90 dark:text-[#E59898]"
+            className="rounded-xl border border-red-700/20 bg-red-50/90 px-3.5 py-2.5 text-xs text-[#991B1B] dark:border-red-400/25 dark:bg-red-950/60 dark:text-[#FCA5A5]"
           >
             {submitError}
           </div>
@@ -461,10 +461,10 @@ export function QuestionCard({
             className="glass-surface space-y-3 rounded-2xl p-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-[#1D1D1F] dark:text-[#F5F5F7]">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-[#111318] dark:text-[#F5F7FA]">
                 IB Markscheme Breakdown
               </h4>
-              <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+              <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold text-[#111318] dark:text-[#F5F7FA]">
                 {attempt.awarded_marks} / {attempt.max_marks} marks awarded
               </span>
             </div>
@@ -481,27 +481,27 @@ export function QuestionCard({
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-2">
                           {awardedFull ? (
-                            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#27533B] dark:text-[#9FC3AD]" />
+                            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#065F46] dark:text-[#6EE7B7]" />
                           ) : (
-                            <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#9B3B3B] dark:text-[#E59898]" />
+                            <XCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#991B1B] dark:text-[#FCA5A5]" />
                           )}
                           <div>
-                            <span className="mr-1.5 font-mono font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                            <span className="mr-1.5 font-mono font-semibold text-[#111318] dark:text-[#F5F7FA]">
                               [{pt.code}]
                             </span>
-                            <span className="text-[#1D1D1F] dark:text-[#F5F5F7]">
+                            <span className="text-[#111318] dark:text-[#F5F7FA]">
                               {pt.criterion}
                             </span>
                           </div>
                         </div>
-                        <span className="shrink-0 font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                        <span className="shrink-0 font-mono text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                           {pt.awarded}
                           {pt.max_marks !== undefined ? `/${pt.max_marks}` : ''}{' '}
                           m
                         </span>
                       </div>
                       {pt.feedback && (
-                        <p className="mt-1 pl-5.5 text-[#6E6E73] dark:text-[#98989D]">
+                        <p className="mt-1 pl-5.5 text-[#525866] dark:text-[#9AA3B2]">
                           {pt.feedback}
                         </p>
                       )}
@@ -512,11 +512,11 @@ export function QuestionCard({
             )}
 
             {attempt.grading_breakdown.command_term_feedback && (
-              <div className="glass-pill rounded-xl px-3.5 py-2.5 text-xs text-[#1D1D1F] dark:text-[#F5F5F7]">
+              <div className="glass-pill rounded-xl px-3.5 py-2.5 text-xs text-[#111318] dark:text-[#F5F7FA]">
                 <span className="font-semibold">
                   Command term ({question.command_term}):{' '}
                 </span>
-                <span className="text-[#6E6E73] dark:text-[#98989D]">
+                <span className="text-[#525866] dark:text-[#9AA3B2]">
                   {attempt.grading_breakdown.command_term_feedback}
                 </span>
               </div>
@@ -524,7 +524,7 @@ export function QuestionCard({
 
             {attempt.grading_breakdown.missing_keywords?.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">
+                <span className="text-[11px] font-medium text-[#525866] dark:text-[#9AA3B2]">
                   Missing markscheme terms:
                 </span>
                 {attempt.grading_breakdown.missing_keywords.map((kw) => (
@@ -548,13 +548,13 @@ export function QuestionCard({
         {/* Toggleable Full-Mark Model Answer */}
         {showModelAnswer && (
           <div className="glass-surface rounded-2xl p-4 text-sm">
-            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+            <div className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
               Full-Mark Model Answer
             </div>
             <MarkdownMath content={modelAnswerText} />
             {question.markscheme.examiner_notes && (
-              <div className="mt-3 border-t border-black/[0.06] pt-2.5 text-xs text-[#6E6E73] dark:border-white/[0.08] dark:text-[#98989D]">
-                <span className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+              <div className="mt-3 border-t border-black/[0.06] pt-2.5 text-xs text-[#525866] dark:border-white/[0.08] dark:text-[#9AA3B2]">
+                <span className="font-semibold text-[#111318] dark:text-[#F5F7FA]">
                   Examiner notes:{' '}
                 </span>
                 {question.markscheme.examiner_notes}

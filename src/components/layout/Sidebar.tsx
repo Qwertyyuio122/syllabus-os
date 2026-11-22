@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { APP_COHORT, APP_NAME, BrandMonogram } from '@/config/brand';
+import { getSubjectTheme } from '@/config/subject-themes';
 import { createClient } from '@/lib/supabase/client';
 import type { ProfileRow, SubjectRow } from '@/types/database';
 import { ThemeToggle } from './ThemeToggle';
@@ -138,12 +139,12 @@ export function Sidebar({
       .join('') || 'IB';
 
   const activeNavClass =
-    'bg-white/95 font-medium text-[#1D1D1F] shadow-[0_2px_10px_-3px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.95)] dark:bg-white/[0.13] dark:text-[#F5F5F7] dark:shadow-[0_2px_10px_-3px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.14)]';
+    'bg-white/95 font-medium text-[#111318] border border-black/[0.08] shadow-[0_3px_12px_-3px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.96)] dark:bg-white/[0.14] dark:text-[#F5F7FA] dark:border-white/[0.16] dark:shadow-[0_4px_14px_-3px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.18)]';
   const inactiveNavClass =
-    'text-[#6E6E73] hover:bg-black/[0.045] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:bg-white/[0.06] dark:hover:text-[#F5F5F7]';
+    'border border-transparent text-[#525866] hover:bg-black/[0.045] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:bg-white/[0.07] dark:hover:text-[#F5F7FA]';
 
   const renderNavContent = (isCompactDesktop: boolean) => (
-    <div className="flex h-full flex-col justify-between text-[#1D1D1F] dark:text-[#F5F5F7]">
+    <div className="flex h-full flex-col justify-between text-[#111318] dark:text-[#F5F7FA]">
       <div
         className={`flex flex-col overflow-y-auto py-4 ${
           isCompactDesktop ? 'items-center px-2' : 'px-3.5'
@@ -158,7 +159,7 @@ export function Sidebar({
           <Link
             href="/dashboard"
             title={isCompactDesktop ? `${APP_NAME} — Overview` : undefined}
-            className={`flex min-w-0 items-center gap-2.5 rounded-xl py-1 text-[#1D1D1F] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:text-[#F5F5F7] ${
+            className={`flex min-w-0 items-center gap-2.5 rounded-xl py-1 text-[#111318] transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:text-[#F5F7FA] ${
               isCompactDesktop ? 'justify-center px-1' : ''
             }`}
           >
@@ -170,7 +171,7 @@ export function Sidebar({
                 <div className="truncate text-sm font-semibold leading-none tracking-tight">
                   {APP_NAME}
                 </div>
-                <div className="mt-1 truncate text-[10.5px] leading-none text-[#6E6E73] dark:text-[#98989D]">
+                <div className="mt-1 truncate text-[10.5px] leading-none text-[#525866] dark:text-[#9AA3B2]">
                   {APP_COHORT}
                 </div>
               </div>
@@ -182,7 +183,7 @@ export function Sidebar({
             type="button"
             onClick={() => setMobileOpen(false)}
             aria-label="Close navigation menu"
-            className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-[#6E6E73] hover:bg-black/[0.06] hover:text-[#1D1D1F] lg:hidden dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7]"
+            className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-[#525866] hover:bg-black/[0.06] hover:text-[#111318] lg:hidden dark:text-[#9AA3B2] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F7FA]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -193,7 +194,7 @@ export function Sidebar({
             onClick={toggleCollapsed}
             aria-label={isCompactDesktop ? 'Expand sidebar' : 'Collapse sidebar'}
             title={isCompactDesktop ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="hidden h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-[#6E6E73] transition-colors hover:bg-black/[0.06] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 lg:inline-flex dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25"
+            className="hidden h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-[#525866] transition-colors hover:bg-black/[0.06] hover:text-[#111318] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 lg:inline-flex dark:text-[#9AA3B2] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F7FA] dark:focus-visible:ring-[#F5F7FA]/25"
           >
             {isCompactDesktop ? (
               <PanelLeftOpen className="h-4 w-4" />
@@ -213,9 +214,11 @@ export function Sidebar({
             }}
             aria-label="Open command palette"
             title={
-              isCompactDesktop ? 'Quick search (⌘K)' : 'Quick search across subjects and notes'
+              isCompactDesktop
+                ? 'Quick search (⌘K)'
+                : 'Quick search across subjects and notes'
             }
-            className={`glass-pill glass-interactive mb-4 flex cursor-pointer items-center text-xs text-[#6E6E73] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:text-[#98989D] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25 ${
+            className={`glass-pill glass-interactive mb-4 flex cursor-pointer items-center text-xs text-[#525866] hover:text-[#111318] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA] dark:focus-visible:ring-[#F5F7FA]/25 ${
               isCompactDesktop
                 ? 'h-9 w-9 justify-center rounded-xl'
                 : 'w-full justify-between rounded-xl px-2.5 py-2'
@@ -226,7 +229,7 @@ export function Sidebar({
               {!isCompactDesktop && <span>Quick jump…</span>}
             </span>
             {!isCompactDesktop && (
-              <kbd className="rounded-md border border-black/[0.08] bg-white/70 px-1.5 py-0.5 font-mono text-[10px] font-medium text-[#6E6E73] dark:border-white/[0.12] dark:bg-white/[0.06] dark:text-[#98989D]">
+              <kbd className="rounded-md border border-black/[0.08] bg-white/75 px-1.5 py-0.5 font-mono text-[10px] font-medium text-[#525866] dark:border-white/[0.12] dark:bg-white/[0.07] dark:text-[#9AA3B2]">
                 ⌘K
               </kbd>
             )}
@@ -234,9 +237,11 @@ export function Sidebar({
         )}
 
         {/* Workspace Overview */}
-        <div className={`w-full space-y-1 ${isCompactDesktop ? 'flex flex-col items-center' : ''}`}>
+        <div
+          className={`w-full space-y-1 ${isCompactDesktop ? 'flex flex-col items-center' : ''}`}
+        >
           {!isCompactDesktop && (
-            <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+            <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
               Workspace
             </div>
           )}
@@ -281,7 +286,7 @@ export function Sidebar({
           }`}
         >
           {!isCompactDesktop && (
-            <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+            <div className="px-2.5 pb-1 text-[10.5px] font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
               IB Subjects
             </div>
           )}
@@ -290,6 +295,7 @@ export function Sidebar({
             const isActive =
               pathname === href || pathname.startsWith(`${href}/`);
             const Icon = getSubjectIcon(subject.slug);
+            const theme = getSubjectTheme(subject.slug);
             const pct =
               subject.totalCount > 0
                 ? Math.round((subject.completedCount / subject.totalCount) * 100)
@@ -309,26 +315,36 @@ export function Sidebar({
                   isCompactDesktop
                     ? 'h-9 w-9 items-center justify-center'
                     : 'gap-1.5 px-2.5 py-2'
-                } ${isActive ? activeNavClass : inactiveNavClass}`}
+                } ${
+                  isActive
+                    ? `${activeNavClass} ${theme.tintBg} ${theme.borderTint}`
+                    : inactiveNavClass
+                }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex min-w-0 items-center gap-2.5">
-                    <Icon className="h-4 w-4 shrink-0" />
+                    <Icon
+                      className={`h-4 w-4 shrink-0 transition-colors ${
+                        isActive
+                          ? theme.textAccent
+                          : 'group-hover:text-[#111318] dark:group-hover:text-[#F5F7FA]'
+                      }`}
+                    />
                     {!isCompactDesktop && (
                       <span className="truncate">{subject.name}</span>
                     )}
                   </span>
                   {!isCompactDesktop && (
-                    <span className="shrink-0 font-mono text-[10.5px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+                    <span className="shrink-0 font-mono text-[10.5px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                       {subject.level}
                       {subject.totalCount > 0 ? ` · ${pct}%` : ''}
                     </span>
                   )}
                 </div>
                 {!isCompactDesktop && subject.totalCount > 0 && (
-                  <div className="h-0.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
+                  <div className="h-0.5 w-full overflow-hidden rounded-full bg-black/[0.07] dark:bg-white/[0.09]">
                     <div
-                      className="h-full rounded-full bg-[#1D1D1F]/65 transition-all duration-300 dark:bg-[#F5F5F7]/70"
+                      className={`h-full rounded-full transition-all duration-300 ${theme.progressBarClass}`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -361,7 +377,7 @@ export function Sidebar({
             disabled={signingOut}
             aria-label={isCompactDesktop ? 'Sign out' : undefined}
             title={isCompactDesktop ? 'Sign out' : undefined}
-            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-xl text-xs text-[#6E6E73] transition-colors hover:bg-black/[0.05] hover:text-[#1D1D1F] disabled:opacity-50 dark:text-[#98989D] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F5F7] ${
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-xl text-xs text-[#525866] transition-colors hover:bg-black/[0.05] hover:text-[#111318] disabled:opacity-50 dark:text-[#9AA3B2] dark:hover:bg-white/[0.08] dark:hover:text-[#F5F7FA] ${
               isCompactDesktop ? 'h-8 w-8 justify-center' : 'px-2.5 py-1.5'
             }`}
           >
@@ -378,15 +394,15 @@ export function Sidebar({
             isCompactDesktop ? 'h-9 w-9 justify-center' : 'gap-2.5 px-2.5 py-2'
           }`}
         >
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1D1D1F] font-mono text-[11px] font-semibold text-white dark:bg-[#F5F5F7] dark:text-[#111113]">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#111318] font-mono text-[11px] font-semibold text-white dark:bg-[#F5F7FA] dark:text-[#0B0D12]">
             {initials}
           </div>
           {!isCompactDesktop && (
             <div className="min-w-0">
-              <div className="truncate text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+              <div className="truncate text-xs font-medium text-[#111318] dark:text-[#F5F7FA]">
                 {displayName}
               </div>
-              <div className="truncate text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+              <div className="truncate text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                 {userEmail}
               </div>
             </div>
@@ -405,13 +421,13 @@ export function Sidebar({
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open navigation menu"
-            className="glass-pill inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+            className="glass-pill inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-[#111318] hover:bg-white/95 dark:text-[#F5F7FA] dark:hover:bg-white/[0.12]"
           >
             <Menu className="h-4 w-4" />
           </button>
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]"
+            className="flex items-center gap-2 text-sm font-semibold tracking-tight text-[#111318] dark:text-[#F5F7FA]"
           >
             <BrandMonogram size={18} />
             <span>{APP_NAME}</span>
@@ -423,7 +439,7 @@ export function Sidebar({
               type="button"
               onClick={onOpenCommandPalette}
               aria-label="Open command palette"
-              className="glass-pill inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+              className="glass-pill inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]"
             >
               <Search className="h-4 w-4" />
             </button>
@@ -436,7 +452,7 @@ export function Sidebar({
       {mobileOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div
-            className="fixed inset-0 bg-black/25 backdrop-blur-sm dark:bg-black/60"
+            className="fixed inset-0 bg-slate-950/30 backdrop-blur-sm dark:bg-black/65"
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />

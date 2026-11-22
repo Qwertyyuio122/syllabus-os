@@ -7,7 +7,7 @@ import type {
 import { IB_SUBJECTS_CONFIG } from '@/data/ib-syllabi';
 import type { CoreMilestone, CoreProjectType, SubjectSlug } from '@/types/database';
 
-export const CLASSROOM_SEED_PACK_VERSION = 2;
+export const CLASSROOM_SEED_PACK_VERSION = 3;
 
 export interface ClassroomSyncSummary {
   version: number;
@@ -17,6 +17,11 @@ export interface ClassroomSyncSummary {
   addedFlashcards: number;
   updatedTopics: number;
   updatedCoreProjects: number;
+}
+
+export interface SyncClassroomOptions {
+  /** Bypass the fast-path count check and run a full non-destructive reconciliation. */
+  force?: boolean;
 }
 
 const V1_TO_V2_NOTE_TITLE_MAP: Record<string, string> = {
@@ -53,6 +58,44 @@ const V1_TO_V2_NOTE_TITLE_MAP: Record<string, string> = {
   'Carbohydrates, Polysaccharides & Cis/Trans Lipids (B1.1)':
     'Carbohydrates, Glycogen vs Cellulose & Cis/Trans Lipids (B1.1)',
 };
+
+// All 30 v2 note titles were preserved verbatim in v3; keep this map explicit for future title migrations.
+const V2_TO_V3_NOTE_TITLE_MAP: Record<string, string> = {};
+
+function getExpectedSeedTotals(): {
+  notes: number;
+  questions: number;
+  flashcards: number;
+  coreProjects: number;
+} {
+  let notes = 0;
+  let questions = 0;
+  let flashcards = 0;
+  for (const subject of IB_SUBJECTS_CONFIG) {
+    const seed = CLASSROOM_SEED_BY_SUBJECT[subject.slug] as
+      | SubjectClassroomSeed
+      | undefined;
+    if (!seed) continue;
+    notes += seed.notes.length;
+    questions += seed.questions.length;
+    flashcards += seed.flashcards.length;
+  }
+
+  const coreKeys = new Set<string>();
+  for (const spec of DEFAULT_CORE_PROJECTS) {
+    coreKeys.add(`${spec.projectType}::${spec.subjectSlug ?? ''}`);
+  }
+  for (const override of CORE_STARTER_OVERRIDES) {
+    coreKeys.add(`${override.projectType}::${override.subjectSlug ?? ''}`);
+  }
+
+  return {
+    notes,
+    questions,
+    flashcards,
+    coreProjects: coreKeys.size,
+  };
+}
 
 function mergeGuidanceNotes(base: string, classroomNote?: string): string {
   const trimmedBase = base.trim();
@@ -445,7 +488,57 @@ export async function ensureUserSeeded(
 export async function syncClassroomPackUpgrades(
   supabase: SupabaseClient,
   userId: string,
+  options?: SyncClassroomOptions,
 ): Promise<ClassroomSyncSummary> {
+  if (!options?.force) {
+    const expectedTotals = getExpectedSeedTotals();
+    const [
+      v3NotesCountRes,
+      questionsCountRes,
+      flashcardsCountRes,
+      coreCountRes,
+    ] = await Promise.all([
+      supabase
+        .from('study_notes')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .gte('version', CLASSROOM_SEED_PACK_VERSION),
+      supabase
+        .from('questions')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId),
+      supabase
+        .from('flashcards')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId),
+      supabase
+        .from('core_projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId),
+    ]);
+
+    if (
+      !v3NotesCountRes.error &&
+      !questionsCountRes.error &&
+      !flashcardsCountRes.error &&
+      !coreCountRes.error &&
+      (v3NotesCountRes.count ?? 0) >= expectedTotals.notes &&
+      (questionsCountRes.count ?? 0) >= expectedTotals.questions &&
+      (flashcardsCountRes.count ?? 0) >= expectedTotals.flashcards &&
+      (coreCountRes.count ?? 0) >= expectedTotals.coreProjects
+    ) {
+      return {
+        version: CLASSROOM_SEED_PACK_VERSION,
+        addedMaterials: 0,
+        upgradedNotes: 0,
+        addedQuestions: 0,
+        addedFlashcards: 0,
+        updatedTopics: 0,
+        updatedCoreProjects: 0,
+      };
+    }
+  }
+
   const [
     subjectsRes,
     topicsRes,
@@ -707,7 +800,7 @@ export async function syncClassroomPackUpgrades(
     return Array.from(ids);
   };
 
-  // 3) Upgrade v1 seed notes (version < 2) and add missing v2 seed notes without touching user/AI notes
+  // 3) Upgrade v1/v2 seed notes (version < 3) and add missing v3 seed notes without touching user/AI notes
   const existingNoteBySubAndTitle = new Map<
     string,
     { id: string; version: number }
@@ -719,11 +812,20 @@ export async function syncClassroomPackUpgrades(
     );
   }
 
-  const v1AliasesByV2Key = new Map<string, string[]>();
+  const legacyAliasesByTitle = new Map<string, string[]>();
+  const registerAlias = (legacyTitle: string, currentTitle: string) => {
+    const list = legacyAliasesByTitle.get(currentTitle) ?? [];
+    if (!list.includes(legacyTitle)) {
+      list.push(legacyTitle);
+    }
+    legacyAliasesByTitle.set(currentTitle, list);
+  };
   for (const [v1Title, v2Title] of Object.entries(V1_TO_V2_NOTE_TITLE_MAP)) {
-    const list = v1AliasesByV2Key.get(v2Title) ?? [];
-    list.push(v1Title);
-    v1AliasesByV2Key.set(v2Title, list);
+    const v3Title = V2_TO_V3_NOTE_TITLE_MAP[v2Title] ?? v2Title;
+    registerAlias(v1Title, v3Title);
+  }
+  for (const [v2Title, v3Title] of Object.entries(V2_TO_V3_NOTE_TITLE_MAP)) {
+    registerAlias(v2Title, v3Title);
   }
 
   let upgradedNotes = 0;
@@ -735,12 +837,12 @@ export async function syncClassroomPackUpgrades(
     if (!subjectId || !seed) continue;
 
     for (const note of seed.notes) {
-      const v2Key = `${subjectId}::${note.title}`;
-      const directMatch = existingNoteBySubAndTitle.get(v2Key);
+      const directKey = `${subjectId}::${note.title}`;
+      const directMatch = existingNoteBySubAndTitle.get(directKey);
       let match: { id: string; version: number } | undefined = directMatch;
 
       if (!match) {
-        const legacyTitles = v1AliasesByV2Key.get(note.title) ?? [];
+        const legacyTitles = legacyAliasesByTitle.get(note.title) ?? [];
         for (const legacyTitle of legacyTitles) {
           const found = existingNoteBySubAndTitle.get(`${subjectId}::${legacyTitle}`);
           if (found) {
@@ -786,7 +888,7 @@ export async function syncClassroomPackUpgrades(
   }
 
   if (missingNotes.length > 0) {
-    await insertInChunks(supabase, 'study_notes', missingNotes, 20);
+    await insertInChunks(supabase, 'study_notes', missingNotes, 8);
   }
 
   // 4) Append missing questions and flashcards without deleting or resetting attempts/mastery
@@ -846,7 +948,7 @@ export async function syncClassroomPackUpgrades(
   }
 
   if (missingQuestions.length > 0) {
-    await insertInChunks(supabase, 'questions', missingQuestions, 35);
+    await insertInChunks(supabase, 'questions', missingQuestions, 30);
   }
   if (missingFlashcards.length > 0) {
     await insertInChunks(supabase, 'flashcards', missingFlashcards, 60);
@@ -1173,8 +1275,8 @@ async function runEnsureUserSeeded(
     }
   }
 
-  await insertInChunks(supabase, 'study_notes', studyNotePayloads, 20);
-  await insertInChunks(supabase, 'questions', questionPayloads, 35);
+  await insertInChunks(supabase, 'study_notes', studyNotePayloads, 8);
+  await insertInChunks(supabase, 'questions', questionPayloads, 30);
   await insertInChunks(supabase, 'flashcards', flashcardPayloads, 60);
 
   // d) Insert starter core_projects (EE, TOK_ESSAY, TOK_EXHIBITION, CAS, and all 6 subject IAs)

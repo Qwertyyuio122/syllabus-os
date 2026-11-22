@@ -13,10 +13,12 @@ import {
   Save,
   Sparkles,
 } from 'lucide-react';
+import { getSubjectTheme } from '@/config/subject-themes';
 import { getRubricForProject } from '@/data/ib-rubrics';
-import { CRHS_2026_2028_MILESTONES } from '@/data/classroom-seed';
+import { CRHS_2026_2028_MILESTONES } from '@/data/classroom-seed/core-ee-cas';
 import { createClient } from '@/lib/supabase/client';
 import { MarkdownMath } from '@/components/notes/MarkdownMath';
+import { LiquidArtwork } from '@/components/subjects/SubjectMotif';
 import {
   Accordion,
   AccordionContent,
@@ -27,6 +29,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { GlassSpotlight } from '@/components/ui/GlassSpotlight';
+import { GlassReveal, ProgressRing } from '@/components/ui/MotionPrimitives';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ClassroomSeedCoreResource } from '@/data/classroom-seed/types';
 import type {
@@ -147,7 +151,10 @@ export function CoreWorkspaceClient({
   const [projects, setProjects] =
     React.useState<CoreProjectRow[]>(initialProjects);
   const [selectedProjectId, setSelectedProjectId] = React.useState<string>(
-    initialProjectId ?? orderedProjects[0]?.project.id ?? initialProjects[0]?.id ?? '',
+    initialProjectId ??
+      orderedProjects[0]?.project.id ??
+      initialProjects[0]?.id ??
+      '',
   );
 
   React.useEffect(() => {
@@ -155,19 +162,19 @@ export function CoreWorkspaceClient({
       setSelectedProjectId(initialProjectId);
     }
   }, [initialProjectId]);
+
   const [subTab, setSubTab] = React.useState<'draft' | 'rubric' | 'toolkit'>(
     'draft',
   );
 
   // Rubric variants (EE FA2027 30m vs legacy 34m; English HL Essay vs IO)
-  const [eeVariant, setEeVariant] = React.useState<'EE_FA2027_30' | 'EE_LEGACY_34'>(
-    'EE_FA2027_30',
-  );
+  const [eeVariant, setEeVariant] = React.useState<
+    'EE_FA2027_30' | 'EE_LEGACY_34'
+  >('EE_FA2027_30');
   const [englishVariant, setEnglishVariant] = React.useState<
     'ENGLISH_HL_ESSAY' | 'IO'
   >('ENGLISH_HL_ESSAY');
 
-  // Form drafts synced to selected project
   const selectedProject = React.useMemo(
     () => projects.find((p) => p.id === selectedProjectId) ?? projects[0] ?? null,
     [projects, selectedProjectId],
@@ -353,7 +360,6 @@ export function CoreWorkspaceClient({
     setEvaluating(true);
 
     try {
-      // Ensure latest RQ and draft excerpt are persisted before evaluation
       const savedOk = await persistProjectPatch(
         selectedProject.id,
         {
@@ -412,7 +418,7 @@ export function CoreWorkspaceClient({
   if (!selectedProject) {
     return (
       <div className="mx-auto max-w-4xl px-6 py-12 text-center">
-        <p className="text-sm text-[#787774] dark:text-[#9B9A97]">
+        <p className="text-sm text-[#525866] dark:text-[#9AA3B2]">
           No DP Core or IA projects initialized yet.
         </p>
       </div>
@@ -422,6 +428,23 @@ export function CoreWorkspaceClient({
   const completedMilestones = selectedProject.milestones.filter(
     (m) => m.completed,
   ).length;
+  const totalAllMilestones = projects.reduce(
+    (sum, p) => sum + (p.milestones?.length ?? 0),
+    0,
+  );
+  const completedAllMilestones = projects.reduce(
+    (sum, p) =>
+      sum + (p.milestones?.filter((m) => m.completed).length ?? 0),
+    0,
+  );
+  const overallMilestonePct =
+    totalAllMilestones > 0
+      ? Math.round((completedAllMilestones / totalAllMilestones) * 100)
+      : 0;
+  const activeProjectTheme = getSubjectTheme(
+    selectedProject.subject_slug ?? 'core',
+  );
+
   const wordTarget = selectedProject.word_count_target || 0;
   const overTarget = wordTarget > 0 && liveWordCount > wordTarget;
 
@@ -430,35 +453,64 @@ export function CoreWorkspaceClient({
       {/* Breadcrumb */}
       <nav
         aria-label="Breadcrumb"
-        className="mb-4 flex items-center gap-1.5 text-xs text-[#787774] dark:text-[#9B9A97]"
+        className="mb-4 flex items-center gap-1.5 text-xs text-[#525866] dark:text-[#9AA3B2]"
       >
         <Link
           href="/dashboard"
-          className="transition-colors hover:text-[#37352F] dark:hover:text-[#EBEBEB]"
+          className="transition-colors hover:text-[#111318] dark:hover:text-[#F5F7FA]"
         >
           Dashboard
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
-        <span className="font-medium text-[#37352F] dark:text-[#EBEBEB]">
+        <span className="font-medium text-[#111318] dark:text-[#F5F7FA]">
           EE · TOK · CAS · Subject IAs
         </span>
       </nav>
 
-      {/* Page Title */}
-      <div className="glass-panel mb-6 rounded-3xl p-6">
-        <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#1D1D1F] sm:text-[34px] sm:leading-[1.12] dark:text-[#F5F5F7]">
-          DP Core &amp; Internal Assessments
-        </h1>
-        <p className="mt-1.5 text-sm text-[#6E6E73] dark:text-[#98989D]">
-          Official IB Diploma criteria, classroom reference toolkits,
-          milestone tracking, and examiner-calibrated rubric evaluation.
-        </p>
-      </div>
+      {/* Page Title Hero */}
+      <GlassReveal>
+        <GlassSpotlight className="glass-panel relative mb-6 flex flex-col gap-4 rounded-3xl p-6 sm:flex-row sm:items-end sm:justify-between">
+          <LiquidArtwork
+            src="/images/hero-glass.png"
+            className="absolute -top-6 right-8 hidden h-48 w-80 sm:block"
+            imgClassName="opacity-70 dark:opacity-75"
+          />
+
+          <div className="relative z-10 min-w-0">
+            <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#111318] sm:text-[34px] sm:leading-[1.12] dark:text-[#F5F7FA]">
+              DP Core &amp; Internal Assessments
+            </h1>
+            <p className="mt-1.5 max-w-2xl text-sm text-[#525866] dark:text-[#9AA3B2]">
+              Official IB Diploma criteria, classroom reference toolkits,
+              milestone tracking, and examiner-calibrated rubric evaluation.
+            </p>
+          </div>
+
+          <div className="glass-surface relative z-10 flex shrink-0 items-center gap-3 rounded-2xl px-4 py-3">
+            <ProgressRing
+              value={overallMilestonePct}
+              size={44}
+              strokeWidth={3.5}
+              accentClassName="text-[#1E3A5F] dark:text-[#93C5FD]"
+              centerLabel={`${overallMilestonePct}%`}
+              ariaLabel={`Core milestone readiness ${overallMilestonePct}%`}
+            />
+            <div>
+              <div className="text-[11px] font-medium text-[#525866] dark:text-[#9AA3B2]">
+                All Core &amp; IA Milestones
+              </div>
+              <div className="font-mono text-sm font-semibold tabular-nums text-[#111318] dark:text-[#F5F7FA]">
+                {completedAllMilestones} / {totalAllMilestones} done
+              </div>
+            </div>
+          </div>
+        </GlassSpotlight>
+      </GlassReveal>
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         {/* Left Project Selector */}
         <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-64">
-          <div className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+          <div className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
             Core &amp; Subject IAs
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
@@ -469,27 +521,33 @@ export function CoreWorkspaceClient({
               const doneCount = liveProj.milestones.filter(
                 (m) => m.completed,
               ).length;
+              const projTheme = getSubjectTheme(liveProj.subject_slug ?? 'core');
 
               return (
                 <button
                   key={liveProj.id}
                   type="button"
                   onClick={() => setSelectedProjectId(liveProj.id)}
-                  className={`flex shrink-0 items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 text-left transition-all cursor-pointer lg:w-full ${
+                  className={`flex shrink-0 cursor-pointer items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 text-left transition-all lg:w-full ${
                     isSelected
-                      ? 'glass-panel border-[#1D1D1F]/30 text-[#1D1D1F] dark:border-white/25 dark:text-[#F5F5F7]'
-                      : 'glass-surface glass-interactive text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                      ? `glass-panel border-[#111318]/25 text-[#111318] dark:border-white/25 dark:text-[#F5F7FA] ${projTheme.tintBg}`
+                      : 'glass-surface glass-interactive text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                   }`}
                 >
                   <div className="min-w-0">
-                    <div className="truncate text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                    <div className="truncate text-xs font-medium text-[#111318] dark:text-[#F5F7FA]">
                       {label}
                     </div>
-                    <div className="mt-0.5 font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
+                    <div className="mt-0.5 font-mono text-[10px] text-[#525866] dark:text-[#9AA3B2]">
                       {doneCount}/{liveProj.milestones.length} milestones
                     </div>
                   </div>
-                  <Badge variant="outline" className="shrink-0 font-mono">
+                  <Badge
+                    variant="outline"
+                    className={`shrink-0 font-mono ${
+                      isSelected ? `${projTheme.borderTint} ${projTheme.textAccent}` : ''
+                    }`}
+                  >
                     {shortTag}
                   </Badge>
                 </button>
@@ -501,21 +559,24 @@ export function CoreWorkspaceClient({
         {/* Main Workspace Column */}
         <div className="min-w-0 flex-1 space-y-5">
           {/* Selected Project Summary Header */}
-          <Card>
+          <Card className={activeProjectTheme.borderTint}>
             <CardContent className="space-y-3 p-4 sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-lg font-semibold tracking-tight text-[#37352F] dark:text-[#EBEBEB]">
+                    <h2 className="text-lg font-semibold tracking-tight text-[#111318] dark:text-[#F5F7FA]">
                       {activeRubric.title}
                     </h2>
                     {activeRubric.totalMaxMarks > 0 && (
-                      <Badge variant="default" className="font-mono">
+                      <Badge
+                        variant="default"
+                        className={`font-mono ${activeProjectTheme.tintBg} ${activeProjectTheme.borderTint} ${activeProjectTheme.textAccent}`}
+                      >
                         {activeRubric.totalMaxMarks} marks
                       </Badge>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-[#787774] dark:text-[#9B9A97]">
+                  <p className="mt-1 text-xs text-[#525866] dark:text-[#9AA3B2]">
                     {activeRubric.cohortSession} · {activeRubric.wordLimit} ·{' '}
                     {activeRubric.weightingNote}
                   </p>
@@ -527,10 +588,10 @@ export function CoreWorkspaceClient({
                     <button
                       type="button"
                       onClick={() => setEeVariant('EE_FA2027_30')}
-                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
+                      className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-all ${
                         eeVariant === 'EE_FA2027_30'
-                          ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-                          : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                          ? 'bg-[#111318] text-white shadow-sm dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                          : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                       }`}
                     >
                       FA2027 (30m)
@@ -538,10 +599,10 @@ export function CoreWorkspaceClient({
                     <button
                       type="button"
                       onClick={() => setEeVariant('EE_LEGACY_34')}
-                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
+                      className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-all ${
                         eeVariant === 'EE_LEGACY_34'
-                          ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-                          : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                          ? 'bg-[#111318] text-white shadow-sm dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                          : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                       }`}
                     >
                       Legacy (34m)
@@ -555,10 +616,10 @@ export function CoreWorkspaceClient({
                       <button
                         type="button"
                         onClick={() => setEnglishVariant('ENGLISH_HL_ESSAY')}
-                        className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
+                        className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-all ${
                           englishVariant === 'ENGLISH_HL_ESSAY'
-                            ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-                            : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                            ? 'bg-[#111318] text-white shadow-sm dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                            : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                         }`}
                       >
                         HL Essay (20m)
@@ -566,10 +627,10 @@ export function CoreWorkspaceClient({
                       <button
                         type="button"
                         onClick={() => setEnglishVariant('IO')}
-                        className={`rounded-full px-3 py-1 text-xs font-medium transition-all cursor-pointer ${
+                        className={`cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-all ${
                           englishVariant === 'IO'
-                            ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-                            : 'text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                            ? 'bg-[#111318] text-white shadow-sm dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                            : 'text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                         }`}
                       >
                         Individual Oral (40m)
@@ -578,7 +639,7 @@ export function CoreWorkspaceClient({
                   )}
               </div>
 
-              <p className="text-xs leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+              <p className="text-xs leading-relaxed text-[#525866] dark:text-[#9AA3B2]">
                 {activeRubric.overview}
               </p>
             </CardContent>
@@ -587,7 +648,7 @@ export function CoreWorkspaceClient({
           {errorMsg && (
             <div
               role="alert"
-              className="rounded-md border border-[#E6D0D0] bg-[#FAF2F2] px-3 py-2 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F] dark:text-[#E59898]"
+              className="rounded-xl border border-red-700/20 bg-red-50/90 px-3.5 py-2.5 text-xs text-[#991B1B] dark:border-red-400/25 dark:bg-red-950/60 dark:text-[#FCA5A5]"
             >
               {errorMsg}
             </div>
@@ -596,7 +657,7 @@ export function CoreWorkspaceClient({
           {statusMsg && (
             <div
               role="status"
-              className="rounded-md border border-[#DCE5DF] bg-[#F3F6F4] px-3 py-2 text-xs text-[#2F5E44] dark:border-[#2D3B32] dark:bg-[#1E2621] dark:text-[#9FC3AD]"
+              className="rounded-xl border border-emerald-700/20 bg-emerald-50/90 px-3.5 py-2.5 text-xs text-[#065F46] dark:border-emerald-400/25 dark:bg-emerald-950/60 dark:text-[#6EE7B7]"
             >
               {statusMsg}
             </div>
@@ -610,7 +671,7 @@ export function CoreWorkspaceClient({
               setSubTab(v as 'draft' | 'rubric' | 'toolkit')
             }
           >
-            <div className="sticky top-[52px] z-20 -mx-2 bg-gradient-to-b from-[#F2F2F5]/95 via-[#F2F2F5]/75 to-transparent px-2 pt-2 pb-1.5 backdrop-blur-[2px] lg:top-0 lg:pt-2.5 dark:from-[#111113]/95 dark:via-[#111113]/75 dark:to-transparent">
+            <div className="sticky top-[52px] z-20 -mx-2 bg-gradient-to-b from-[#E9EFF7]/95 via-[#E9EFF7]/70 to-transparent px-2 pt-2 pb-1.5 backdrop-blur-[2px] lg:top-0 lg:pt-2.5 dark:from-[#0B0D12]/95 dark:via-[#0B0D12]/70 dark:to-transparent">
               <TabsList className="glass-floating-bar">
                 <TabsTrigger value="draft">
                   <FileText className="h-3.5 w-3.5" />
@@ -619,14 +680,14 @@ export function CoreWorkspaceClient({
                 <TabsTrigger value="rubric">
                   <Check className="h-3.5 w-3.5" />
                   <span>Official IB Rubric</span>
-                  <span className="font-mono text-[11px] tabular-nums text-[#787774] dark:text-[#9B9A97]">
+                  <span className="font-mono text-[11px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                     {activeRubric.criteria.length}
                   </span>
                 </TabsTrigger>
                 <TabsTrigger value="toolkit">
                   <BookMarked className="h-3.5 w-3.5" />
                   <span>Classroom Reference Toolkit</span>
-                  <span className="font-mono text-[11px] tabular-nums text-[#787774] dark:text-[#9B9A97]">
+                  <span className="font-mono text-[11px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                     {filteredResources.length}
                   </span>
                 </TabsTrigger>
@@ -637,11 +698,11 @@ export function CoreWorkspaceClient({
             <TabsContent value="draft" className="space-y-5">
               {/* Research Question / Prompt */}
               <Card>
-                <CardContent className="space-y-3 p-4">
+                <CardContent className="space-y-3 p-4 sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <label
                       htmlFor="core-rq-input"
-                      className="text-xs font-semibold uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]"
+                      className="text-xs font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]"
                     >
                       {selectedProject.project_type === 'CAS'
                         ? 'CAS Programme Focus & Goals'
@@ -664,22 +725,22 @@ export function CoreWorkspaceClient({
                     value={rqInput}
                     onChange={(e) => setRqInput(e.target.value)}
                     placeholder="Enter your exact IB Research Question, TOK Prescribed Title, or Global Issue…"
-                    className="h-9 w-full rounded-md border border-[#E6E6E4] bg-white px-3 text-sm text-[#37352F] placeholder:text-[#787774] focus:border-[#37352F] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:placeholder:text-[#9B9A97] dark:focus:border-[#EBEBEB]"
+                    className="glass-surface h-9.5 w-full rounded-xl px-3 text-sm text-[#111318] placeholder:text-[#525866] focus:border-[#111318]/40 focus:outline-none dark:text-[#F5F7FA] dark:placeholder:text-[#9AA3B2] dark:focus:border-white/35"
                   />
 
                   <div className="space-y-1.5 pt-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <label
                         htmlFor="core-draft-textarea"
-                        className="text-xs font-semibold uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]"
+                        className="text-xs font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]"
                       >
                         Draft Excerpt / Outline / Reflections
                       </label>
                       <span
                         className={`font-mono text-xs ${
                           overTarget
-                            ? 'font-semibold text-[#9B3B3B] dark:text-[#E59898]'
-                            : 'text-[#787774] dark:text-[#9B9A97]'
+                            ? 'font-semibold text-[#991B1B] dark:text-[#FCA5A5]'
+                            : 'text-[#525866] dark:text-[#9AA3B2]'
                         }`}
                       >
                         {liveWordCount.toLocaleString()}
@@ -695,12 +756,12 @@ export function CoreWorkspaceClient({
                       value={draftExcerpt}
                       onChange={(e) => setDraftExcerpt(e.target.value)}
                       placeholder="Paste or draft your introduction, methodology, analytical paragraph, or CAS reflection here for rubric evaluation…"
-                      className="w-full resize-y rounded-md border border-[#E6E6E4] bg-white p-3 text-sm leading-relaxed text-[#37352F] placeholder:text-[#787774] focus:border-[#37352F] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:placeholder:text-[#9B9A97] dark:focus:border-[#EBEBEB]"
+                      className="glass-surface w-full resize-y rounded-2xl p-3.5 text-sm leading-relaxed text-[#111318] placeholder:text-[#525866] focus:border-[#111318]/40 focus:outline-none dark:text-[#F5F7FA] dark:placeholder:text-[#9AA3B2] dark:focus:border-white/35"
                     />
                   </div>
 
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <span className="text-xs text-[#787774] dark:text-[#9B9A97]">
+                    <span className="text-xs text-[#525866] dark:text-[#9AA3B2]">
                       Evaluates strictly against {activeRubric.title}.
                     </span>
                     <Button
@@ -728,12 +789,12 @@ export function CoreWorkspaceClient({
               {selectedProject.latest_ai_review && (
                 <Card>
                   <CardContent className="space-y-4 p-4 sm:p-5">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E6E6E4] pb-3 dark:border-[#2E2E2E]">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.06] pb-3 dark:border-white/[0.08]">
                       <div>
-                        <h3 className="text-sm font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                        <h3 className="text-sm font-semibold text-[#111318] dark:text-[#F5F7FA]">
                           IB Examiner Rubric Evaluation
                         </h3>
-                        <p className="mt-0.5 text-[11px] text-[#787774] dark:text-[#9B9A97]">
+                        <p className="mt-0.5 text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                           Reviewed{' '}
                           {new Date(
                             selectedProject.latest_ai_review.reviewed_at,
@@ -746,7 +807,7 @@ export function CoreWorkspaceClient({
                       </Badge>
                     </div>
 
-                    <p className="text-xs leading-relaxed text-[#37352F] dark:text-[#EBEBEB]">
+                    <p className="text-xs leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
                       {selectedProject.latest_ai_review.overall_summary}
                     </p>
 
@@ -755,21 +816,21 @@ export function CoreWorkspaceClient({
                         (crit, idx) => (
                           <div
                             key={`${crit.criterion}-${idx}`}
-                            className="rounded-md border border-[#E6E6E4] bg-[#FBFBFA] p-3 text-xs dark:border-[#2E2E2E] dark:bg-[#202020]"
+                            className="glass-surface rounded-2xl p-3.5 text-xs"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                              <span className="font-semibold text-[#111318] dark:text-[#F5F7FA]">
                                 {crit.criterion}
                               </span>
-                              <span className="font-mono font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                              <span className="font-mono font-semibold text-[#111318] dark:text-[#F5F7FA]">
                                 {crit.awarded} / {crit.max_marks}
                               </span>
                             </div>
-                            <p className="mt-1 leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+                            <p className="mt-1 leading-relaxed text-[#525866] dark:text-[#9AA3B2]">
                               {crit.justification}
                             </p>
                             {crit.improvements.length > 0 && (
-                              <ul className="mt-2 list-disc space-y-1 pl-4 text-[#37352F] dark:text-[#EBEBEB]">
+                              <ul className="mt-2 list-disc space-y-1 pl-4 text-[#111318] dark:text-[#F5F7FA]">
                                 {crit.improvements.map((imp, i) => (
                                   <li key={i}>{imp}</li>
                                 ))}
@@ -782,11 +843,11 @@ export function CoreWorkspaceClient({
 
                     {selectedProject.latest_ai_review.priority_actions.length >
                       0 && (
-                      <div className="rounded-md border border-[#E6E6E4] bg-white p-3 text-xs dark:border-[#2E2E2E] dark:bg-[#191919]">
-                        <div className="mb-1.5 font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                      <div className="glass-pill rounded-2xl p-3.5 text-xs">
+                        <div className="mb-1.5 font-semibold text-[#111318] dark:text-[#F5F7FA]">
                           Priority Next Revisions
                         </div>
-                        <ul className="list-disc space-y-1 pl-4 text-[#787774] dark:text-[#9B9A97]">
+                        <ul className="list-disc space-y-1 pl-4 text-[#525866] dark:text-[#9AA3B2]">
                           {selectedProject.latest_ai_review.priority_actions.map(
                             (act, idx) => (
                               <li key={idx}>{act}</li>
@@ -801,9 +862,9 @@ export function CoreWorkspaceClient({
 
               {/* Interactive Milestone Checklist */}
               <Card>
-                <CardContent className="space-y-3 p-4">
+                <CardContent className="space-y-3 p-4 sm:p-5">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
                       Milestone Checklist
                     </h3>
                     <Badge variant="outline" className="font-mono">
@@ -811,11 +872,11 @@ export function CoreWorkspaceClient({
                     </Badge>
                   </div>
 
-                  <div className="divide-y divide-[#E6E6E4] rounded-md border border-[#E6E6E4] dark:divide-[#2E2E2E] dark:border-[#2E2E2E]">
+                  <div className="glass-surface divide-y divide-black/[0.06] overflow-hidden rounded-2xl dark:divide-white/[0.08]">
                     {selectedProject.milestones.map((m) => (
                       <div
                         key={m.id}
-                        className="flex items-center justify-between gap-3 px-3 py-2.5 text-xs"
+                        className="flex items-center justify-between gap-3 px-3.5 py-2.5 text-xs"
                       >
                         <div className="flex min-w-0 items-center gap-2.5">
                           <Checkbox
@@ -829,22 +890,22 @@ export function CoreWorkspaceClient({
                             htmlFor={`milestone-${m.id}`}
                             className={`cursor-pointer select-none ${
                               m.completed
-                                ? 'text-[#787774] line-through dark:text-[#9B9A97]'
-                                : 'text-[#37352F] dark:text-[#EBEBEB]'
+                                ? 'text-[#525866] line-through dark:text-[#9AA3B2]'
+                                : 'text-[#111318] dark:text-[#F5F7FA]'
                             }`}
                           >
                             {m.title}
                           </label>
                         </div>
                         {m.dueDate && (
-                          <span className="shrink-0 font-mono text-[11px] text-[#787774] dark:text-[#9B9A97]">
+                          <span className="shrink-0 font-mono text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                             {m.dueDate}
                           </span>
                         )}
                       </div>
                     ))}
                     {selectedProject.milestones.length === 0 && (
-                      <div className="px-3 py-4 text-center text-xs text-[#787774] dark:text-[#9B9A97]">
+                      <div className="px-3 py-4 text-center text-xs text-[#525866] dark:text-[#9AA3B2]">
                         No milestones added yet.
                       </div>
                     )}
@@ -860,7 +921,7 @@ export function CoreWorkspaceClient({
                       onChange={(e) => setNewMilestoneTitle(e.target.value)}
                       placeholder="Add a milestone (e.g., RPF Session 2 check-in)…"
                       aria-label="Add milestone"
-                      className="h-8 flex-1 rounded-md border border-[#E6E6E4] bg-white px-2.5 text-xs text-[#37352F] placeholder:text-[#787774] focus:border-[#37352F] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#191919] dark:text-[#EBEBEB] dark:placeholder:text-[#9B9A97] dark:focus:border-[#EBEBEB]"
+                      className="glass-surface h-8.5 flex-1 rounded-xl px-3 text-xs text-[#111318] placeholder:text-[#525866] focus:border-[#111318]/40 focus:outline-none dark:text-[#F5F7FA] dark:placeholder:text-[#9AA3B2] dark:focus:border-white/35"
                     />
                     <Button
                       type="submit"
@@ -879,11 +940,11 @@ export function CoreWorkspaceClient({
             {/* Tab 2: Official IB Criteria & Descriptors Accordion */}
             <TabsContent value="rubric" className="space-y-4">
               {activeRubric.examinerNotes.length > 0 && (
-                <div className="rounded-lg border border-[#E6E6E4] bg-[#FBFBFA] p-4 dark:border-[#2E2E2E] dark:bg-[#202020]">
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+                <div className="glass-surface rounded-2xl p-4 sm:p-5">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
                     Official IB Examiner Notes
                   </div>
-                  <ul className="list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-[#37352F] dark:text-[#EBEBEB]">
+                  <ul className="list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
                     {activeRubric.examinerNotes.map((note, idx) => (
                       <li key={idx}>{note}</li>
                     ))}
@@ -892,7 +953,7 @@ export function CoreWorkspaceClient({
               )}
 
               {activeRubric.criteria.length > 0 && (
-                <div className="overflow-hidden rounded-lg border border-[#E6E6E4] bg-white dark:border-[#2E2E2E] dark:bg-[#191919]">
+                <div className="glass-panel overflow-hidden rounded-2xl">
                   <Accordion
                     type="multiple"
                     defaultValue={
@@ -913,22 +974,22 @@ export function CoreWorkspaceClient({
                             </Badge>
                             <span>{criterion.name}</span>
                             {criterion.maxMarks > 0 && (
-                              <span className="font-mono text-xs text-[#787774] dark:text-[#9B9A97]">
+                              <span className="font-mono text-xs text-[#525866] dark:text-[#9AA3B2]">
                                 ({criterion.maxMarks} marks)
                               </span>
                             )}
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-3">
-                          <p className="text-xs leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+                          <p className="text-xs leading-relaxed text-[#525866] dark:text-[#9AA3B2]">
                             {criterion.summary}
                           </p>
 
-                          <div className="divide-y divide-[#E6E6E4] rounded-md border border-[#E6E6E4] dark:divide-[#2E2E2E] dark:border-[#2E2E2E]">
+                          <div className="glass-surface divide-y divide-black/[0.06] overflow-hidden rounded-xl dark:divide-white/[0.08]">
                             {criterion.descriptors.map((band) => (
                               <div
                                 key={`${criterion.code}-${band.marks}`}
-                                className="flex flex-col gap-1 bg-[#FBFBFA] px-3 py-2 text-xs sm:flex-row sm:items-start sm:gap-3 dark:bg-[#202020]"
+                                className="flex flex-col gap-1 px-3.5 py-2.5 text-xs sm:flex-row sm:items-start sm:gap-3"
                               >
                                 <div className="flex shrink-0 items-center gap-2 sm:w-36">
                                   <Badge
@@ -937,11 +998,11 @@ export function CoreWorkspaceClient({
                                   >
                                     {band.marks}
                                   </Badge>
-                                  <span className="font-medium text-[#37352F] dark:text-[#EBEBEB]">
+                                  <span className="font-medium text-[#111318] dark:text-[#F5F7FA]">
                                     {band.levelLabel}
                                   </span>
                                 </div>
-                                <p className="leading-relaxed text-[#787774] dark:text-[#9B9A97]">
+                                <p className="leading-relaxed text-[#525866] dark:text-[#9AA3B2]">
                                   {band.descriptor}
                                 </p>
                               </div>
@@ -949,11 +1010,11 @@ export function CoreWorkspaceClient({
                           </div>
 
                           {criterion.examinerTips.length > 0 && (
-                            <div className="rounded-md border border-[#E6E6E4] bg-white px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#191919]">
-                              <span className="font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                            <div className="glass-pill rounded-xl px-3.5 py-2.5 text-xs">
+                              <span className="font-semibold text-[#111318] dark:text-[#F5F7FA]">
                                 Examiner tips:{' '}
                               </span>
-                              <span className="text-[#787774] dark:text-[#9B9A97]">
+                              <span className="text-[#525866] dark:text-[#9AA3B2]">
                                 {criterion.examinerTips.join(' · ')}
                               </span>
                             </div>
@@ -971,10 +1032,10 @@ export function CoreWorkspaceClient({
                   {activeRubric.casStrands.map((strand) => (
                     <Card key={strand.name}>
                       <CardContent className="space-y-2 p-4 text-xs">
-                        <div className="font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                        <div className="font-semibold text-[#111318] dark:text-[#F5F7FA]">
                           {strand.name}
                         </div>
-                        <p className="text-[#787774] dark:text-[#9B9A97]">
+                        <p className="text-[#525866] dark:text-[#9AA3B2]">
                           {strand.description}
                         </p>
                       </CardContent>
@@ -987,19 +1048,19 @@ export function CoreWorkspaceClient({
                 activeRubric.casLearningOutcomes.length > 0 && (
                   <Card>
                     <CardContent className="space-y-2 p-4">
-                      <div className="text-xs font-semibold uppercase tracking-wider text-[#787774] dark:text-[#9B9A97]">
+                      <div className="text-xs font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
                         7 IB CAS Learning Outcomes
                       </div>
-                      <div className="divide-y divide-[#E6E6E4] dark:divide-[#2E2E2E]">
+                      <div className="divide-y divide-black/[0.06] dark:divide-white/[0.08]">
                         {activeRubric.casLearningOutcomes.map((lo) => (
                           <div key={lo.code} className="py-2 text-xs">
-                            <span className="mr-2 font-mono font-semibold text-[#37352F] dark:text-[#EBEBEB]">
+                            <span className="mr-2 font-mono font-semibold text-[#111318] dark:text-[#F5F7FA]">
                               {lo.code}
                             </span>
-                            <span className="font-medium text-[#37352F] dark:text-[#EBEBEB]">
+                            <span className="font-medium text-[#111318] dark:text-[#F5F7FA]">
                               {lo.title}
                             </span>
-                            <p className="mt-0.5 text-[#787774] dark:text-[#9B9A97]">
+                            <p className="mt-0.5 text-[#525866] dark:text-[#9AA3B2]">
                               {lo.description}
                             </p>
                           </div>
@@ -1013,7 +1074,7 @@ export function CoreWorkspaceClient({
             {/* Tab 3: Classroom Reference Toolkit */}
             <TabsContent value="toolkit" className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs text-[#787774] dark:text-[#9B9A97]">
+                <p className="text-xs text-[#525866] dark:text-[#9AA3B2]">
                   Teacher-provided IB guides, lab formatting manuals, timelines,
                   and citation standards.
                 </p>
@@ -1040,21 +1101,21 @@ export function CoreWorkspaceClient({
                           key={res.id}
                           type="button"
                           onClick={() => setActiveResourceId(res.id)}
-                          className={`w-full rounded-2xl px-3.5 py-3 text-left transition-all cursor-pointer ${
+                          className={`w-full cursor-pointer rounded-2xl px-3.5 py-3 text-left transition-all ${
                             active
-                              ? 'glass-panel border-[#1D1D1F]/30 text-[#1D1D1F] dark:border-white/25 dark:text-[#F5F5F7]'
-                              : 'glass-surface glass-interactive text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                              ? 'glass-panel border-[#111318]/25 text-[#111318] dark:border-white/25 dark:text-[#F5F7FA]'
+                              : 'glass-surface glass-interactive text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-mono text-[10px] uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+                            <span className="font-mono text-[10px] uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
                               {res.category}
                             </span>
                           </div>
-                          <div className="mt-0.5 text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          <div className="mt-0.5 text-xs font-medium text-[#111318] dark:text-[#F5F7FA]">
                             {res.title}
                           </div>
-                          <div className="mt-0.5 line-clamp-2 text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                          <div className="mt-0.5 line-clamp-2 text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                             {res.summary}
                           </div>
                         </button>
@@ -1069,7 +1130,7 @@ export function CoreWorkspaceClient({
                           <Badge variant="subtle" className="font-mono">
                             {selectedResource.sourceFileName}
                           </Badge>
-                          <h3 className="mt-1.5 text-base font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          <h3 className="mt-1.5 text-base font-semibold text-[#111318] dark:text-[#F5F7FA]">
                             {selectedResource.title}
                           </h3>
                         </div>
@@ -1078,7 +1139,7 @@ export function CoreWorkspaceClient({
                             href={selectedResource.externalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="glass-pill inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-medium text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+                            className="glass-pill inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-medium text-[#111318] hover:bg-white/95 dark:text-[#F5F7FA] dark:hover:bg-white/[0.12]"
                           >
                             <span>Open in Drive</span>
                             <ExternalLink className="h-3 w-3" />
@@ -1086,7 +1147,7 @@ export function CoreWorkspaceClient({
                         )}
                       </div>
 
-                      <div className="text-sm leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+                      <div className="text-sm leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
                         <MarkdownMath
                           content={selectedResource.contentMarkdown}
                         />
@@ -1096,11 +1157,12 @@ export function CoreWorkspaceClient({
                 </div>
               ) : (
                 <div className="glass-surface rounded-2xl border-dashed px-6 py-10 text-center">
-                  <p className="text-xs text-[#6E6E73] dark:text-[#98989D]">
+                  <p className="text-xs text-[#525866] dark:text-[#9AA3B2]">
                     No classroom reference guide is scoped exclusively to this
                     item. Click &ldquo;Show All Reference Guides&rdquo; above to
-                    browse Extended Essay, CAS Portfolio, Chemistry Lab Info, History
-                    Chicago Style, and English Assessment Calendar guides.
+                    browse Extended Essay, CAS Portfolio, Chemistry Lab Info,
+                    History Chicago Style, and English Assessment Calendar
+                    guides.
                   </p>
                 </div>
               )}
@@ -1110,11 +1172,12 @@ export function CoreWorkspaceClient({
                 <CardContent className="space-y-3 p-4 sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/[0.06] pb-3 dark:border-white/[0.08]">
                     <div>
-                      <h3 className="text-sm font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                      <h3 className="text-sm font-semibold text-[#111318] dark:text-[#F5F7FA]">
                         CRHS Class of 2028 — Master IB Assessment Calendar
                       </h3>
-                      <p className="mt-0.5 text-xs text-[#6E6E73] dark:text-[#98989D]">
-                        Verified from IB Assessment Calendar 2026–2027.pdf &amp; Timeline 2028 cohort.docx.
+                      <p className="mt-0.5 text-xs text-[#525866] dark:text-[#9AA3B2]">
+                        Verified from IB Assessment Calendar 2026–2027.pdf &amp;
+                        Timeline 2028 cohort.docx.
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -1129,10 +1192,10 @@ export function CoreWorkspaceClient({
                           key={tab.id}
                           type="button"
                           onClick={() => setCalendarStage(tab.id)}
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors cursor-pointer ${
+                          className={`cursor-pointer rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
                             calendarStage === tab.id
-                              ? 'bg-[#1D1D1F] text-white dark:bg-[#F5F5F7] dark:text-[#111113]'
-                              : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                              ? 'bg-[#111318] text-white dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                              : 'glass-pill text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                           }`}
                         >
                           {tab.label}
@@ -1153,21 +1216,24 @@ export function CoreWorkspaceClient({
                     }).map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-start justify-between gap-3 rounded-xl border border-black/[0.06] bg-white/50 px-3 py-2.5 dark:border-white/[0.08] dark:bg-white/[0.02]"
+                        className="glass-surface flex items-start justify-between gap-3 rounded-xl px-3 py-2.5"
                       >
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-mono text-[11px] font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                            <span className="font-mono text-[11px] font-semibold text-[#111318] dark:text-[#F5F7FA]">
                               {item.dateLabel}
                             </span>
-                            <Badge variant="outline" className="font-mono text-[10px]">
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-[10px]"
+                            >
                               {item.subjectOrCore}
                             </Badge>
                           </div>
-                          <div className="mt-1 text-xs font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          <div className="mt-1 text-xs font-medium text-[#111318] dark:text-[#F5F7FA]">
                             {item.title}
                           </div>
-                          <div className="mt-0.5 font-mono text-[10px] text-[#6E6E73] dark:text-[#98989D]">
+                          <div className="mt-0.5 font-mono text-[10px] text-[#525866] dark:text-[#9AA3B2]">
                             {item.cohortStage} · {item.sourceRef}
                           </div>
                         </div>

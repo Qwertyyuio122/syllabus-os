@@ -368,17 +368,17 @@ export function MaterialsSyncTab({
         upgradedNotes?: number;
       };
       if (!res.ok || !json.synced) {
-        throw new Error(json.error || 'Failed to sync Classroom Pack v2.');
+        throw new Error(json.error || 'Failed to sync Classroom Pack v3.');
       }
       setSuccessMsg(
-        `Classroom Pack v${json.version ?? 2} synced (${json.addedMaterials ?? 0} materials added, ${json.upgradedNotes ?? 0} notes updated; user progress preserved).`,
+        `Classroom Pack v${json.version ?? 3} synced (${json.addedMaterials ?? 0} materials added, ${json.upgradedNotes ?? 0} notes updated; user progress preserved).`,
       );
       router.refresh();
     } catch (err) {
       setErrorMsg(
         err instanceof Error
           ? err.message
-          : 'Failed to sync Classroom Pack v2.',
+          : 'Failed to sync Classroom Pack v3.',
       );
     } finally {
       setSyncingPack(false);
@@ -589,7 +589,7 @@ export function MaterialsSyncTab({
               <span>
                 {syncingPack
                   ? 'Syncing Classroom Pack…'
-                  : 'Sync Classroom Pack v2'}
+                  : 'Sync Classroom Pack v3'}
               </span>
             </Button>
           </div>

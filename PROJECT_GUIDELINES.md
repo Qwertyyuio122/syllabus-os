@@ -11,10 +11,12 @@ This document defines the engineering, design, domain, and operational standards
 - **Core & IAs:** Extended Essay (FA2027), Theory of Knowledge (Essay & Exhibition), CAS 2028, and all 6 Subject Internal Assessments (`src/data/ib-rubrics/`, `src/components/core-ee-tok/`).
 - **Markscheme Rigor:** Questions and AI grading must align with official IB command terms and markscheme codes (`M1`, `A1`, `R1`, etc.).
 
-### Design & UX Principles
-- **Notion-Minimalist Aesthetic:** Use the CSS design tokens in `src/app/globals.css` (`--bg-canvas`, `--bg-surface`, `--bg-hover`, `--border-hairline`, `--ink`, `--ink-muted`, `--accent-solid`).
+### Design & UX Principles (Apple Liquid Glass + Subtle Academic Tints)
+- **Liquid Glass System:** Use the CSS design tokens and surface primitives in `src/app/globals.css` (`--bg-canvas`, `--bg-surface`, `--bg-surface-strong`, `--bg-surface-elevated`, `--border-hairline`, `--border-specular`, `--ink`, `--ink-muted`, `--glass-blur`, `--spring-ease`) paired with route-reactive ambient refraction (`src/components/layout/LiquidBackdrop.tsx`) and subject accent tokens (`src/config/subject-themes.ts`). See `docs/DESIGN_SYSTEM_RULES.md` for full token, contrast, and Figma MCP governance.
+- **Bespoke Studio Artwork:** Visual vignettes in `public/images/hero-glass.png` and `public/images/subjects/*.png` render via `LiquidArtwork` (`src/components/subjects/SubjectMotif.tsx`) with seamless Light/Dark mode optical blending (`mix-blend-multiply` in Light Mode; `dark:invert dark:hue-rotate-180 dark:mix-blend-screen` in Dark Mode).
+- **Accessible Motion & Transparency:** Wrap gauge/entrance animations in `src/components/ui/MotionPrimitives.tsx` (`ProgressRing`, `GlassReveal`, `AnimatedCounter`) and respect `prefers-reduced-motion` and `prefers-reduced-transparency`.
 - **No Gamification:** Never introduce mascots, XP, streaks, leaderboards, badges, or timed mock-exam builders.
-- **Readable Study Notes:** Notes are read-only, structured with clear headings, callouts, KaTeX math (`$...$` / `$$...$$`), and interactive diagram blocks (`src/components/diagrams/InteractiveDiagramPlayer.tsx`).
+- **Readable Study Notes:** Notes are strictly read-only, structured with clear headings, 7 callout variants (`definition`, `examiner_warning`, `key_formula`, `syllabus_link`, `guiding_questions`, `textbook_excerpt`, `tok_nos`), word count & reading time badges, KaTeX math (`$...$` / `$$...$$`), and interactive diagram blocks (`src/components/diagrams/InteractiveDiagramPlayer.tsx`).
 - **Centralized Branding:** Update app name, tagline, cohort label, or monogram only in `src/config/brand.ts`.
 
 ---
@@ -44,12 +46,19 @@ This document defines the engineering, design, domain, and operational standards
 - Keep prompt templates isolated in `src/lib/gemini/prompts.ts`.
 
 ### Interactive Diagrams & Safe Math
-- Supported diagram types (`src/types/diagrams.ts`):
+- Supported diagram types (`src/types/diagrams.ts` & `src/components/diagrams/InteractiveDiagramPlayer.tsx`):
+  - `labeled_explorer` (`LabeledAnatomyExplorer.tsx`)
   - `step_mechanism` (`StepMechanismPlayer.tsx`)
-  - `labeled_anatomy` (`LabeledAnatomyExplorer.tsx`)
   - `function_graph` (`InteractiveFunctionGraph.tsx`)
-  - `timeline_causality` (`TimelineCausalityExplorer.tsx`)
   - `comparison_matrix` (`ConceptComparisonMatrix.tsx`)
+  - `timeline_causality` (`TimelineCausalityExplorer.tsx`)
+  - `vsepr_polarity_lab` (`VseprPolarityLab.tsx`)
+  - `bonding_continuum_lab` (`BondingContinuumLab.tsx`)
+  - `scientific_simulation` (`ScientificSimulationLab.tsx`)
+  - `primary_source_analyzer` (`PrimarySourceAnalyzer.tsx`)
+  - `literary_extract_annotator` (`LiteraryExtractAnnotator.tsx`)
+  - `french_text_type_studio` (`FrenchTextTypeStudio.tsx`)
+  - `worked_example` (`InteractiveWorkedExample.tsx`)
 - All mathematical expressions plotted on the client must be parsed and evaluated via `src/lib/math/safe-eval.ts`. Never use `eval()`, `Function()`, or unsanitized expression execution.
 
 ### File Parsing & Classroom Ingestion

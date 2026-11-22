@@ -1,6 +1,6 @@
 # SyllabusOS — Project Instructions (`GEMINI.md`)
 
-**SyllabusOS** is a Notion-minimalist **IB Diploma Class of 2028 (May 2028)** study and revision workspace built with Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Supabase (Auth, Postgres with RLS, private Storage), KaTeX, and Google Gemini (`gemini-3.8-flash`).
+**SyllabusOS** is an **Apple Liquid Glass + Subtle Academic Tints** **IB Diploma Class of 2028 (May 2028)** study and revision workspace built with Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Supabase (Auth, Postgres with RLS, private Storage), KaTeX, and Google Gemini (`gemini-3.8-flash`).
 
 ---
 
@@ -12,11 +12,14 @@
   - `Extended Essay FA2027`, `TOK Essay & Exhibition`, `CAS 2028`, and all six Subject Internal Assessments (`core_projects`).
 - **Hard Exclusions (Do NOT add):**
   - No mascot, no XP points, no daily streaks, no leaderboards, no badges/achievements, and no timed mock-exam builder.
-- **Visual & Brand System:**
-  - Monochrome-first Notion-style workspace defined in `src/app/globals.css` (`#FFFFFF` / `#FBFBFA` light; `#191919` / `#202020` dark; `1px solid` hairline borders `#E6E6E4` / `#2E2E2E`; ink `#37352F` / `#EBEBEB`).
-  - Zero neon colors, zero decorative gradients, zero drop-shadow clutter.
-  - Typography: `Inter` for UI/prose, `Newsreader` for optional study-note serif reader mode, `JetBrains Mono` for IB syllabus codes, command terms, LaTeX, and markscheme codes (`M1`, `A1`, `R1`).
+- **Visual & Brand System (Apple Liquid Glass + Subtle Academic Tints):**
+  - Translucent frosted glass architecture defined in `src/app/globals.css` (`#E9EFF7` light ambient canvas with `rgba(255, 255, 255, 0.62)` glass panels; `#0B0D12` dark obsidian-sapphire canvas with `rgba(22, 26, 34, 0.70)` glass panels; `blur(26px) saturate(190%) brightness(1.03)`, `1.5px` specular top rims, and layered soft shadows).
+  - WCAG AA >= 4.5:1 ink tokens (`#111318` / `#525866` light; `#F5F7FA` / `#9AA3B2` dark).
+  - Subject-specific academic accent tints (`emerald`, `cobalt`, `indigo`, `amber`, `plum`, `sapphire`, `slate`) and bespoke studio glass artwork (`public/images/hero-glass.png`, `public/images/subjects/*.png`) live in `src/config/subject-themes.ts` and power `LiquidBackdrop` (`src/components/layout/LiquidBackdrop.tsx`).
+  - Zero neon clutter, zero gamified badges; full `prefers-reduced-motion` and `prefers-reduced-transparency` fallbacks.
+  - Typography: `Inter` for UI/prose, `Newsreader` for editorial headings & optional serif reader mode, `JetBrains Mono` for IB syllabus codes, command terms, LaTeX, and markscheme codes (`M1`, `A1`, `R1`).
   - Centralized branding lives in `src/config/brand.ts` (`APP_NAME`, `APP_TAGLINE`, `APP_COHORT`, `BrandMonogram`).
+  - Complete design token and Figma MCP governance rules live in `docs/DESIGN_SYSTEM_RULES.md`.
 
 ---
 
@@ -38,6 +41,8 @@
   - `seed-user.ts` — First-login hydration of subjects, syllabus topics, Classroom materials, notes, questions, flashcards, and core projects
 - `src/data/` — Static IB syllabi (`ib-syllabi/`), IB Core/IA rubrics (`ib-rubrics/`), and Google Classroom seed packs (`classroom-seed/`).
 - `src/components/` — Feature UI (`layout/`, `syllabus/`, `notes/`, `diagrams/`, `qbank/`, `flashcards/`, `materials/`, `core-ee-tok/`, `subjects/`, `ui/`).
+- `docs/` — Design system specifications (`DESIGN_SYSTEM_RULES.md`).
+- `public/images/` — Bespoke Apple Liquid Glass studio artwork (`hero-glass.png`, `subjects/*.png`).
 - `supabase/migrations/` — `001_initial_schema.sql` and `002_fk_indexes.sql`.
 - `tests/e2e/` — Playwright E2E suite (`smoke.spec.ts`) backed by `mock-supabase.ts`.
 
@@ -54,7 +59,8 @@
    - Use `generateStructuredJson` in `src/lib/gemini/client.ts` with `GEMINI_MODEL` (`gemini-3.8-flash`), `ThinkingLevel`, JSON Schema, and Zod validation (`src/lib/gemini/schemas.ts`).
    - Do not bypass Zod validation or hardcode different model names outside `src/lib/gemini/client.ts`.
 4. **Math & Diagrams:**
-   - Study notes are **read-only** Notion-style documents rendered via `NotionNoteViewer` and `MarkdownMath` (KaTeX + `remark-math` + `rehype-katex`).
+   - Study notes are **read-only** Notion-style documents rendered via `NotionNoteViewer` and `MarkdownMath` (KaTeX + `remark-math` + `rehype-katex`), supporting callouts (`definition`, `examiner_warning`, `key_formula`, `syllabus_link`, `guiding_questions`, `textbook_excerpt`, `tok_nos`).
+   - Interactive diagrams (`src/components/diagrams/InteractiveDiagramPlayer.tsx`) use crisp full-color scientific rendering by default (with optional Monochrome Ink print toggle where applicable).
    - Math graphing (`InteractiveFunctionGraph`) must evaluate expressions solely through `src/lib/math/safe-eval.ts`.
 5. **TypeScript & Code Hygiene:**
    - `tsconfig.json` has `"strict": true`. Keep `allowJs: false` and `@/*` path aliases.

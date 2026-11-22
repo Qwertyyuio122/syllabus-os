@@ -7,6 +7,7 @@ import {
   Check,
   RotateCw,
 } from 'lucide-react';
+import { getSubjectTheme } from '@/config/subject-themes';
 import { createClient } from '@/lib/supabase/client';
 import { MarkdownMath } from '@/components/notes/MarkdownMath';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +25,7 @@ interface FlashcardsTabProps {
   userId: string;
   flashcards: FlashcardRow[];
   topics: SyllabusTopicRow[];
+  subjectSlug?: string;
   onFlashcardsChange: (nextFlashcards: FlashcardRow[]) => void;
 }
 
@@ -31,8 +33,10 @@ export function FlashcardsTab({
   userId,
   flashcards,
   topics,
+  subjectSlug,
   onFlashcardsChange,
 }: FlashcardsTabProps) {
+  const theme = getSubjectTheme(subjectSlug);
   const [topicFilter, setTopicFilter] = React.useState<string>('all');
   const [hideMastered, setHideMastered] = React.useState(false);
   const [currentIndex, setCurrentIndex] = React.useState(0);
@@ -204,7 +208,7 @@ export function FlashcardsTab({
           </Button>
         </div>
 
-        <div className="flex items-center gap-3 font-mono text-xs text-[#6E6E73] dark:text-[#98989D]">
+        <div className="flex items-center gap-3 font-mono text-xs text-[#525866] dark:text-[#9AA3B2]">
           <span>
             {masteredTotal} / {flashcards.length} mastered overall
           </span>
@@ -214,7 +218,7 @@ export function FlashcardsTab({
       {errorMsg && (
         <div
           role="alert"
-          className="rounded-xl border border-[#E6D0D0] bg-[#FAF2F2]/90 px-3.5 py-2.5 text-xs text-[#9B3B3B] dark:border-[#4A2E2E] dark:bg-[#291F1F]/90 dark:text-[#E59898]"
+          className="rounded-xl border border-red-700/20 bg-red-50/90 px-3.5 py-2.5 text-xs text-[#991B1B] dark:border-red-400/25 dark:bg-red-950/60 dark:text-[#FCA5A5]"
         >
           {errorMsg}
         </div>
@@ -224,17 +228,15 @@ export function FlashcardsTab({
         <div className="mx-auto max-w-2xl space-y-4">
           {/* Progress bar */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between font-mono text-xs tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+            <div className="flex items-center justify-between font-mono text-xs tabular-nums text-[#525866] dark:text-[#9AA3B2]">
               <span>
                 Card {currentIndex + 1} of {filteredCards.length}
               </span>
-              <span>
-                {masteredFiltered} mastered in view
-              </span>
+              <span>{masteredFiltered} mastered in view</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
               <div
-                className="h-full rounded-full bg-[#1D1D1F] transition-all duration-200 dark:bg-[#F5F5F7]"
+                className={`h-full rounded-full transition-all duration-200 ${theme.progressBarClass}`}
                 style={{ width: `${deckProgressPct}%` }}
               />
             </div>
@@ -257,7 +259,7 @@ export function FlashcardsTab({
               }
             }}
             data-testid="flashcard-surface"
-            className="flashcard-scene block w-full cursor-pointer rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25"
+            className="flashcard-scene block w-full cursor-pointer rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:focus-visible:ring-[#F5F7FA]/25"
           >
             <div
               className="flashcard-rotator relative grid min-h-[290px]"
@@ -266,7 +268,7 @@ export function FlashcardsTab({
               {/* Front Face: Prompt */}
               <div
                 aria-hidden={flipped}
-                className={`flashcard-face glass-panel glass-interactive relative col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-3xl p-7 transition-[visibility] delay-[260ms] duration-0 motion-reduce:delay-0 ${
+                className={`flashcard-face glass-panel glass-interactive relative col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-3xl p-7 transition-[visibility] delay-[260ms] duration-0 motion-reduce:delay-0 ${theme.borderTint} ${
                   flipped ? 'invisible pointer-events-none' : 'visible'
                 }`}
               >
@@ -280,7 +282,10 @@ export function FlashcardsTab({
                       Prompt
                     </Badge>
                     {currentCard.topic_id && topicMap[currentCard.topic_id] && (
-                      <Badge variant="subtle" className="font-mono">
+                      <Badge
+                        variant="subtle"
+                        className={`font-mono ${theme.tintBg} ${theme.borderTint} ${theme.textAccent}`}
+                      >
                         {topicMap[currentCard.topic_id].code}
                       </Badge>
                     )}
@@ -292,11 +297,11 @@ export function FlashcardsTab({
                   )}
                 </div>
 
-                <div className="relative z-10 my-6 text-base leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+                <div className="relative z-10 my-6 text-base leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
                   <MarkdownMath content={currentCard.front_markdown} />
                 </div>
 
-                <div className="relative z-10 flex items-center justify-between text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                <div className="relative z-10 flex items-center justify-between text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                   <span>Click card or press Space to flip</span>
                   <span className="font-mono">← / → navigate · M mastered</span>
                 </div>
@@ -305,7 +310,7 @@ export function FlashcardsTab({
               {/* Back Face: Answer */}
               <div
                 aria-hidden={!flipped}
-                className={`flashcard-face flashcard-face-back glass-panel glass-interactive relative col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-3xl p-7 transition-[visibility] delay-[260ms] duration-0 motion-reduce:delay-0 ${
+                className={`flashcard-face flashcard-face-back glass-panel glass-interactive relative col-start-1 row-start-1 flex flex-col justify-between overflow-hidden rounded-3xl p-7 transition-[visibility] delay-[260ms] duration-0 motion-reduce:delay-0 ${theme.borderTint} ${
                   flipped ? 'visible' : 'invisible pointer-events-none'
                 }`}
               >
@@ -319,7 +324,10 @@ export function FlashcardsTab({
                       Answer
                     </Badge>
                     {currentCard.topic_id && topicMap[currentCard.topic_id] && (
-                      <Badge variant="subtle" className="font-mono">
+                      <Badge
+                        variant="subtle"
+                        className={`font-mono ${theme.tintBg} ${theme.borderTint} ${theme.textAccent}`}
+                      >
                         {topicMap[currentCard.topic_id].code}
                       </Badge>
                     )}
@@ -331,11 +339,11 @@ export function FlashcardsTab({
                   )}
                 </div>
 
-                <div className="relative z-10 my-6 text-base leading-relaxed text-[#1D1D1F] dark:text-[#F5F5F7]">
+                <div className="relative z-10 my-6 text-base leading-relaxed text-[#111318] dark:text-[#F5F7FA]">
                   <MarkdownMath content={currentCard.back_markdown} />
                 </div>
 
-                <div className="relative z-10 flex items-center justify-between text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+                <div className="relative z-10 flex items-center justify-between text-[11px] text-[#525866] dark:text-[#9AA3B2]">
                   <span>Click card or press Space to flip</span>
                   <span className="font-mono">← / → navigate · M mastered</span>
                 </div>
@@ -381,13 +389,13 @@ export function FlashcardsTab({
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-[#E6E6E4] px-6 py-10 text-center dark:border-[#2E2E2E]">
-          <p className="text-sm font-medium text-[#37352F] dark:text-[#EBEBEB]">
+        <div className="glass-surface rounded-2xl border-dashed px-6 py-10 text-center">
+          <p className="text-sm font-medium text-[#111318] dark:text-[#F5F7FA]">
             {flashcards.length === 0
               ? 'No flashcards yet for this subject.'
               : 'No flashcards match your current filter.'}
           </p>
-          <p className="mt-1 text-xs text-[#787774] dark:text-[#9B9A97]">
+          <p className="mt-1 text-xs text-[#525866] dark:text-[#9AA3B2]">
             {hideMastered
               ? 'All flashcards in this filter are mastered. Toggle "Showing Unmastered" to review them again.'
               : 'Generate study suites from Classroom Materials to add active-recall flashcards.'}

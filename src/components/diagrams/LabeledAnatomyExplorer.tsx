@@ -27,23 +27,92 @@ export interface LabeledAnatomyExplorerProps {
   spec: LabeledExplorerSpec;
 }
 
-function parseHexLuminance(color: string): number | null {
+function parseHexRgb(color: string): [number, number, number] | null {
   const hex = color.trim().toLowerCase();
-  if (hex === 'black') return 0;
-  if (hex === 'white') return 1;
+  if (hex === 'black') return [0, 0, 0];
+  if (hex === 'white') return [255, 255, 255];
   const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex);
   if (!match) return null;
-
   const digits = match[1];
-  const rHex = digits.length === 3 ? digits[0] + digits[0] : digits.slice(0, 2);
-  const gHex = digits.length === 3 ? digits[1] + digits[1] : digits.slice(2, 4);
-  const bHex = digits.length === 3 ? digits[2] + digits[2] : digits.slice(4, 6);
+  const r = parseInt(digits.length === 3 ? digits[0] + digits[0] : digits.slice(0, 2), 16);
+  const g = parseInt(digits.length === 3 ? digits[1] + digits[1] : digits.slice(2, 4), 16);
+  const b = parseInt(digits.length === 3 ? digits[2] + digits[2] : digits.slice(4, 6), 16);
+  return [r, g, b];
+}
 
-  const r = parseInt(rHex, 16) / 255;
-  const g = parseInt(gHex, 16) / 255;
-  const b = parseInt(bHex, 16) / 255;
+function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === rn) h = (gn - bn) / d + (gn < bn ? 6 : 0);
+  else if (max === gn) h = (bn - rn) / d + 2;
+  else h = (rn - gn) / d + 4;
+  return [h / 6, s, l];
+}
 
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+function hslToHex(h: number, s: number, l: number): string {
+  const hue2rgb = (p: number, q: number, t: number) => {
+    let tt = t;
+    if (tt < 0) tt += 1;
+    if (tt > 1) tt -= 1;
+    if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+    if (tt < 1 / 2) return q;
+    if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const r = s === 0 ? l : hue2rgb(p, q, h + 1 / 3);
+  const g = s === 0 ? l : hue2rgb(p, q, h);
+  const b = s === 0 ? l : hue2rgb(p, q, h - 1 / 3);
+  const toHex = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function parseHexLuminance(color: string): number | null {
+  const rgb = parseHexRgb(color);
+  if (!rgb) return null;
+  return 0.2126 * (rgb[0] / 255) + 0.7152 * (rgb[1] / 255) + 0.0722 * (rgb[2] / 255);
+}
+
+function adaptHexForDarkMode(
+  color: string,
+  role: 'stroke' | 'fill',
+  shapeKind: SvgShape['kind'],
+): string {
+  const rgb = parseHexRgb(color);
+  if (!rgb) return color;
+  const [h, s, l] = rgbToHsl(rgb[0], rgb[1], rgb[2]);
+
+  if (shapeKind === 'text' && role === 'fill') {
+    // Lift dark ink labels to high-contrast bright pastel/silver in Dark Mode
+    if (l < 0.55) {
+      return hslToHex(h, Math.min(s, 0.55), 0.82 + (0.55 - l) * 0.22);
+    }
+    return color;
+  }
+
+  if (role === 'stroke') {
+    // Lift dark strokes to luminous mid-light tones so outlines pop in Dark Mode
+    if (l < 0.52) {
+      return hslToHex(h, Math.min(s, 0.6), 0.66 + (0.52 - l) * 0.32);
+    }
+    return color;
+  }
+
+  // Fill on geometric shapes: transform bright off-white/cream/pastel fills to deep jewel/slate tones
+  if (l > 0.58) {
+    const darkL = 0.14 + (1 - l) * 0.35;
+    return hslToHex(h, Math.min(0.42, s * 0.78), darkL);
+  }
+  return color;
 }
 
 function normalizeSvgPaint(
@@ -51,6 +120,7 @@ function normalizeSvgPaint(
   role: 'stroke' | 'fill',
   shapeKind: SvgShape['kind'],
   monochromeMode: boolean,
+  isDarkMode: boolean,
 ): string {
   if (!rawColor) {
     if (role === 'stroke') {
@@ -74,9 +144,11 @@ function normalizeSvgPaint(
   }
 
   if (!monochromeMode) {
-    // Preserve scientific-illustration colors, except pure near-black ink adapts to theme
+    if (isDarkMode) {
+      return adaptHexForDarkMode(trimmed, role, shapeKind);
+    }
     const lum = parseHexLuminance(trimmed);
-    if (lum !== null && lum < 0.06 && role === 'stroke') {
+    if (lum !== null && lum < 0.08 && role === 'stroke') {
       return 'currentColor';
     }
     return trimmed;
@@ -131,6 +203,7 @@ interface ShapeFocusContext {
   activeFlowTags: Set<string>;
   hasAnyFocusTags: boolean;
   monochromeMode: boolean;
+  isDarkMode: boolean;
   hotspotIdSet: Set<string>;
   visibleLayers: Set<string> | null;
   onSelectTarget: (targetId: string) => void;
@@ -187,10 +260,19 @@ function getShapeFocusStyle(shape: SvgShape, focus: ShapeFocusContext) {
 
   if (hasTags || shape.hotspotId) {
     const emphasized = isMatched || isFlowActive;
+    if (shape.kind === 'text') {
+      return {
+        opacity: emphasized ? 1 : 0.78,
+        strokeBoost: 0,
+        shouldAnimate: false,
+        transitionClass:
+          'transition-opacity duration-300 motion-reduce:transition-none',
+      };
+    }
     return {
       opacity: emphasized
         ? Math.max(baseOpacity, 0.94)
-        : Math.min(baseOpacity, 0.24),
+        : Math.min(baseOpacity, 0.3),
       strokeBoost: emphasized ? 0.65 : 0,
       shouldAnimate: emphasized,
       transitionClass:
@@ -245,6 +327,7 @@ function renderSvgShape(
 
   const cursorClass = targetId ? ' cursor-pointer' : '';
   const mono = focus.monochromeMode;
+  const dark = focus.isDarkMode;
 
   switch (shape.kind) {
     case 'rect':
@@ -256,8 +339,8 @@ function renderSvgShape(
           width={shape.width}
           height={shape.height}
           rx={shape.rx ?? 0}
-          fill={normalizeSvgPaint(shape.fill, 'fill', 'rect', mono)}
-          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'rect', mono)}
+          fill={normalizeSvgPaint(shape.fill, 'fill', 'rect', mono, dark)}
+          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'rect', mono, dark)}
           strokeWidth={
             shape.stroke === 'none'
               ? 0
@@ -276,8 +359,8 @@ function renderSvgShape(
           cx={shape.cx}
           cy={shape.cy}
           r={shape.r}
-          fill={normalizeSvgPaint(shape.fill, 'fill', 'circle', mono)}
-          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'circle', mono)}
+          fill={normalizeSvgPaint(shape.fill, 'fill', 'circle', mono, dark)}
+          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'circle', mono, dark)}
           strokeWidth={
             shape.stroke === 'none'
               ? 0
@@ -297,8 +380,8 @@ function renderSvgShape(
           cy={shape.cy}
           rx={shape.rx}
           ry={shape.ry}
-          fill={normalizeSvgPaint(shape.fill, 'fill', 'ellipse', mono)}
-          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'ellipse', mono)}
+          fill={normalizeSvgPaint(shape.fill, 'fill', 'ellipse', mono, dark)}
+          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'ellipse', mono, dark)}
           strokeWidth={
             shape.stroke === 'none'
               ? 0
@@ -318,7 +401,7 @@ function renderSvgShape(
           y1={shape.y1}
           x2={shape.x2}
           y2={shape.y2}
-          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'line', mono)}
+          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'line', mono, dark)}
           strokeWidth={(shape.strokeWidth ?? 1.6) + strokeBoost}
           strokeDasharray={shape.strokeDasharray}
           strokeLinecap="round"
@@ -334,8 +417,8 @@ function renderSvgShape(
         <path
           key={`shape-${index}`}
           d={shape.d}
-          fill={normalizeSvgPaint(shape.fill, 'fill', 'path', mono)}
-          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'path', mono)}
+          fill={normalizeSvgPaint(shape.fill, 'fill', 'path', mono, dark)}
+          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'path', mono, dark)}
           strokeWidth={
             shape.stroke === 'none'
               ? 0
@@ -356,8 +439,8 @@ function renderSvgShape(
         <polygon
           key={`shape-${index}`}
           points={shape.points}
-          fill={normalizeSvgPaint(shape.fill, 'fill', 'polygon', mono)}
-          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'polygon', mono)}
+          fill={normalizeSvgPaint(shape.fill, 'fill', 'polygon', mono, dark)}
+          stroke={normalizeSvgPaint(shape.stroke, 'stroke', 'polygon', mono, dark)}
           strokeWidth={
             shape.stroke === 'none'
               ? 0
@@ -368,7 +451,8 @@ function renderSvgShape(
           {...interactiveProps}
         />
       );
-    case 'text':
+    case 'text': {
+      const resolvedFill = normalizeSvgPaint(shape.fill, 'fill', 'text', mono, dark);
       return (
         <text
           key={`shape-${index}`}
@@ -377,15 +461,109 @@ function renderSvgShape(
           fontSize={shape.fontSize ?? 13}
           fontWeight={shape.fontWeight ?? 500}
           textAnchor={shape.textAnchor ?? 'start'}
-          fill={normalizeSvgPaint(shape.fill, 'fill', 'text', mono)}
+          fill={resolvedFill}
+          stroke={!mono ? 'var(--diagram-surface, #ffffff)' : undefined}
+          strokeWidth={!mono ? 2.8 : undefined}
+          strokeOpacity={!mono ? 0.72 : undefined}
+          strokeLinejoin="round"
           opacity={opacity}
           className={transitionClass}
-          style={{ fontFamily: 'var(--font-sans)', pointerEvents: 'none' }}
+          style={{
+            fontFamily: 'var(--font-sans)',
+            pointerEvents: 'none',
+            paintOrder: !mono ? 'stroke' : undefined,
+          }}
         >
           {shape.text}
         </text>
       );
+    }
   }
+}
+
+function resolveNonOverlappingPins(
+  hotspots: LabeledExplorerHotspot[],
+  shapes: SvgShape[],
+  vbWidth: number,
+  vbHeight: number,
+  pinRadius: number,
+): Array<{ hotspot: LabeledExplorerHotspot; dx: number; dy: number; moved: boolean }> {
+  const minDist = pinRadius * 2 + 8;
+  const pad = pinRadius + 6;
+  const positions = hotspots.map((h) => ({
+    hotspot: h,
+    dx: Math.max(pad, Math.min(vbWidth - pad, h.x)),
+    dy: Math.max(pad, Math.min(vbHeight - pad, h.y)),
+  }));
+
+  const textBoxes = shapes
+    .filter((s): s is Extract<SvgShape, { kind: 'text' }> => s.kind === 'text')
+    .map((t) => {
+      const fs = t.fontSize ?? 13;
+      const w = Math.max(24, t.text.length * fs * 0.56);
+      const anchor = t.textAnchor ?? 'start';
+      const left = anchor === 'middle' ? t.x - w / 2 : anchor === 'end' ? t.x - w : t.x;
+      return {
+        left: left - 4,
+        right: left + w + 4,
+        top: t.y - fs - 2,
+        bottom: t.y + fs * 0.28 + 2,
+      };
+    });
+
+  for (let pass = 0; pass < 20; pass += 1) {
+    let anyMoved = false;
+    // Pin-to-pin separation
+    for (let i = 0; i < positions.length; i += 1) {
+      for (let j = i + 1; j < positions.length; j += 1) {
+        const a = positions[i];
+        const b = positions[j];
+        let vx = b.dx - a.dx;
+        let vy = b.dy - a.dy;
+        let dist = Math.hypot(vx, vy);
+        if (dist < 0.01) {
+          vx = 1;
+          vy = -0.6;
+          dist = Math.hypot(vx, vy);
+        }
+        if (dist < minDist) {
+          const push = (minDist - dist) / 2 + 0.5;
+          const nx = vx / dist;
+          const ny = vy / dist;
+          a.dx = Math.max(pad, Math.min(vbWidth - pad, a.dx - nx * push));
+          a.dy = Math.max(pad, Math.min(vbHeight - pad, a.dy - ny * push));
+          b.dx = Math.max(pad, Math.min(vbWidth - pad, b.dx + nx * push));
+          b.dy = Math.max(pad, Math.min(vbHeight - pad, b.dy + ny * push));
+          anyMoved = true;
+        }
+      }
+    }
+    // Pin-to-text-label separation
+    for (const p of positions) {
+      for (const box of textBoxes) {
+        const closestX = Math.max(box.left, Math.min(p.dx, box.right));
+        const closestY = Math.max(box.top, Math.min(p.dy, box.bottom));
+        const dx = p.dx - closestX;
+        const dy = p.dy - closestY;
+        const dist = Math.hypot(dx, dy);
+        const clearR = pinRadius + 10;
+        if (dist < clearR) {
+          // Push vertically clear of text line (preferring downward when near top edge)
+          const pushDownY = box.bottom + clearR;
+          const pushUpY = box.top - clearR;
+          const useDown = pushDownY <= vbHeight - pad && (p.dy >= (box.top + box.bottom) / 2 || pushUpY < pad);
+          p.dy = Math.max(pad, Math.min(vbHeight - pad, useDown ? pushDownY : pushUpY));
+          anyMoved = true;
+        }
+      }
+    }
+    if (!anyMoved) break;
+  }
+
+  return positions.map((p) => ({
+    ...p,
+    moved: Math.hypot(p.dx - p.hotspot.x, p.dy - p.hotspot.y) > 4,
+  }));
 }
 
 export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
@@ -409,8 +587,21 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
   );
 
   const [monochromeMode, setMonochromeMode] = useState<boolean>(
-    () => spec.palette !== 'scientific',
+    () => spec.palette === 'monochrome',
   );
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const checkDark = () =>
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => observer.disconnect();
+  }, []);
   const [selfTestMode, setSelfTestMode] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(
     activeHotspots[0]?.id ?? null,
@@ -476,6 +667,19 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
     [activeViewBox],
   );
 
+  const pinRadius = Math.max(11, Math.min(14, vb.width * 0.016));
+  const resolvedPins = useMemo(
+    () =>
+      resolveNonOverlappingPins(
+        activeHotspots,
+        activeShapes,
+        vb.width,
+        vb.height,
+        pinRadius,
+      ),
+    [activeHotspots, activeShapes, vb.width, vb.height, pinRadius],
+  );
+
   const hotspotIdSet = useMemo(
     () => new Set(activeHotspots.map((h) => h.id)),
     [activeHotspots],
@@ -523,6 +727,7 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
       activeFlowTags: flowTags,
       hasAnyFocusTags,
       monochromeMode,
+      isDarkMode,
       hotspotIdSet,
       visibleLayers: activeLayers.length > 0 ? visibleLayerIds : null,
       onSelectTarget: (id: string) => handleSelectHotspot(id, true),
@@ -540,6 +745,7 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
     selectedId,
     hasAnyFocusTags,
     monochromeMode,
+    isDarkMode,
     hotspotIdSet,
     activeLayers.length,
     visibleLayerIds,
@@ -1013,7 +1219,7 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
 
                 {/* Hotspot Pins */}
                 <g>
-                  {activeHotspots.map((hotspot, idx) => {
+                  {resolvedPins.map(({ hotspot, dx, dy, moved }, idx) => {
                     const isSelected = hotspot.id === selectedId;
                     const isHovered = hotspot.id === hoveredId;
                     const isAnimHighlighted = Boolean(
@@ -1021,10 +1227,9 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
                     );
                     const isRevealed =
                       !selfTestMode || revealedIds.has(hotspot.id);
-                    const pinRadius = Math.max(
-                      11,
-                      Math.min(14, vb.width * 0.016),
-                    );
+                    const pinAccent = !monochromeMode
+                      ? '#2563EB'
+                      : 'currentColor';
 
                     return (
                       <g
@@ -1057,50 +1262,72 @@ export function LabeledAnatomyExplorer({ spec }: LabeledAnatomyExplorerProps) {
                           !isSelected &&
                           !isHovered &&
                           !isAnimHighlighted
-                            ? 0.72
+                            ? 0.78
                             : 1
                         }
                       >
+                        {moved && (
+                          <>
+                            <line
+                              x1={hotspot.x}
+                              y1={hotspot.y}
+                              x2={dx}
+                              y2={dy}
+                              stroke={pinAccent}
+                              strokeWidth={1.3}
+                              strokeDasharray="2.5 2.5"
+                              opacity={0.75}
+                            />
+                            <circle
+                              cx={hotspot.x}
+                              cy={hotspot.y}
+                              r={2.8}
+                              fill={pinAccent}
+                            />
+                          </>
+                        )}
                         {(isSelected || isAnimHighlighted) && (
                           <circle
-                            cx={hotspot.x}
-                            cy={hotspot.y}
+                            cx={dx}
+                            cy={dy}
                             r={pinRadius + 5.5}
                             fill="none"
-                            stroke="currentColor"
-                            strokeWidth={1.6}
+                            stroke={pinAccent}
+                            strokeWidth={1.7}
                             className="animate-pin-ripple"
                           />
                         )}
                         <circle
-                          cx={hotspot.x}
-                          cy={hotspot.y}
+                          cx={dx}
+                          cy={dy}
                           r={pinRadius + 1.5}
                           fill="var(--diagram-surface, #ffffff)"
-                          opacity={0.78}
+                          opacity={0.86}
                         />
                         <circle
-                          cx={hotspot.x}
-                          cy={hotspot.y}
+                          cx={dx}
+                          cy={dy}
                           r={pinRadius}
                           fill={
                             isSelected || isAnimHighlighted
-                              ? 'currentColor'
+                              ? pinAccent
                               : 'var(--diagram-surface, #ffffff)'
                           }
-                          stroke="currentColor"
-                          strokeWidth={isSelected ? 2.1 : 1.55}
+                          stroke={pinAccent}
+                          strokeWidth={isSelected ? 2.1 : 1.65}
                         />
                         <text
-                          x={hotspot.x}
-                          y={hotspot.y + 4}
+                          x={dx}
+                          y={dy + 4}
                           textAnchor="middle"
                           fontSize={10.5}
                           fontWeight={700}
                           fill={
                             isSelected || isAnimHighlighted
-                              ? 'var(--diagram-surface, #ffffff)'
-                              : 'currentColor'
+                              ? monochromeMode
+                                ? 'var(--diagram-surface, #ffffff)'
+                                : '#FFFFFF'
+                              : pinAccent
                           }
                           style={{
                             fontFamily: 'var(--font-mono)',

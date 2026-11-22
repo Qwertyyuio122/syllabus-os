@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useMemo, useRef, useState } from 'react';
-import { Activity, Crosshair, FlipHorizontal2, SlidersHorizontal } from 'lucide-react';
+import {
+  Activity,
+  AreaChart,
+  Crosshair,
+  FlipHorizontal2,
+  SlidersHorizontal,
+  TrendingUp,
+} from 'lucide-react';
 import type { InteractiveFunctionGraphSpec } from '@/types/diagrams';
 import {
   compileMathExpression,
@@ -136,7 +143,111 @@ function buildCurvePath(
 }
 
 const CURVE_DASH_PATTERNS = [undefined, '6 4', '2 3', '10 4 2 4'] as const;
-const CURVE_OPACITIES = [1, 0.72, 0.56, 0.45] as const;
+const CURVE_COLORS = ['#4F46E5', '#059669', '#0891B2', '#E11D48', '#7C3AED'] as const;
+
+function buildSampledCurvePath(
+  sampleY: (x: number) => number,
+  xMin: number,
+  xMax: number,
+  yMin: number,
+  yMax: number,
+): string {
+  const samples = 360;
+  const dx = (xMax - xMin) / samples;
+  const ySpan = yMax - yMin;
+  const boundLow = yMin - ySpan * 2;
+  const boundHigh = yMax + ySpan * 2;
+
+  const toSvgX = (x: number) => PAD_LEFT + ((x - xMin) / (xMax - xMin)) * PLOT_W;
+  const toSvgY = (y: number) => PAD_TOP + ((yMax - y) / (yMax - yMin)) * PLOT_H;
+
+  const parts: string[] = [];
+  let prevX: number | null = null;
+  let prevY: number | null = null;
+  let segmentOpen = false;
+
+  for (let i = 0; i <= samples; i += 1) {
+    const x = xMin + i * dx;
+    const y = sampleY(x);
+    const valid = Number.isFinite(y) && y >= boundLow && y <= boundHigh;
+
+    if (!valid) {
+      segmentOpen = false;
+      prevX = null;
+      prevY = null;
+      continue;
+    }
+
+    let shouldBreak = false;
+    if (segmentOpen && prevX !== null && prevY !== null) {
+      const jump = Math.abs(y - prevY);
+      const oppositeOutside =
+        (prevY < yMin && y > yMax) || (prevY > yMax && y < yMin);
+
+      if (oppositeOutside && jump > ySpan * 0.9) {
+        shouldBreak = true;
+      } else if (jump > ySpan * 0.65) {
+        const midX = (prevX + x) / 2;
+        const midY = sampleY(midX);
+        const minY = Math.min(prevY, y);
+        const maxY = Math.max(prevY, y);
+        if (!Number.isFinite(midY) || midY < minY - 1e-6 || midY > maxY + 1e-6) {
+          shouldBreak = true;
+        }
+      }
+    }
+
+    const sx = toSvgX(x).toFixed(2);
+    const sy = toSvgY(y).toFixed(2);
+
+    if (!segmentOpen || shouldBreak) {
+      parts.push(`M ${sx} ${sy}`);
+      segmentOpen = true;
+    } else {
+      parts.push(`L ${sx} ${sy}`);
+    }
+
+    prevX = x;
+    prevY = y;
+  }
+
+  return parts.join(' ');
+}
+
+function computeSimpsonIntegral(
+  fn: CompiledMathFn,
+  vars: Record<string, number>,
+  rawA: number,
+  rawB: number,
+): { signed: number; totalArea: number; valid: boolean } {
+  const a = Math.min(rawA, rawB);
+  const b = Math.max(rawA, rawB);
+  const signDir = rawB >= rawA ? 1 : -1;
+  if (Math.abs(b - a) < 1e-9) {
+    return { signed: 0, totalArea: 0, valid: true };
+  }
+  const N = 200; // even subintervals for Simpson's Rule
+  const h = (b - a) / N;
+  let sumSigned = 0;
+  let sumAbs = 0;
+
+  for (let i = 0; i <= N; i += 1) {
+    const x = a + i * h;
+    const y = fn({ ...vars, x });
+    if (!Number.isFinite(y)) {
+      return { signed: NaN, totalArea: NaN, valid: false };
+    }
+    const weight = i === 0 || i === N ? 1 : i % 2 === 1 ? 4 : 2;
+    sumSigned += weight * y;
+    sumAbs += weight * Math.abs(y);
+  }
+
+  return {
+    signed: signDir * (h / 3) * sumSigned,
+    totalArea: (h / 3) * sumAbs,
+    valid: true,
+  };
+}
 
 export function InteractiveFunctionGraph({
   spec,
@@ -154,6 +265,17 @@ export function InteractiveFunctionGraph({
 
   const hasInitialTangent = typeof spec.tangentX === 'number' && Number.isFinite(spec.tangentX);
   const [tangentEnabled, setTangentEnabled] = useState<boolean>(hasInitialTangent);
+  const [showDerivativeCurve, setShowDerivativeCurve] = useState<boolean>(
+    Boolean(spec.defaultShowDerivative),
+  );
+  const hasInitialIntegral = Boolean(spec.integralBounds);
+  const [integralEnabled, setIntegralEnabled] = useState<boolean>(hasInitialIntegral);
+  const [intA, setIntA] = useState<number>(
+    spec.integralBounds?.a ?? Number((xMin + (xMax - xMin) * 0.25).toFixed(2)),
+  );
+  const [intB, setIntB] = useState<number>(
+    spec.integralBounds?.b ?? Number((xMin + (xMax - xMin) * 0.65).toFixed(2)),
+  );
   const [inverseVisible, setInverseVisible] = useState<boolean>(
     Boolean(spec.inverseReflection?.enabled && spec.inverseReflection?.defaultVisible),
   );
@@ -161,6 +283,7 @@ export function InteractiveFunctionGraph({
     hasInitialTangent ? (spec.tangentX as number) : Number(((xMin + xMax) / 2).toFixed(2)),
   );
   const [isDraggingProbe, setIsDraggingProbe] = useState(false);
+  const [hoverX, setHoverX] = useState<number | null>(null);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const clipId = `graph-clip-${spec.id.replace(/[^a-zA-Z0-9_-]/g, '') || 'graph'}`;
@@ -190,10 +313,111 @@ export function InteractiveFunctionGraph({
       compiledCurves.map(({ curve, fn }, idx) => ({
         curve,
         idx,
+        color: curve.color || CURVE_COLORS[idx % CURVE_COLORS.length],
         d: buildCurvePath(fn, sliderValues, xMin, xMax, yMin, yMax),
       })),
     [compiledCurves, sliderValues, xMin, xMax, yMin, yMax],
   );
+
+  const derivativePath = useMemo(() => {
+    if (!showDerivativeCurve || compiledCurves.length === 0) return '';
+    const primaryFn = compiledCurves[0].fn;
+    const h = Math.max(1e-4, (xMax - xMin) * 1e-4);
+    return buildSampledCurvePath(
+      (x) => {
+        const fPlus = primaryFn({ ...sliderValues, x: x + h });
+        const fMinus = primaryFn({ ...sliderValues, x: x - h });
+        if (!Number.isFinite(fPlus) || !Number.isFinite(fMinus)) return NaN;
+        return (fPlus - fMinus) / (2 * h);
+      },
+      xMin,
+      xMax,
+      yMin,
+      yMax,
+    );
+  }, [showDerivativeCurve, compiledCurves, sliderValues, xMin, xMax, yMin, yMax]);
+
+  const integralOverlay = useMemo(() => {
+    if (!integralEnabled || compiledCurves.length === 0) return null;
+    const primaryFn = compiledCurves[0].fn;
+    const simpson = computeSimpsonIntegral(primaryFn, sliderValues, intA, intB);
+    const lo = Math.max(xMin, Math.min(intA, intB));
+    const hi = Math.min(xMax, Math.max(intA, intB));
+    if (hi <= lo) {
+      return { simpson, posPath: '', negPath: '', ax: mapToSvgX(lo, xMin, xMax), bx: mapToSvgX(hi, xMin, xMax) };
+    }
+
+    const N = 120;
+    const dx = (hi - lo) / N;
+    const zeroY = mapToSvgY(Math.max(yMin, Math.min(yMax, 0)), yMin, yMax);
+    const posSegs: string[] = [];
+    const negSegs: string[] = [];
+    let curPos: string[] = [];
+    let curNeg: string[] = [];
+
+    const closePos = () => {
+      if (curPos.length > 0) {
+        const firstX = curPos[0].split(' ')[1];
+        const lastX = curPos[curPos.length - 1].split(' ')[1];
+        posSegs.push(`M ${firstX} ${zeroY.toFixed(1)} ${curPos.join(' ')} L ${lastX} ${zeroY.toFixed(1)} Z`);
+        curPos = [];
+      }
+    };
+    const closeNeg = () => {
+      if (curNeg.length > 0) {
+        const firstX = curNeg[0].split(' ')[1];
+        const lastX = curNeg[curNeg.length - 1].split(' ')[1];
+        negSegs.push(`M ${firstX} ${zeroY.toFixed(1)} ${curNeg.join(' ')} L ${lastX} ${zeroY.toFixed(1)} Z`);
+        curNeg = [];
+      }
+    };
+
+    for (let i = 0; i <= N; i += 1) {
+      const x = lo + i * dx;
+      const y = primaryFn({ ...sliderValues, x });
+      if (!Number.isFinite(y)) {
+        closePos();
+        closeNeg();
+        continue;
+      }
+      const clampedY = Math.max(yMin, Math.min(yMax, y));
+      const sx = mapToSvgX(x, xMin, xMax).toFixed(1);
+      const sy = mapToSvgY(clampedY, yMin, yMax).toFixed(1);
+      if (y >= 0) {
+        closeNeg();
+        curPos.push(`L ${sx} ${sy}`);
+      } else {
+        closePos();
+        curNeg.push(`L ${sx} ${sy}`);
+      }
+    }
+    closePos();
+    closeNeg();
+
+    return {
+      simpson,
+      posPath: posSegs.join(' '),
+      negPath: negSegs.join(' '),
+      ax: mapToSvgX(intA, xMin, xMax),
+      bx: mapToSvgX(intB, xMin, xMax),
+    };
+  }, [integralEnabled, compiledCurves, sliderValues, intA, intB, xMin, xMax, yMin, yMax]);
+
+  const hoverCrosshair = useMemo(() => {
+    if (hoverX === null || compiledCurves.length === 0) return null;
+    const primaryFn = compiledCurves[0].fn;
+    const y = primaryFn({ ...sliderValues, x: hoverX });
+    if (!Number.isFinite(y)) return null;
+    const h = Math.max(1e-4, (xMax - xMin) * 1e-4);
+    const dy = (primaryFn({ ...sliderValues, x: hoverX + h }) - primaryFn({ ...sliderValues, x: hoverX - h })) / (2 * h);
+    return {
+      x: hoverX,
+      y,
+      dy: Number.isFinite(dy) ? dy : null,
+      sx: mapToSvgX(hoverX, xMin, xMax),
+      sy: mapToSvgY(y, yMin, yMax),
+    };
+  }, [hoverX, compiledCurves, sliderValues, xMin, xMax, yMin, yMax]);
 
   const resolvedAsymptotes = useMemo(() => {
     if (!spec.asymptotes || spec.asymptotes.length === 0) return [];
@@ -340,13 +564,18 @@ export function InteractiveFunctionGraph({
     };
   }, [tangentEnabled, compiledCurves, sliderValues, tangentX, xMin, xMax, yMin, yMax]);
 
-  const updateProbeFromPointer = (clientX: number) => {
-    if (!svgRef.current) return;
+  const clientXToMathX = (clientX: number): number | null => {
+    if (!svgRef.current) return null;
     const rect = svgRef.current.getBoundingClientRect();
-    if (rect.width <= 0) return;
+    if (rect.width <= 0) return null;
     const svgX = ((clientX - rect.left) / rect.width) * SVG_W;
     const clampedSvgX = Math.max(PAD_LEFT, Math.min(PAD_LEFT + PLOT_W, svgX));
-    const mathX = xMin + ((clampedSvgX - PAD_LEFT) / PLOT_W) * (xMax - xMin);
+    return xMin + ((clampedSvgX - PAD_LEFT) / PLOT_W) * (xMax - xMin);
+  };
+
+  const updateProbeFromPointer = (clientX: number) => {
+    const mathX = clientXToMathX(clientX);
+    if (mathX === null) return;
     setTangentX(Number(mathX.toFixed(3)));
   };
 
@@ -364,7 +593,7 @@ export function InteractiveFunctionGraph({
             const dash = curve.dashed
               ? '6 4'
               : CURVE_DASH_PATTERNS[idx % CURVE_DASH_PATTERNS.length];
-            const opacity = CURVE_OPACITIES[idx % CURVE_OPACITIES.length];
+            const color = curve.color || CURVE_COLORS[idx % CURVE_COLORS.length];
             return (
               <div
                 key={curve.id}
@@ -376,16 +605,31 @@ export function InteractiveFunctionGraph({
                     y1="4"
                     x2="20"
                     y2="4"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                    stroke={color}
+                    strokeWidth="2.5"
                     strokeDasharray={dash}
-                    opacity={opacity}
                   />
                 </svg>
                 <span className="font-medium">{curve.label}</span>
               </div>
             );
           })}
+          {showDerivativeCurve && (
+            <div className="glass-pill inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs text-amber-700 dark:text-amber-300">
+              <svg width="20" height="8" aria-hidden="true">
+                <line
+                  x1="0"
+                  y1="4"
+                  x2="20"
+                  y2="4"
+                  stroke="#F59E0B"
+                  strokeWidth="2.2"
+                  strokeDasharray="5 3"
+                />
+              </svg>
+              <span className="font-mono font-semibold">f&apos;(x)</span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -404,6 +648,36 @@ export function InteractiveFunctionGraph({
               Reflect y = x (f⁻¹)
             </button>
           )}
+
+          {spec.showDerivative !== false && (
+            <button
+              type="button"
+              aria-pressed={showDerivativeCurve}
+              onClick={() => setShowDerivativeCurve((prev) => !prev)}
+              className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                showDerivativeCurve
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
+              }`}
+            >
+              <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
+              f&apos;(x) Curve
+            </button>
+          )}
+
+          <button
+            type="button"
+            aria-pressed={integralEnabled}
+            onClick={() => setIntegralEnabled((prev) => !prev)}
+            className={`inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+              integralEnabled
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'glass-pill text-[#1D1D1F] hover:bg-white/95 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]'
+            }`}
+          >
+            <AreaChart className="h-3.5 w-3.5" aria-hidden="true" />
+            ∫ₐᵇ Area
+          </button>
 
           <button
             type="button"
@@ -428,9 +702,7 @@ export function InteractiveFunctionGraph({
             <svg
               ref={svgRef}
               viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-              className={`block h-auto w-full select-none text-[#1D1D1F] dark:text-[#F5F5F7] ${
-                tangentEnabled ? 'cursor-crosshair' : ''
-              }`}
+              className="block h-auto w-full cursor-crosshair select-none text-[#1D1D1F] dark:text-[#F5F5F7]"
               role="img"
               aria-label={spec.title}
               onPointerDown={(e) => {
@@ -440,8 +712,16 @@ export function InteractiveFunctionGraph({
                 updateProbeFromPointer(e.clientX);
               }}
               onPointerMove={(e) => {
-                if (!tangentEnabled || !isDraggingProbe) return;
-                updateProbeFromPointer(e.clientX);
+                const mathX = clientXToMathX(e.clientX);
+                if (mathX !== null) {
+                  setHoverX(Number(mathX.toFixed(3)));
+                }
+                if (tangentEnabled && isDraggingProbe) {
+                  updateProbeFromPointer(e.clientX);
+                }
+              }}
+              onPointerLeave={() => {
+                setHoverX(null);
               }}
               onPointerUp={(e) => {
                 if (!isDraggingProbe) return;
@@ -670,25 +950,106 @@ export function InteractiveFunctionGraph({
                   </g>
                 )}
 
-                {curvePaths.map(({ curve, idx, d }) =>
+                {/* Definite Integral Shaded Region */}
+                {integralOverlay && (
+                  <g>
+                    {integralOverlay.posPath && (
+                      <path
+                        d={integralOverlay.posPath}
+                        fill="rgba(79, 70, 229, 0.22)"
+                      />
+                    )}
+                    {integralOverlay.negPath && (
+                      <path
+                        d={integralOverlay.negPath}
+                        fill="rgba(225, 29, 72, 0.22)"
+                      />
+                    )}
+                    <line
+                      x1={integralOverlay.ax}
+                      y1={PAD_TOP}
+                      x2={integralOverlay.ax}
+                      y2={PAD_TOP + PLOT_H}
+                      stroke="#4F46E5"
+                      strokeWidth={1.3}
+                      strokeDasharray="4 3"
+                    />
+                    <line
+                      x1={integralOverlay.bx}
+                      y1={PAD_TOP}
+                      x2={integralOverlay.bx}
+                      y2={PAD_TOP + PLOT_H}
+                      stroke="#4F46E5"
+                      strokeWidth={1.3}
+                      strokeDasharray="4 3"
+                    />
+                  </g>
+                )}
+
+                {curvePaths.map(({ curve, idx, color, d }) =>
                   d ? (
                     <path
                       key={curve.id}
                       d={d}
                       fill="none"
-                      stroke="currentColor"
-                      strokeWidth={idx === 0 ? 2.2 : 1.7}
+                      stroke={color}
+                      strokeWidth={idx === 0 ? 2.6 : 2}
                       strokeDasharray={
                         curve.dashed
                           ? '6 4'
                           : CURVE_DASH_PATTERNS[idx % CURVE_DASH_PATTERNS.length]
                       }
-                      opacity={CURVE_OPACITIES[idx % CURVE_OPACITIES.length]}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   ) : null,
                 )}
+
+                {/* Numerical Derivative Curve f'(x) */}
+                {showDerivativeCurve && derivativePath && (
+                  <path
+                    d={derivativePath}
+                    fill="none"
+                    stroke="#F59E0B"
+                    strokeWidth={2.2}
+                    strokeDasharray="5 3"
+                    strokeLinecap="round"
+                  />
+                )}
+
+                {/* Interactive Hover Coordinate Crosshair */}
+                {hoverCrosshair &&
+                  hoverCrosshair.sy >= PAD_TOP &&
+                  hoverCrosshair.sy <= PAD_TOP + PLOT_H && (
+                    <g pointerEvents="none">
+                      <line
+                        x1={hoverCrosshair.sx}
+                        y1={PAD_TOP}
+                        x2={hoverCrosshair.sx}
+                        y2={PAD_TOP + PLOT_H}
+                        stroke="currentColor"
+                        strokeOpacity={0.25}
+                        strokeDasharray="3 3"
+                      />
+                      <line
+                        x1={PAD_LEFT}
+                        y1={hoverCrosshair.sy}
+                        x2={PAD_LEFT + PLOT_W}
+                        y2={hoverCrosshair.sy}
+                        stroke="currentColor"
+                        strokeOpacity={0.25}
+                        strokeDasharray="3 3"
+                      />
+                      <circle
+                        cx={hoverCrosshair.sx}
+                        cy={hoverCrosshair.sy}
+                        r={4.2}
+                        fill="#4F46E5"
+                        stroke="#FFFFFF"
+                        strokeWidth={1.6}
+                      />
+                    </g>
+                  )}
 
                 {/* Tangent Line */}
                 {tangentStats?.valid && tangentStats.line && (
@@ -756,6 +1117,25 @@ export function InteractiveFunctionGraph({
                 })}
               </g>
             </svg>
+            <div className="flex min-h-[32px] flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] bg-white/40 px-3 py-1.5 font-mono text-[11px] text-[#1D1D1F] dark:border-white/[0.08] dark:bg-white/[0.025] dark:text-[#F5F5F7]">
+              {hoverCrosshair ? (
+                <>
+                  <span>
+                    Crosshair: ({hoverCrosshair.x.toFixed(2)},{' '}
+                    {hoverCrosshair.y.toFixed(2)})
+                  </span>
+                  {hoverCrosshair.dy !== null && (
+                    <span className="text-amber-700 dark:text-amber-300">
+                      f&apos;(x) = {hoverCrosshair.dy.toFixed(2)}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-[#6E6E73] dark:text-[#98989D]">
+                  Hover graph for live (x, f(x)) crosshair
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -882,6 +1262,72 @@ export function InteractiveFunctionGraph({
                       ).toFixed(2)}
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Definite Integral Simpson Calculator */}
+            {integralEnabled && (
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-1.5 text-xs font-semibold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
+                  <AreaChart className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" aria-hidden="true" />
+                  {spec.integralBounds?.label ?? 'Definite Integral ∫ₐᵇ f(x) dx (Simpson)'}
+                </div>
+                <div className="glass-surface space-y-2.5 rounded-2xl px-3.5 py-3">
+                  <div>
+                    <div className="flex justify-between font-mono text-xs">
+                      <span>Lower bound a</span>
+                      <span className="font-semibold">{intA.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      aria-label="Integral lower bound a"
+                      min={xMin}
+                      max={xMax}
+                      step={tangentStep}
+                      value={Math.max(xMin, Math.min(xMax, intA))}
+                      onChange={(e) => setIntA(Number(e.target.value))}
+                      className="mt-1 h-1.5 w-full cursor-pointer accent-indigo-600"
+                    />
+                  </div>
+                  <div>
+                    <div className="flex justify-between font-mono text-xs">
+                      <span>Upper bound b</span>
+                      <span className="font-semibold">{intB.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      aria-label="Integral upper bound b"
+                      min={xMin}
+                      max={xMax}
+                      step={tangentStep}
+                      value={Math.max(xMin, Math.min(xMax, intB))}
+                      onChange={(e) => setIntB(Number(e.target.value))}
+                      className="mt-1 h-1.5 w-full cursor-pointer accent-indigo-600"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 border-t border-black/[0.06] pt-2 dark:border-white/[0.08]">
+                    <div>
+                      <div className="font-mono text-[10px] text-[#6E6E73] uppercase dark:text-[#98989D]">
+                        Signed ∫ₐᵇ f(x) dx
+                      </div>
+                      <div className="font-mono text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                        {integralOverlay?.simpson.valid
+                          ? integralOverlay.simpson.signed.toFixed(3)
+                          : 'Undefined'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] text-[#6E6E73] uppercase dark:text-[#98989D]">
+                        Total Area ∫ₐᵇ |f(x)| dx
+                      </div>
+                      <div className="font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                        {integralOverlay?.simpson.valid
+                          ? integralOverlay.simpson.totalArea.toFixed(3)
+                          : 'Undefined'}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

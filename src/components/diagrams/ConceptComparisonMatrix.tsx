@@ -152,6 +152,11 @@ export function ConceptComparisonMatrix({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {searchQuery.trim() && (
+            <span className="glass-pill rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-0.5 font-mono text-[11px] font-medium text-indigo-700 dark:text-indigo-300">
+              {filteredRows.length} / {spec.rows.length} rows
+            </span>
+          )}
           {blurMode && (
             <span className="glass-pill rounded-full px-2.5 py-0.5 font-mono text-[11px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
               {revealedCells.size} / {totalTestableCells} revealed ({revealPct}%)
@@ -225,9 +230,16 @@ export function ConceptComparisonMatrix({
             <tbody>
               {filteredRows.map(({ row, originalIdx }) => {
                 const isTipOpen = expandedTips.has(originalIdx);
+                const isSearchHighlighted = Boolean(searchQuery.trim());
                 return (
                   <React.Fragment key={`row-${originalIdx}`}>
-                    <tr className="border-b border-black/[0.06] transition-colors last:border-b-0 hover:bg-black/[0.025] dark:border-white/[0.08] dark:hover:bg-white/[0.03]">
+                    <tr
+                      className={`border-b border-black/[0.06] transition-colors last:border-b-0 hover:bg-black/[0.025] dark:border-white/[0.08] dark:hover:bg-white/[0.03] ${
+                        isSearchHighlighted
+                          ? 'border-l-[3px] border-l-indigo-600 bg-indigo-500/[0.04] dark:border-l-indigo-400 dark:bg-indigo-400/[0.06]'
+                          : ''
+                      }`}
+                    >
                       <td className="border-r border-black/[0.06] px-4 py-3 align-top font-medium text-[#1D1D1F] dark:border-white/[0.08] dark:text-[#F5F5F7]">
                         <div className="flex flex-col items-start gap-1.5">
                           <MarkdownMath

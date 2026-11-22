@@ -18,7 +18,9 @@ export async function POST() {
     }
 
     await ensureUserSeeded(supabase, user.id);
-    const summary = await syncClassroomPackUpgrades(supabase, user.id);
+    const summary = await syncClassroomPackUpgrades(supabase, user.id, {
+      force: true,
+    });
 
     return NextResponse.json({
       synced: true,
@@ -31,7 +33,7 @@ export async function POST() {
         error:
           err instanceof Error
             ? err.message
-            : 'Failed to sync Classroom Pack v2.',
+            : 'Failed to sync Classroom Pack v3.',
       },
       { status: 500 },
     );

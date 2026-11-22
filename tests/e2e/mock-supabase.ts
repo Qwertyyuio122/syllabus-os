@@ -104,6 +104,25 @@ function parseInValues(raw: string): string[] {
   });
 }
 
+function compareOrderedValues(
+  rowValue: unknown,
+  expectedRaw: string,
+): number | null {
+  if (rowValue === null || rowValue === undefined || rowValue === '') {
+    return null;
+  }
+  const expectedNum = Number(expectedRaw);
+  const rowNum = typeof rowValue === 'number' ? rowValue : Number(rowValue);
+  if (
+    expectedRaw.trim() !== '' &&
+    Number.isFinite(expectedNum) &&
+    Number.isFinite(rowNum)
+  ) {
+    return rowNum - expectedNum;
+  }
+  return String(rowValue).localeCompare(expectedRaw);
+}
+
 function matchesCondition(rowValue: unknown, expr: string): boolean {
   if (expr.startsWith('eq.')) {
     const expected = expr.slice(3);
@@ -118,6 +137,22 @@ function matchesCondition(rowValue: unknown, expr: string): boolean {
       return String(rowValue) !== expected;
     }
     return coerceComparable(rowValue) !== expected;
+  }
+  if (expr.startsWith('gte.')) {
+    const cmp = compareOrderedValues(rowValue, expr.slice(4));
+    return cmp !== null && cmp >= 0;
+  }
+  if (expr.startsWith('gt.')) {
+    const cmp = compareOrderedValues(rowValue, expr.slice(3));
+    return cmp !== null && cmp > 0;
+  }
+  if (expr.startsWith('lte.')) {
+    const cmp = compareOrderedValues(rowValue, expr.slice(4));
+    return cmp !== null && cmp <= 0;
+  }
+  if (expr.startsWith('lt.')) {
+    const cmp = compareOrderedValues(rowValue, expr.slice(3));
+    return cmp !== null && cmp < 0;
   }
   if (expr.startsWith('in.')) {
     const allowed = parseInValues(expr.slice(3));
@@ -285,7 +320,9 @@ function handleRestRequest(
 
     const total = filtered.length;
     const contentRange =
-      total === 0 ? '*/0' : `0-${Math.max(0, sliced.length - 1)}/${total}`;
+      total === 0 || sliced.length === 0
+        ? `*/${total}`
+        : `${offset}-${offset + sliced.length - 1}/${total}`;
     const headers: Record<string, string> = {};
     if (wantsCount || method === 'HEAD') {
       headers['Content-Range'] = contentRange;

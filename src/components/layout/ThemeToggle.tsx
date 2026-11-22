@@ -20,7 +20,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
         size={compact ? 'icon' : 'sm'}
         aria-label="Toggle color theme"
         disabled
-        className="text-[#787774] dark:text-[#9B9A97]"
+        className="text-[#525866] dark:text-[#9AA3B2]"
       >
         <Sun className="h-4 w-4" />
         {!compact && <span className="text-xs">Theme</span>}
@@ -37,7 +37,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className="text-[#787774] hover:text-[#37352F] dark:text-[#9B9A97] dark:hover:text-[#EBEBEB]"
+      className="text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]"
     >
       {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
       {!compact && (

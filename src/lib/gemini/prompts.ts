@@ -61,7 +61,7 @@ function getSubjectSpecificInstructions(subjectSlug: string): string {
         'Subject-specific IB 2025+ Biology HL rules:',
         '- Official exam papers ONLY: "Paper 1A (MCQ)", "Paper 1B (Data-Based)", "Paper 2 (Structured & Extended)". NEVER emit Paper 3.',
         '- Include exact IB markscheme biological terminology (e.g., hydrogen bonds, hydrophilic/hydrophobic, active site complementarity, chemiosmosis, concentration gradient).',
-        '- Prefer 1–3 diagrams from: labeled_explorer (monochrome SVG anatomy/structure using strokes "#37352F", "#787774", "#E6E6E4", fills "none" or "#FBFBFA" within viewBox "0 0 800 440"), step_mechanism (molecular/physiological process), or comparison_matrix.',
+        '- Prefer 1–3 diagrams from: scientific_simulation (enzyme_kinetics, water_potential_osmosis, microscopy_magnification, respiration_photosynthesis_flux), labeled_explorer (full-color scientific SVG anatomy/structure with palette: "scientific" within viewBox "0 0 800 440"), step_mechanism (molecular/physiological process), worked_example (quantitative magnification/genetics problems), or comparison_matrix.',
       ].join('\n');
     case 'chemistry-sl':
       return [
@@ -70,14 +70,14 @@ function getSubjectSpecificInstructions(subjectSlug: string): string {
         '- STRICT SL BOUNDARY: NEVER include HL-only R1.4 Entropy and spontaneity (ΔG, ΔS) or HL-only Transition Metals / NMR splitting.',
         '- Use official IB STP molar volume: 22.7 dm^3 mol^-1 at 273.15 K and 100 kPa (NEVER 22.4 dm^3 mol^-1).',
         '- Format chemical equations with KaTeX/mhchem ($\\ce{...}$) and IUPAC nomenclature.',
-        '- Prefer 1–3 diagrams from: step_mechanism, comparison_matrix, or labeled_explorer (clean monochrome SVG apparatus/energy diagram).',
+        '- Prefer 1–3 diagrams from: scientific_simulation (bohr_emission_spectra, enthalpy_energy_profile, titration_ph_curve, periodicity_explorer, equilibrium_le_chatelier), worked_example (stoichiometry/calorimetry/equilibrium step-by-step), step_mechanism, comparison_matrix, or labeled_explorer (palette: "scientific" full-color apparatus/orbital/energy diagram).',
       ].join('\n');
     case 'math-aa-sl':
       return [
         'Subject-specific IB Math AA SL rules:',
         '- Official exam papers ONLY: "Paper 1 (Non-GDC)", "Paper 2 (GDC)".',
         '- Ensure Paper 1 questions are solvable analytically without a graphing calculator, and Paper 2 questions appropriately leverage GDC methods.',
-        '- Include a "function_graph" playable_diagram whenever functions, transformations, calculus, or equations apply:',
+        '- Include a "function_graph" (setting showDerivative: true or integralBounds where calculus applies) and/or "worked_example" (progressive [M1]/[A1]/[R1] solution steps) playable_diagram whenever functions, transformations, calculus, or equations apply:',
         '  * curves[].expression MUST be plain evaluable math syntax using x and slider keys (e.g., "a*(x-h)^2+k", "a/(x-h)+k", "a*sin(b*x)+c", "exp(k*x)", "ln(x)"), NEVER LaTeX ($ or \\frac) inside expression.',
         '  * slider keys MUST be valid identifiers (letters/digits/underscore starting with letter, e.g., "a", "h", "k"), with min < max and step > 0.',
         '  * xMin < xMax and yMin < yMax.',
@@ -88,14 +88,14 @@ function getSubjectSpecificInstructions(subjectSlug: string): string {
         '- Current Year 1 Classroom Focus: May 2028 History IA (24 marks, 3 sections: Inquiry Question 6m, Sources & Perspectives 6m, Synthesis & Evaluation 12m, ≤7 sources, ≤2,200w, Chicago NB — standalone Reflection & old OPCVL removed) AND Paper 3 Regional Study — Europe (2 hours, 30 marks, two 15-mark essays from Pearson 2026 regional studies like European Totalitarianism 1918–41).',
         '- Official exam papers ONLY: "Paper 3 (Regional Study — Europe)", "Internal Assessment (2028 History IA)", "Paper 1 (Focused Study)", "Paper 2 (Thematic Essay)".',
         '- Explicitly integrate the 4 redesigned 2028 History concepts (Cause & consequence, Continuity & change, Perspectives, Significance) and 4 Skills (Using sources, Making connections, Evaluating arguments, Asking questions).',
-        '- Prefer "timeline_causality" (with conceptTags, primarySourceQuote, and historiographyNotes) and "comparison_matrix".',
+        '- Prefer "primary_source_analyzer" (with Chicago NB citations & Perspective/Value/Limitation annotations), "timeline_causality" (with conceptTags, primarySourceQuote, and historiographyNotes), and "comparison_matrix".',
       ].join('\n');
     case 'english-lit-hl':
       return [
         'Subject-specific IB English A: Literature HL rules:',
         '- Official exam papers ONLY: "Paper 1 (Guided Literary Analysis)", "Paper 2 (Comparative Essay)", plus HL Essay (1,200–1,500w) & Individual Oral (1 English-original literary work + 1 translated work — NEVER non-literary bodies of work).',
         '- Ground questions and study notes in authorial choices, literary/stylistic devices, Global Issues, and close textual analysis.',
-        '- Prefer "comparison_matrix", "labeled_explorer", and "step_mechanism".',
+        '- Prefer "literary_extract_annotator" (color-coded device layers & Band 7 thesis sentences), "comparison_matrix", "labeled_explorer", and "step_mechanism".',
       ].join('\n');
     case 'french-b-sl':
       return [
@@ -103,7 +103,7 @@ function getSubjectSpecificInstructions(subjectSlug: string): string {
         '- Official exam papers ONLY: "Paper 1 (Production écrite · 250–400 mots)", "Paper 2 (Compréhension écrite & orale)".',
         '- Reference the 5 Prescribed Themes (*Identités, Expériences, Ingéniosité humaine, Organisation sociale, Partage de la planète*) per *Le Monde en Français* (Cambridge 2018) Chapitre 6 text types.',
         '- Write French B SL prompts, reading passages, and flashcards in authentic French with clear English/French examiner markscheme criteria.',
-        '- Prefer "comparison_matrix" (text types / register / grammar) and "step_mechanism".',
+        '- Prefer "french_text_type_studio" (interactive Paper 1 structural convention pins, Courant vs Soutenu register toggle, and Oral Individuel cultural link), "comparison_matrix" (text types / register / grammar), and "step_mechanism".',
       ].join('\n');
     default:
       return '';
@@ -126,7 +126,7 @@ export function buildGenerateSuitePrompts(
     'Respond strictly with valid JSON matching the provided responseJsonSchema.',
     'Core Academic Rules:',
     '1. Ground EVERY note section, equation, diagram, question, and flashcard in the uploaded classroom materials AND the official IB syllabus context.',
-    '2. Visual Aesthetic & Spatial Accuracy for Diagrams: Monochrome-first ONLY. For labeled_explorer SVG shapes, use monochrome strokes/fills ("#1D1D1F", "#6E6E73", "#E5E5EA", "none", "currentColor") — NEVER neon colors or gradients. Use rich <path> curves, <polygon> arrowheads, and complete molecular/organelle/apparatus geometry instead of bare plain boxes. Keep hotspot coordinates inside x: 0..800, y: 0..440 and place hotspot pins BESIDE target structures (never directly over text labels). Keep step_mechanism nodes inside x: 40..760, y: 40..360 spaced at least 180px apart horizontally.',
+    '2. Visual Aesthetic & Spatial Accuracy for Diagrams: Use harmonious, full-color scientific & academic illustration palettes by default (set palette: "scientific" on labeled_explorer and step_mechanism) — e.g. crisp cobalt, emerald, amber, rose, teal, and violet fills/strokes with readable contrast in both light and dark modes, avoiding harsh neon clashing colors. Use rich <path> curves, <polygon> arrowheads, and complete molecular/organelle/apparatus geometry instead of bare plain boxes. Keep hotspot coordinates inside x: 0..800, y: 0..440 and place hotspot pins BESIDE target structures (never directly over text labels). Keep step_mechanism nodes inside x: 40..760, y: 40..360 spaced at least 180px apart horizontally.',
     '3. Keep comparison_matrix row.cells lengths equal to columns.length.',
     '4. For MCQ questions (paper_type containing MCQ or Paper 1A), set max_marks = 1, provide 4 mcq_options labeled A-D, and set correct_mcq_option ("A"-"D"). For non-MCQ questions, omit mcq_options and correct_mcq_option.',
     '5. Every question markscheme must specify concrete IB marking_points (M1, M2, A1, C1, etc.) whose marks sum to max_marks, plus required markscheme keywords and a full-mark model_answer.',
@@ -144,7 +144,7 @@ export function buildGenerateSuitePrompts(
     getSubjectSpecificInstructions(input.subjectSlug),
     '',
     'Required Deliverables in JSON:',
-    '1. studyNote: 1 comprehensive Read-Only Notion study guide containing headings (level 2/3), crisp paragraphs, callouts (definition, examiner_warning, key_formula, syllabus_link), key_terms with markschemeKeyword badges, equations where relevant, and 1 to 3 schema-valid playable_diagram blocks.',
+    '1. studyNote: 1 comprehensive Read-Only Notion study guide containing an opening guiding_questions callout, headings (level 2/3), crisp paragraphs, callouts (definition, examiner_warning, key_formula, syllabus_link, guiding_questions, textbook_excerpt, tok_nos), key_terms with markschemeKeyword badges, equations where relevant, and 1 to 3 schema-valid playable_diagram blocks (including worked_example, scientific_simulation, or subject-native interactive diagrams where appropriate).',
     '2. questions: Exactly 8 authentic IB exam questions distributed across the allowed paper_types and difficulties (Foundation, Standard IB, HL Extension for HL subjects), each with full M1/M2/A1 markscheme and model_answer.',
     '3. flashcards: Exactly 12 crisp active-recall flashcards targeting markscheme keywords, formulas, mechanisms, or primary evidence from the materials.',
     '',

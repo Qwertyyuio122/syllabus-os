@@ -12,6 +12,10 @@ import {
   Search,
   X,
 } from 'lucide-react';
+import {
+  isSubjectThemeKey,
+  SUBJECT_THEMES,
+} from '@/config/subject-themes';
 
 export interface CommandPaletteItem {
   id: string;
@@ -51,6 +55,14 @@ function renderKindIcon(kind: CommandPaletteItem['kind']) {
     default:
       return <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden="true" />;
   }
+}
+
+function getItemAccentClass(href: string): string | null {
+  const match = href.match(/\/dashboard\/subjects\/([^/?#]+)/);
+  if (match?.[1] && isSubjectThemeKey(match[1])) {
+    return SUBJECT_THEMES[match[1]].textAccent;
+  }
+  return null;
 }
 
 export function CommandPalette({
@@ -101,7 +113,6 @@ export function CommandPalette({
   const filteredItems = React.useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) {
-      // Curated default Spotlight view: Workspace + 6 Subjects + first few Study Guides
       const defaults = items.filter(
         (item) => item.kind === 'action' || item.kind === 'subject',
       );
@@ -179,17 +190,17 @@ export function CommandPalette({
     >
       {/* Dimmed Frosted Backdrop */}
       <div
-        className="fixed inset-0 bg-black/25 backdrop-blur-sm transition-opacity dark:bg-black/60"
+        className="fixed inset-0 bg-slate-950/25 backdrop-blur-md transition-opacity dark:bg-black/65"
         onClick={() => onOpenChange(false)}
         aria-hidden="true"
       />
 
-      {/* Spotlight Glass Dialog */}
-      <div className="glass-panel relative z-10 flex w-full max-w-xl flex-col overflow-hidden rounded-3xl">
+      {/* Tahoe Spotlight Glass Dialog */}
+      <div className="glass-panel animate-glass-reveal relative z-10 flex w-full max-w-xl flex-col overflow-hidden rounded-3xl">
         {/* Search Header */}
         <div className="flex items-center gap-3 border-b border-black/[0.06] px-4 py-3.5 dark:border-white/[0.08]">
           <Search
-            className="h-4 w-4 shrink-0 text-[#6E6E73] dark:text-[#98989D]"
+            className="h-4 w-4 shrink-0 text-[#525866] dark:text-[#9AA3B2]"
             aria-hidden="true"
           />
           <input
@@ -209,7 +220,7 @@ export function CommandPalette({
                 ? `command-item-${filteredItems[activeIndex].id}`
                 : undefined
             }
-            className="w-full bg-transparent text-sm text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none dark:text-[#F5F5F7] dark:placeholder:text-[#98989D]"
+            className="w-full bg-transparent text-sm text-[#111318] placeholder:text-[#525866] focus:outline-none dark:text-[#F5F7FA] dark:placeholder:text-[#9AA3B2]"
           />
           {query && (
             <button
@@ -219,7 +230,7 @@ export function CommandPalette({
                 inputRef.current?.focus();
               }}
               aria-label="Clear search query"
-              className="glass-pill inline-flex h-6 shrink-0 cursor-pointer items-center rounded-full px-2 text-[11px] text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]"
+              className="glass-pill inline-flex h-6 shrink-0 cursor-pointer items-center rounded-full px-2 text-[11px] text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]"
             >
               Clear
             </button>
@@ -228,7 +239,7 @@ export function CommandPalette({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Close command palette"
-            className="glass-pill inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#6E6E73] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:text-[#98989D] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25"
+            className="glass-pill inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#525866] hover:text-[#111318] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA] dark:focus-visible:ring-[#F5F7FA]/25"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -243,7 +254,7 @@ export function CommandPalette({
           className="max-h-[55vh] overflow-y-auto p-2"
         >
           {filteredItems.length === 0 ? (
-            <div className="px-4 py-10 text-center text-xs text-[#6E6E73] dark:text-[#98989D]">
+            <div className="px-4 py-10 text-center text-xs text-[#525866] dark:text-[#9AA3B2]">
               No matching subjects, syllabus sub-topics, or study guides for
               &ldquo;{query}&rdquo;.
             </div>
@@ -251,6 +262,8 @@ export function CommandPalette({
             <div className="space-y-1">
               {filteredItems.map((item, idx) => {
                 const isSelected = idx === activeIndex;
+                const subjectAccent = getItemAccentClass(item.href);
+
                 return (
                   <button
                     key={item.id}
@@ -261,18 +274,18 @@ export function CommandPalette({
                     aria-selected={isSelected}
                     onMouseEnter={() => setActiveIndex(idx)}
                     onClick={() => handleSelectItem(item)}
-                    className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                    className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl px-3.5 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:focus-visible:ring-[#F5F7FA]/25 ${
                       isSelected
-                        ? 'bg-black/[0.06] text-[#1D1D1F] dark:bg-white/[0.11] dark:text-[#F5F5F7]'
-                        : 'text-[#1D1D1F] hover:bg-black/[0.035] dark:text-[#F5F5F7] dark:hover:bg-white/[0.06]'
+                        ? 'bg-black/[0.06] text-[#111318] dark:bg-white/[0.11] dark:text-[#F5F7FA]'
+                        : 'text-[#111318] hover:bg-black/[0.035] dark:text-[#F5F7FA] dark:hover:bg-white/[0.06]'
                     }`}
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <span
                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
                           isSelected
-                            ? 'bg-[#1D1D1F] text-white dark:bg-[#F5F5F7] dark:text-[#111113]'
-                            : 'glass-pill text-[#6E6E73] dark:text-[#98989D]'
+                            ? 'bg-[#111318] text-white dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                            : `glass-pill ${subjectAccent ?? 'text-[#525866] dark:text-[#9AA3B2]'}`
                         }`}
                       >
                         {renderKindIcon(item.kind)}
@@ -280,7 +293,7 @@ export function CommandPalette({
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           {item.badge && (
-                            <span className="glass-pill shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                            <span className="glass-pill shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold text-[#111318] dark:text-[#F5F7FA]">
                               {item.badge}
                             </span>
                           )}
@@ -288,13 +301,13 @@ export function CommandPalette({
                             {item.title}
                           </span>
                         </div>
-                        <div className="mt-0.5 truncate text-xs text-[#6E6E73] dark:text-[#98989D]">
+                        <div className="mt-0.5 truncate text-xs text-[#525866] dark:text-[#9AA3B2]">
                           {item.subtitle}
                         </div>
                       </div>
                     </div>
 
-                    <span className="shrink-0 font-mono text-[10.5px] text-[#6E6E73] dark:text-[#98989D]">
+                    <span className="shrink-0 font-mono text-[10.5px] text-[#525866] dark:text-[#9AA3B2]">
                       {KIND_LABELS[item.kind]}
                     </span>
                   </button>
@@ -305,7 +318,7 @@ export function CommandPalette({
         </div>
 
         {/* Footer Shortcuts Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] bg-white/35 px-4 py-2 text-[11px] text-[#6E6E73] dark:border-white/[0.08] dark:bg-white/[0.02] dark:text-[#98989D]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-black/[0.06] bg-white/40 px-4 py-2 text-[11px] text-[#525866] dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-[#9AA3B2]">
           <div className="flex items-center gap-3 font-mono">
             <span>↑↓ navigate</span>
             <span className="inline-flex items-center gap-1">

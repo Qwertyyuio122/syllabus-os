@@ -22,6 +22,31 @@ const PAD_B = 46;
 const PLOT_W = SVG_W - PAD_L - PAD_R;
 const PLOT_H = SVG_H - PAD_T - PAD_B;
 
+const IB_ELEMENTS_EN: Array<{ symbol: string; name: string; en: number }> = [
+  { symbol: 'Cs', name: 'Caesium', en: 0.8 },
+  { symbol: 'K', name: 'Potassium', en: 0.8 },
+  { symbol: 'Na', name: 'Sodium', en: 0.9 },
+  { symbol: 'Li', name: 'Lithium', en: 1.0 },
+  { symbol: 'Ca', name: 'Calcium', en: 1.0 },
+  { symbol: 'Mg', name: 'Magnesium', en: 1.3 },
+  { symbol: 'Be', name: 'Beryllium', en: 1.6 },
+  { symbol: 'Al', name: 'Aluminium', en: 1.6 },
+  { symbol: 'Fe', name: 'Iron', en: 1.8 },
+  { symbol: 'Cu', name: 'Copper', en: 1.9 },
+  { symbol: 'Si', name: 'Silicon', en: 1.9 },
+  { symbol: 'B', name: 'Boron', en: 2.0 },
+  { symbol: 'H', name: 'Hydrogen', en: 2.2 },
+  { symbol: 'P', name: 'Phosphorus', en: 2.2 },
+  { symbol: 'C', name: 'Carbon', en: 2.6 },
+  { symbol: 'S', name: 'Sulfur', en: 2.6 },
+  { symbol: 'I', name: 'Iodine', en: 2.7 },
+  { symbol: 'N', name: 'Nitrogen', en: 3.0 },
+  { symbol: 'Br', name: 'Bromine', en: 3.0 },
+  { symbol: 'Cl', name: 'Chlorine', en: 3.2 },
+  { symbol: 'O', name: 'Oxygen', en: 3.4 },
+  { symbol: 'F', name: 'Fluorine', en: 4.0 },
+];
+
 function mapAvgEn(avgEn: number): number {
   const clamped = Math.max(0.6, Math.min(4.1, avgEn));
   return PAD_L + ((clamped - 0.6) / 3.5) * PLOT_W;
@@ -481,6 +506,8 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
   const [selectedCompoundId, setSelectedCompoundId] = useState<string>(
     spec.compounds[0]?.id ?? '',
   );
+  const [elemA, setElemA] = useState<string>('Na');
+  const [elemB, setElemB] = useState<string>('Cl');
   const [enA, setEnA] = useState<number>(spec.compounds[0]?.enA ?? 0.9);
   const [enB, setEnB] = useState<number>(spec.compounds[0]?.enB ?? 3.2);
 
@@ -504,12 +531,15 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
 
   const customAvgEn = Number(((enA + enB) / 2).toFixed(2));
   const customDeltaEn = Number(Math.abs(enA - enB).toFixed(2));
+  const pctIonic = Math.round((1 - Math.exp(-0.25 * customDeltaEn * customDeltaEn)) * 100);
   const customClass = classifyBonding(customAvgEn, customDeltaEn);
 
   const selectCompound = (c: BondingCompoundPoint) => {
     setSelectedCompoundId(c.id);
     setEnA(c.enA);
     setEnB(c.enB);
+    setElemA('Custom');
+    setElemB('Custom');
   };
 
   return (
@@ -656,7 +686,8 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
                       />
                       <text
                         x={px + 8}
-                        y={py + 3}
+                        y={comp.deltaEn < 0.25 ? py - 9 : py + 3}
+                        textAnchor="start"
                         fontSize={10}
                         fontWeight={selected ? 700 : 500}
                         fill="currentColor"
@@ -669,6 +700,24 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
                 })}
 
                 {/* Custom Live Probe Point */}
+                <line
+                  x1={mapAvgEn(customAvgEn)}
+                  y1={PAD_T}
+                  x2={mapAvgEn(customAvgEn)}
+                  y2={PAD_T + PLOT_H}
+                  stroke={monochromeMode ? 'currentColor' : '#C85A53'}
+                  strokeOpacity={0.28}
+                  strokeDasharray="3 3"
+                />
+                <line
+                  x1={PAD_L}
+                  y1={mapDeltaEn(customDeltaEn)}
+                  x2={PAD_L + PLOT_W}
+                  y2={mapDeltaEn(customDeltaEn)}
+                  stroke={monochromeMode ? 'currentColor' : '#C85A53'}
+                  strokeOpacity={0.28}
+                  strokeDasharray="3 3"
+                />
                 <circle
                   cx={mapAvgEn(customAvgEn)}
                   cy={mapDeltaEn(customDeltaEn)}
@@ -681,9 +730,21 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
                 <circle
                   cx={mapAvgEn(customAvgEn)}
                   cy={mapDeltaEn(customDeltaEn)}
-                  r={4}
+                  r={4.5}
                   fill={monochromeMode ? 'currentColor' : '#C85A53'}
                 />
+                {elemA !== 'Custom' && elemB !== 'Custom' && (
+                  <text
+                    x={mapAvgEn(customAvgEn) + 10}
+                    y={mapDeltaEn(customDeltaEn) - 8}
+                    fontSize={10.5}
+                    fontWeight={700}
+                    fill={monochromeMode ? 'currentColor' : '#C85A53'}
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    {elemA}–{elemB}
+                  </text>
+                )}
               </svg>
             </div>
 
@@ -714,9 +775,53 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
             <div className="space-y-3">
               <div className="glass-surface rounded-2xl px-3.5 py-3">
                 <div className="font-mono text-[10px] font-semibold tracking-wider text-[#6E6E73] uppercase dark:text-[#98989D]">
-                  Live Custom Electronegativity Probe
+                  Custom Element-Pair Electronegativity Calculator
                 </div>
-                <div className="mt-2 space-y-2">
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <label className="block min-w-0 text-[11px]">
+                    <span className="font-mono text-[#6E6E73] dark:text-[#98989D]">Element A</span>
+                    <select
+                      aria-label="Select Element A"
+                      value={elemA}
+                      onChange={(e) => {
+                        const sym = e.target.value;
+                        setElemA(sym);
+                        const found = IB_ELEMENTS_EN.find((el) => el.symbol === sym);
+                        if (found) setEnA(found.en);
+                      }}
+                      className="glass-pill mt-1 block h-7 w-full min-w-0 truncate rounded-xl px-2 font-mono text-xs text-[#1D1D1F] dark:text-[#F5F5F7]"
+                    >
+                      <option value="Custom">Custom (Slider)</option>
+                      {IB_ELEMENTS_EN.map((el) => (
+                        <option key={el.symbol} value={el.symbol}>
+                          {el.symbol} — {el.name} ({el.en.toFixed(1)})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block min-w-0 text-[11px]">
+                    <span className="font-mono text-[#6E6E73] dark:text-[#98989D]">Element B</span>
+                    <select
+                      aria-label="Select Element B"
+                      value={elemB}
+                      onChange={(e) => {
+                        const sym = e.target.value;
+                        setElemB(sym);
+                        const found = IB_ELEMENTS_EN.find((el) => el.symbol === sym);
+                        if (found) setEnB(found.en);
+                      }}
+                      className="glass-pill mt-1 block h-7 w-full min-w-0 truncate rounded-xl px-2 font-mono text-xs text-[#1D1D1F] dark:text-[#F5F5F7]"
+                    >
+                      <option value="Custom">Custom (Slider)</option>
+                      {IB_ELEMENTS_EN.map((el) => (
+                        <option key={el.symbol} value={el.symbol}>
+                          {el.symbol} — {el.name} ({el.en.toFixed(1)})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <div className="mt-2.5 space-y-2">
                   <div>
                     <div className="flex justify-between font-mono text-xs">
                       <span>Element A (χₐ)</span>
@@ -729,7 +834,10 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
                       max={4.0}
                       step={0.1}
                       value={enA}
-                      onChange={(e) => setEnA(Number(e.target.value))}
+                      onChange={(e) => {
+                        setElemA('Custom');
+                        setEnA(Number(e.target.value));
+                      }}
                       className="h-1.5 w-full cursor-pointer accent-[#1D1D1F] dark:accent-[#F5F5F7]"
                     />
                   </div>
@@ -745,14 +853,24 @@ export function BondingContinuumLab({ spec }: BondingContinuumLabProps) {
                       max={4.0}
                       step={0.1}
                       value={enB}
-                      onChange={(e) => setEnB(Number(e.target.value))}
+                      onChange={(e) => {
+                        setElemB('Custom');
+                        setEnB(Number(e.target.value));
+                      }}
                       className="h-1.5 w-full cursor-pointer accent-[#1D1D1F] dark:accent-[#F5F5F7]"
                     />
                   </div>
                 </div>
                 <div className="mt-2.5 border-t border-black/[0.06] pt-2 dark:border-white/[0.08]">
-                  <div className="font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-                    χ_avg = {customAvgEn.toFixed(2)} · Δχ = {customDeltaEn.toFixed(2)} →{' '}
+                  <div className="flex flex-wrap items-center justify-between gap-1 font-mono text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                    <span>
+                      χ_avg = {customAvgEn.toFixed(2)} · Δχ = {customDeltaEn.toFixed(2)}
+                    </span>
+                    <span className="glass-pill rounded-full px-2 py-0.5 text-[10.5px]">
+                      ~{pctIonic}% ionic / {100 - pctIonic}% covalent
+                    </span>
+                  </div>
+                  <div className="mt-1 font-mono text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                     {customClass.label}
                   </div>
                   <p className="mt-1 text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]">

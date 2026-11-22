@@ -6,11 +6,16 @@ import {
   Atom,
   Clock,
   Expand,
+  Feather,
+  FlaskConical,
   GitBranch,
+  Languages,
   Layers,
   LineChart,
+  ListChecks,
   MapPin,
   RotateCcw,
+  ScrollText,
   Table2,
 } from 'lucide-react';
 import {
@@ -25,6 +30,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { enhanceDiagramSpec } from './diagram-enhancer';
+import { MarkdownMath } from '@/components/notes/MarkdownMath';
 import { LabeledAnatomyExplorer } from './LabeledAnatomyExplorer';
 import { StepMechanismPlayer } from './StepMechanismPlayer';
 import { InteractiveFunctionGraph } from './InteractiveFunctionGraph';
@@ -32,6 +38,11 @@ import { ConceptComparisonMatrix } from './ConceptComparisonMatrix';
 import { TimelineCausalityExplorer } from './TimelineCausalityExplorer';
 import { VseprPolarityLab } from './VseprPolarityLab';
 import { BondingContinuumLab } from './BondingContinuumLab';
+import { ScientificSimulationLab } from './ScientificSimulationLab';
+import { PrimarySourceAnalyzer } from './PrimarySourceAnalyzer';
+import { LiteraryExtractAnnotator } from './LiteraryExtractAnnotator';
+import { FrenchTextTypeStudio } from './FrenchTextTypeStudio';
+import { InteractiveWorkedExample } from './InteractiveWorkedExample';
 
 export interface InteractiveDiagramPlayerProps {
   spec: PlayableDiagramSpec;
@@ -117,6 +128,11 @@ const DIAGRAM_META: Record<
   timeline_causality: { label: 'Timeline & Causality', Icon: Clock },
   vsepr_polarity_lab: { label: 'VSEPR & Polarity Lab', Icon: Atom },
   bonding_continuum_lab: { label: 'Bonding Continuum Lab', Icon: Layers },
+  scientific_simulation: { label: 'Scientific Simulation Lab', Icon: FlaskConical },
+  primary_source_analyzer: { label: 'Primary Source Analyzer', Icon: ScrollText },
+  literary_extract_annotator: { label: 'Literary Extract Annotator', Icon: Feather },
+  french_text_type_studio: { label: 'French Text Type Studio', Icon: Languages },
+  worked_example: { label: 'Interactive Worked Example', Icon: ListChecks },
 };
 
 function renderValidatedPlayer(spec: PlayableDiagramSpec): React.ReactElement {
@@ -135,6 +151,16 @@ function renderValidatedPlayer(spec: PlayableDiagramSpec): React.ReactElement {
       return <VseprPolarityLab spec={spec} />;
     case 'bonding_continuum_lab':
       return <BondingContinuumLab spec={spec} />;
+    case 'scientific_simulation':
+      return <ScientificSimulationLab spec={spec} />;
+    case 'primary_source_analyzer':
+      return <PrimarySourceAnalyzer spec={spec} />;
+    case 'literary_extract_annotator':
+      return <LiteraryExtractAnnotator spec={spec} />;
+    case 'french_text_type_studio':
+      return <FrenchTextTypeStudio spec={spec} />;
+    case 'worked_example':
+      return <InteractiveWorkedExample spec={spec} />;
   }
 }
 
@@ -196,7 +222,10 @@ export function InteractiveDiagramPlayer({
               {validSpec.title}
             </h3>
             <figcaption className="mt-0.5 text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
-              {validSpec.caption}
+              <MarkdownMath
+                content={validSpec.caption}
+                className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]"
+              />
             </figcaption>
           </div>
 
@@ -243,7 +272,14 @@ export function InteractiveDiagramPlayer({
               </span>
             </div>
             <DialogTitle className="mt-1">{validSpec.title}</DialogTitle>
-            <DialogDescription>{validSpec.caption}</DialogDescription>
+            <DialogDescription asChild>
+              <div className="text-xs text-[#6E6E73] dark:text-[#98989D]">
+                <MarkdownMath
+                  content={validSpec.caption}
+                  className="text-xs leading-relaxed text-[#6E6E73] dark:text-[#98989D]"
+                />
+              </div>
+            </DialogDescription>
           </DialogHeader>
           <div className="p-2 sm:p-4">
             <DiagramErrorBoundary

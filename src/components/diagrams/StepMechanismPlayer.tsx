@@ -1,9 +1,18 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Palette, Pause, Play } from 'lucide-react';
 import type { StepMechanismNode, StepMechanismSpec } from '@/types/diagrams';
 import { InlineKaTeX, MarkdownMath } from '@/components/notes/MarkdownMath';
+
+const GROUP_COLORS = [
+  { fill: '#2563EB', tint: 'rgba(37, 99, 235, 0.11)', border: '#3B82F6' },
+  { fill: '#059669', tint: 'rgba(5, 150, 105, 0.11)', border: '#10B981' },
+  { fill: '#D97706', tint: 'rgba(217, 119, 6, 0.12)', border: '#F59E0B' },
+  { fill: '#7C3AED', tint: 'rgba(124, 58, 237, 0.11)', border: '#8B5CF6' },
+  { fill: '#0D9488', tint: 'rgba(13, 148, 136, 0.11)', border: '#14B8A6' },
+  { fill: '#E11D48', tint: 'rgba(225, 29, 72, 0.11)', border: '#F43F5E' },
+] as const;
 
 export interface StepMechanismPlayerProps {
   spec: StepMechanismSpec;
@@ -157,11 +166,27 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
 
   const [stepIndex, setStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [monochromeMode, setMonochromeMode] = useState<boolean>(
+    () => spec.palette === 'monochrome',
+  );
 
   const safeId = spec.id.replace(/[^a-zA-Z0-9_-]/g, '') || 'mechanism';
   const activeMarkerId = `arrow-active-${safeId}`;
   const mutedMarkerId = `arrow-muted-${safeId}`;
   const gridPatternId = `mech-grid-${safeId}`;
+
+  const groupColorMap = useMemo(() => {
+    const map = new Map<string, (typeof GROUP_COLORS)[number]>();
+    let idx = 0;
+    for (const node of spec.nodes) {
+      const key = node.group?.trim() || node.id;
+      if (!map.has(key)) {
+        map.set(key, GROUP_COLORS[idx % GROUP_COLORS.length]);
+        idx += 1;
+      }
+    }
+    return map;
+  }, [spec.nodes]);
 
   useEffect(() => {
     if (!isPlaying || sortedSteps.length <= 1) return;
@@ -294,32 +319,47 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
           </button>
         </div>
 
-        {/* Clickable Step Pills 1..N */}
-        <div
-          className="flex flex-wrap items-center gap-1"
-          role="group"
-          aria-label="Mechanism steps"
-        >
-          {sortedSteps.map((step, idx) => {
-            const isCurrent = idx === safeIndex;
-            return (
-              <button
-                key={`${step.stepNumber}-${idx}`}
-                type="button"
-                onClick={() => handleSelectStep(idx)}
-                title={step.title}
-                aria-label={`Step ${step.stepNumber}: ${step.title}`}
-                aria-current={isCurrent ? 'step' : undefined}
-                className={`inline-flex h-7 min-w-7 cursor-pointer items-center justify-center rounded-full px-2.5 font-mono text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
-                  isCurrent
-                    ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-                    : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
-                }`}
-              >
-                {step.stepNumber}
-              </button>
-            );
-          })}
+        {/* Clickable Step Pills 1..N + Monochrome Toggle */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            className="flex flex-wrap items-center gap-1"
+            role="group"
+            aria-label="Mechanism steps"
+          >
+            {sortedSteps.map((step, idx) => {
+              const isCurrent = idx === safeIndex;
+              return (
+                <button
+                  key={`${step.stepNumber}-${idx}`}
+                  type="button"
+                  onClick={() => handleSelectStep(idx)}
+                  title={step.title}
+                  aria-label={`Step ${step.stepNumber}: ${step.title}`}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  className={`inline-flex h-7 min-w-7 cursor-pointer items-center justify-center rounded-full px-2.5 font-mono text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25 ${
+                    isCurrent
+                      ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
+                      : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                  }`}
+                >
+                  {step.stepNumber}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            aria-pressed={monochromeMode}
+            onClick={() => setMonochromeMode((p) => !p)}
+            className={`inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-2.5 text-xs font-medium transition-all ${
+              monochromeMode
+                ? 'bg-[#1D1D1F] text-white dark:bg-[#F5F5F7] dark:text-[#111113]'
+                : 'glass-pill text-[#1D1D1F] dark:text-[#F5F5F7]'
+            }`}
+          >
+            <Palette className="h-3 w-3" aria-hidden="true" />
+            <span className="hidden sm:inline">Monochrome</span>
+          </button>
         </div>
       </div>
 
@@ -356,7 +396,10 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                 markerHeight="6.5"
                 orient="auto-start-reverse"
               >
-                <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="currentColor" />
+                <path
+                  d="M 0 1.5 L 9 5 L 0 8.5 z"
+                  fill={monochromeMode ? 'currentColor' : '#2563EB'}
+                />
               </marker>
               <marker
                 id={mutedMarkerId}
@@ -401,13 +444,15 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                       <path
                         d={loopPath}
                         fill="none"
-                        stroke="currentColor"
-                        strokeWidth={isActive ? 2.3 : 1.3}
+                        stroke={
+                          isActive && !monochromeMode ? '#2563EB' : 'currentColor'
+                        }
+                        strokeWidth={isActive ? 2.6 : 1.3}
                         strokeDasharray={
                           isActive ? '6 4' : edge.dashed ? '5 4' : undefined
                         }
                         className={isActive ? 'animate-diagram-flow' : undefined}
-                        opacity={isActive ? 1 : 0.3}
+                        opacity={isActive ? 1 : 0.34}
                         markerEnd={markerEnd}
                       />
                       {edge.label && (
@@ -486,8 +531,10 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                     <path
                       d={d}
                       fill="none"
-                      stroke="currentColor"
-                      strokeWidth={isActive ? 2.4 : 1.3}
+                      stroke={
+                        isActive && !monochromeMode ? '#2563EB' : 'currentColor'
+                      }
+                      strokeWidth={isActive ? 2.7 : 1.3}
                       strokeDasharray={
                         isActive
                           ? '8 5'
@@ -496,7 +543,7 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                             : undefined
                       }
                       className={isActive ? 'animate-diagram-flow' : undefined}
-                      opacity={isActive ? 1 : 0.28}
+                      opacity={isActive ? 1 : 0.32}
                       markerEnd={markerEnd}
                     />
                     {edge.label && (
@@ -536,8 +583,27 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                 const box = nodeBoxes.get(node.id);
                 if (!box) return null;
                 const isActive = activeNodeSet.has(node.id);
-                const topTextY =
-                  box.cy - box.h / 2 + 19;
+                const topTextY = box.cy - box.h / 2 + 19;
+                const palette =
+                  groupColorMap.get(node.group?.trim() || node.id) ??
+                  GROUP_COLORS[0];
+                const nodeFill = monochromeMode
+                  ? isActive
+                    ? 'currentColor'
+                    : 'var(--diagram-surface, #ffffff)'
+                  : isActive
+                    ? palette.fill
+                    : palette.tint;
+                const nodeStroke = monochromeMode
+                  ? 'currentColor'
+                  : palette.border;
+                const textFill = monochromeMode
+                  ? isActive
+                    ? 'var(--diagram-surface, #ffffff)'
+                    : 'currentColor'
+                  : isActive
+                    ? '#FFFFFF'
+                    : 'currentColor';
 
                 return (
                   <g
@@ -562,9 +628,9 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                         height={box.h + 10}
                         rx={16}
                         fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.4}
-                        opacity={0.38}
+                        stroke={nodeStroke}
+                        strokeWidth={1.8}
+                        opacity={0.48}
                       />
                     )}
                     <rect
@@ -573,14 +639,10 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                       width={box.w}
                       height={box.h}
                       rx={12}
-                      fill={
-                        isActive
-                          ? 'currentColor'
-                          : 'var(--diagram-surface, #ffffff)'
-                      }
-                      stroke="currentColor"
-                      strokeWidth={isActive ? 2 : 1.25}
-                      strokeOpacity={isActive ? 1 : 0.3}
+                      fill={nodeFill}
+                      stroke={nodeStroke}
+                      strokeWidth={isActive ? 2.2 : 1.5}
+                      strokeOpacity={monochromeMode ? (isActive ? 1 : 0.3) : isActive ? 1 : 0.65}
                     />
                     {box.labelLines.map((line, lineIdx) => (
                       <text
@@ -590,12 +652,8 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                         textAnchor="middle"
                         fontSize={12}
                         fontWeight={600}
-                        fill={
-                          isActive
-                            ? 'var(--diagram-surface, #ffffff)'
-                            : 'currentColor'
-                        }
-                        opacity={isActive ? 1 : 0.78}
+                        fill={textFill}
+                        opacity={isActive ? 1 : 0.88}
                         style={{
                           fontFamily: 'var(--font-sans)',
                           pointerEvents: 'none',
@@ -617,12 +675,8 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                         textAnchor="middle"
                         fontSize={10}
                         fontWeight={400}
-                        fill={
-                          isActive
-                            ? 'var(--diagram-surface, #ffffff)'
-                            : 'currentColor'
-                        }
-                        opacity={isActive ? 0.85 : 0.56}
+                        fill={textFill}
+                        opacity={isActive ? 0.9 : 0.68}
                         style={{
                           fontFamily: 'var(--font-mono)',
                           pointerEvents: 'none',
@@ -719,6 +773,46 @@ export function StepMechanismPlayer({ spec }: StepMechanismPlayerProps) {
                             stroke={s.stroke ?? 'currentColor'}
                             strokeWidth={s.strokeWidth ?? 1.6}
                             strokeDasharray={s.strokeDasharray}
+                            opacity={s.opacity ?? 1}
+                          />
+                        );
+                      }
+                      if (s.kind === 'ellipse') {
+                        return (
+                          <ellipse
+                            key={sIdx}
+                            cx={s.cx}
+                            cy={s.cy}
+                            rx={s.rx}
+                            ry={s.ry}
+                            fill={s.fill ?? 'rgba(120,119,116,0.14)'}
+                            stroke={s.stroke ?? 'currentColor'}
+                            strokeWidth={s.strokeWidth ?? 1.5}
+                            opacity={s.opacity ?? 1}
+                          />
+                        );
+                      }
+                      if (s.kind === 'path') {
+                        return (
+                          <path
+                            key={sIdx}
+                            d={s.d}
+                            fill={s.fill ?? 'none'}
+                            stroke={s.stroke ?? 'currentColor'}
+                            strokeWidth={s.strokeWidth ?? 1.6}
+                            strokeDasharray={s.strokeDasharray}
+                            opacity={s.opacity ?? 1}
+                          />
+                        );
+                      }
+                      if (s.kind === 'polygon') {
+                        return (
+                          <polygon
+                            key={sIdx}
+                            points={s.points}
+                            fill={s.fill ?? 'currentColor'}
+                            stroke={s.stroke ?? 'none'}
+                            strokeWidth={s.strokeWidth ?? 1.2}
                             opacity={s.opacity ?? 1}
                           />
                         );

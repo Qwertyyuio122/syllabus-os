@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { CORE_CLASSROOM_RESOURCES } from '@/data/classroom-seed';
+import { CORE_CLASSROOM_RESOURCES } from '@/data/classroom-seed/core-ee-cas';
 import { ensureUserSeeded } from '@/lib/seed-user';
 import { createClient } from '@/lib/supabase/server';
 import { CoreWorkspaceClient } from '@/components/core-ee-tok/CoreWorkspaceClient';

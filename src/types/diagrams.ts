@@ -290,6 +290,15 @@ export const InteractiveFunctionGraphSpecSchema = z.object({
   asymptotes: z.array(FunctionAsymptoteSchema).optional(),
   inverseReflection: FunctionInverseReflectionSchema.optional(),
   readouts: z.array(FunctionReadoutSchema).optional(),
+  showDerivative: z.boolean().optional(),
+  defaultShowDerivative: z.boolean().optional(),
+  integralBounds: z
+    .object({
+      a: z.number(),
+      b: z.number(),
+      label: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type InteractiveFunctionGraphSpec = z.infer<
@@ -478,6 +487,257 @@ export type BondingContinuumLabSpec = z.infer<
 >;
 
 // ---------------------------------------------------------------------------
+// 8. Interactive Scientific Simulation Lab (Bio HL & Chem SL)
+// ---------------------------------------------------------------------------
+
+export const SimulationKindSchema = z.enum([
+  'enzyme_kinetics',
+  'water_potential_osmosis',
+  'microscopy_magnification',
+  'respiration_photosynthesis_flux',
+  'bohr_emission_spectra',
+  'enthalpy_energy_profile',
+  'titration_ph_curve',
+  'periodicity_explorer',
+  'equilibrium_le_chatelier',
+]);
+
+export type SimulationKind = z.infer<typeof SimulationKindSchema>;
+
+export const SimulationParamValueSchema = z.union([
+  z.number(),
+  z.string(),
+  z.boolean(),
+]);
+
+export type SimulationParamValue = z.infer<typeof SimulationParamValueSchema>;
+
+export const ScientificSimulationPresetSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  description: z.string().optional(),
+  params: z.record(z.string(), SimulationParamValueSchema),
+});
+
+export type ScientificSimulationPreset = z.infer<
+  typeof ScientificSimulationPresetSchema
+>;
+
+export const ScientificSimulationSpecSchema = z.object({
+  type: z.literal('scientific_simulation'),
+  id: z.string().min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  simulationKind: SimulationKindSchema,
+  initialParams: z.record(z.string(), SimulationParamValueSchema).optional(),
+  presets: z.array(ScientificSimulationPresetSchema).optional(),
+  examTakeaways: z.array(z.string().min(1)).min(1),
+  formulaLatex: z.string().optional(),
+});
+
+export type ScientificSimulationSpec = z.infer<
+  typeof ScientificSimulationSpecSchema
+>;
+
+// ---------------------------------------------------------------------------
+// 9. History HL — Primary Source & Historiography Analyzer (May 2028)
+// ---------------------------------------------------------------------------
+
+export const PrimarySourceSegmentSchema = z.object({
+  text: z.string().min(1),
+  annotationId: z.string().optional(),
+});
+
+export type PrimarySourceSegment = z.infer<typeof PrimarySourceSegmentSchema>;
+
+export const PrimarySourceItemSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  author: z.string().min(1),
+  date: z.string().min(1),
+  provenance: z.string().min(1),
+  citationChicago: z.string().min(1),
+  sourceType: z.enum(['Primary', 'Secondary', 'Historiography']),
+  perspectiveSchool: z.string().optional(),
+  segments: z.array(PrimarySourceSegmentSchema).min(1),
+});
+
+export type PrimarySourceItem = z.infer<typeof PrimarySourceItemSchema>;
+
+export const PrimarySourceAnnotationSchema = z.object({
+  id: z.string().min(1),
+  category: z.enum([
+    'Origin',
+    'Purpose',
+    'Content',
+    'Value',
+    'Limitation',
+    'Perspective',
+    'Historiography',
+  ]),
+  title: z.string().min(1),
+  analysisMarkdown: z.string().min(1),
+  conceptTag: z.string().optional(),
+});
+
+export type PrimarySourceAnnotation = z.infer<
+  typeof PrimarySourceAnnotationSchema
+>;
+
+export const PrimarySourceAnalyzerSpecSchema = z.object({
+  type: z.literal('primary_source_analyzer'),
+  id: z.string().min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  sources: z.array(PrimarySourceItemSchema).min(1),
+  annotations: z.array(PrimarySourceAnnotationSchema).min(1),
+  comparisonPrompt: z.string().optional(),
+});
+
+export type PrimarySourceAnalyzerSpec = z.infer<
+  typeof PrimarySourceAnalyzerSpecSchema
+>;
+
+// ---------------------------------------------------------------------------
+// 10. English A: Literature HL — Literary Extract Annotator
+// ---------------------------------------------------------------------------
+
+export const LiteraryLayerSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  color: z.string().min(1),
+});
+
+export type LiteraryLayer = z.infer<typeof LiteraryLayerSchema>;
+
+export const LiteraryPassageSegmentSchema = z.object({
+  text: z.string().min(1),
+  annotationId: z.string().optional(),
+});
+
+export type LiteraryPassageSegment = z.infer<
+  typeof LiteraryPassageSegmentSchema
+>;
+
+export const LiteraryPassageLineSchema = z.object({
+  lineNumber: z.union([z.number(), z.string()]).optional(),
+  segments: z.array(LiteraryPassageSegmentSchema).min(1),
+});
+
+export type LiteraryPassageLine = z.infer<typeof LiteraryPassageLineSchema>;
+
+export const LiteraryAnnotationSchema = z.object({
+  id: z.string().min(1),
+  layerId: z.string().min(1),
+  deviceName: z.string().min(1),
+  effectMarkdown: z.string().min(1),
+  band7Sentence: z.string().min(1),
+});
+
+export type LiteraryAnnotation = z.infer<typeof LiteraryAnnotationSchema>;
+
+export const LiteraryExtractAnnotatorSpecSchema = z.object({
+  type: z.literal('literary_extract_annotator'),
+  id: z.string().min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  workTitle: z.string().min(1),
+  author: z.string().min(1),
+  genre: z.string().min(1),
+  globalIssue: z.string().optional(),
+  ibConcept: z.string().optional(),
+  layers: z.array(LiteraryLayerSchema).min(1),
+  passages: z.array(LiteraryPassageLineSchema).min(1),
+  annotations: z.array(LiteraryAnnotationSchema).min(1),
+});
+
+export type LiteraryExtractAnnotatorSpec = z.infer<
+  typeof LiteraryExtractAnnotatorSpecSchema
+>;
+
+// ---------------------------------------------------------------------------
+// 11. French B SL — Paper 1 Text Type & Register Studio
+// ---------------------------------------------------------------------------
+
+export const FrenchTextSectionSchema = z.object({
+  id: z.string().min(1),
+  roleLabel: z.string().min(1),
+  conventionNote: z.string().min(1),
+  frenchFormal: z.string().min(1),
+  frenchSemiFormal: z.string().optional(),
+});
+
+export type FrenchTextSection = z.infer<typeof FrenchTextSectionSchema>;
+
+export const FrenchTextTypeItemSchema = z.object({
+  id: z.string().min(1),
+  nameFr: z.string().min(1),
+  nameEn: z.string().min(1),
+  register: z.string().min(1),
+  audience: z.string().min(1),
+  purpose: z.string().min(1),
+  wordTarget: z.string().min(1),
+  sections: z.array(FrenchTextSectionSchema).min(1),
+  oralLinkPrompt: z.string().optional(),
+  markschemeTips: z.array(z.string().min(1)).min(1),
+});
+
+export type FrenchTextTypeItem = z.infer<typeof FrenchTextTypeItemSchema>;
+
+export const FrenchTextTypeStudioSpecSchema = z.object({
+  type: z.literal('french_text_type_studio'),
+  id: z.string().min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  themeLabel: z.string().min(1),
+  textTypes: z.array(FrenchTextTypeItemSchema).min(1),
+});
+
+export type FrenchTextTypeStudioSpec = z.infer<
+  typeof FrenchTextTypeStudioSpecSchema
+>;
+
+// ---------------------------------------------------------------------------
+// 12. Interactive Step-by-Step Worked Example (Math / Chem / Bio)
+// ---------------------------------------------------------------------------
+
+export const WorkedExampleGivenItemSchema = z.union([
+  z.string().min(1),
+  z.object({
+    label: z.string().min(1),
+    value: z.string().min(1),
+  }),
+]);
+
+export const WorkedExampleStepSchema = z.object({
+  stepNumber: z.number().int().min(1),
+  title: z.string().min(1),
+  workingMarkdown: z.string().min(1),
+  formulaLatex: z.string().optional(),
+  markCode: z.string().optional(),
+  rationale: z.string().min(1),
+});
+
+export type WorkedExampleStep = z.infer<typeof WorkedExampleStepSchema>;
+
+export const WorkedExampleSpecSchema = z.object({
+  type: z.literal('worked_example'),
+  id: z.string().min(1),
+  title: z.string().min(1),
+  caption: z.string().min(1),
+  sourceLabel: z.string().optional(),
+  commandTerm: z.string().min(1),
+  marks: z.number().int().min(1),
+  problemMarkdown: z.string().min(1),
+  givenData: z.array(WorkedExampleGivenItemSchema).optional(),
+  steps: z.array(WorkedExampleStepSchema).min(1),
+  finalAnswerMarkdown: z.string().min(1),
+  commonTrapMarkdown: z.string().optional(),
+});
+
+export type WorkedExampleSpec = z.infer<typeof WorkedExampleSpecSchema>;
+
+// ---------------------------------------------------------------------------
 // Discriminated Union of Playable Diagrams & Read-Only Notion Note Blocks
 // ---------------------------------------------------------------------------
 
@@ -489,6 +749,11 @@ export const PlayableDiagramSpecSchema = z.discriminatedUnion('type', [
   TimelineCausalitySpecSchema,
   VseprPolarityLabSpecSchema,
   BondingContinuumLabSpecSchema,
+  ScientificSimulationSpecSchema,
+  PrimarySourceAnalyzerSpecSchema,
+  LiteraryExtractAnnotatorSpecSchema,
+  FrenchTextTypeStudioSpecSchema,
+  WorkedExampleSpecSchema,
 ]);
 
 export type PlayableDiagramSpec = z.infer<typeof PlayableDiagramSpecSchema>;
@@ -510,6 +775,9 @@ export const StudyNoteBlockSchema = z.discriminatedUnion('type', [
       'examiner_warning',
       'key_formula',
       'syllabus_link',
+      'guiding_questions',
+      'textbook_excerpt',
+      'tok_nos',
     ]),
     title: z.string().min(1),
     markdown: z.string().min(1),

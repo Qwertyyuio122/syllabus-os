@@ -194,7 +194,7 @@ export const TabsList = React.forwardRef<
       {indicator && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute top-1 bottom-1 left-0 z-0 rounded-xl bg-white/95 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.11),inset_0_1px_0_rgba(255,255,255,0.96)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:bg-white/[0.14] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.16)]"
+          className="pointer-events-none absolute top-1 bottom-1 left-0 z-0 rounded-xl bg-white/95 shadow-[0_2px_12px_-2px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.98)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:bg-white/[0.15] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.48),inset_0_1px_0_rgba(255,255,255,0.18)]"
           style={{
             width: indicator.width,
             transform: `translate3d(${indicator.left}px, 0, 0)`,
@@ -238,7 +238,7 @@ export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>
           }
         }}
         className={cn(
-          'relative z-10 inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-medium whitespace-nowrap text-[#6E6E73] transition-colors duration-200 cursor-pointer hover:bg-black/[0.035] hover:text-[#1D1D1F] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white/95 data-[state=active]:text-[#1D1D1F] data-[state=active]:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.09),inset_0_1px_0_rgba(255,255,255,0.95)] group-data-[pill-ready=true]/tablist:data-[state=active]:bg-transparent group-data-[pill-ready=true]/tablist:data-[state=active]:shadow-none dark:text-[#98989D] dark:hover:bg-white/[0.05] dark:hover:text-[#F5F5F7] dark:focus-visible:ring-[#F5F5F7]/25 dark:data-[state=active]:bg-white/[0.14] dark:data-[state=active]:text-[#F5F5F7] dark:data-[state=active]:shadow-[0_2px_10px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.14)] dark:group-data-[pill-ready=true]/tablist:data-[state=active]:bg-transparent dark:group-data-[pill-ready=true]/tablist:data-[state=active]:shadow-none',
+          'relative z-10 inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2 text-[13px] font-medium whitespace-nowrap text-[#525866] transition-colors duration-200 hover:bg-black/[0.035] hover:text-[#111318] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white/95 data-[state=active]:text-[#111318] data-[state=active]:shadow-[0_2px_8px_-2px_rgba(15,23,42,0.1),inset_0_1px_0_rgba(255,255,255,0.96)] group-data-[pill-ready=true]/tablist:data-[state=active]:bg-transparent group-data-[pill-ready=true]/tablist:data-[state=active]:shadow-none dark:text-[#9AA3B2] dark:hover:bg-white/[0.06] dark:hover:text-[#F5F7FA] dark:focus-visible:ring-[#F5F7FA]/25 dark:data-[state=active]:bg-white/[0.15] dark:data-[state=active]:text-[#F5F7FA] dark:data-[state=active]:shadow-[0_2px_10px_-2px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.16)] dark:group-data-[pill-ready=true]/tablist:data-[state=active]:bg-transparent dark:group-data-[pill-ready=true]/tablist:data-[state=active]:shadow-none',
           className,
         )}
         {...props}

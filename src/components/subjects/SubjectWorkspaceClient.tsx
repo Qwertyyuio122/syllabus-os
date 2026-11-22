@@ -12,11 +12,15 @@ import {
   HelpCircle,
   Layers,
 } from 'lucide-react';
+import { getSubjectTheme } from '@/config/subject-themes';
 import { NotionNoteViewer } from '@/components/notes/NotionNoteViewer';
 import { FlashcardsTab } from '@/components/flashcards/FlashcardsTab';
 import { MaterialsSyncTab } from '@/components/materials/MaterialsSyncTab';
 import { QuestionBankTab } from '@/components/qbank/QuestionBankTab';
+import { LiquidArtwork } from '@/components/subjects/SubjectMotif';
 import { SyllabusChecklistTree } from '@/components/syllabus/SyllabusChecklistTree';
+import { GlassSpotlight } from '@/components/ui/GlassSpotlight';
+import { GlassReveal, ProgressRing } from '@/components/ui/MotionPrimitives';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -64,6 +68,8 @@ export function SubjectWorkspaceClient({
   initialTab = 'checklist',
   initialNoteId = null,
 }: SubjectWorkspaceClientProps) {
+  const theme = getSubjectTheme(subject.slug);
+
   const [activeTab, setActiveTab] =
     React.useState<SubjectWorkspaceTab>(initialTab);
   const [topics, setTopics] = React.useState<SyllabusTopicRow[]>(initialTopics);
@@ -94,7 +100,6 @@ export function SubjectWorkspaceClient({
     Record<string, QuestionAttemptRow>
   >(() => {
     const map: Record<string, QuestionAttemptRow> = {};
-    // Keep the most recent attempt per question
     const sorted = [...initialAttempts].sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -218,68 +223,95 @@ export function SubjectWorkspaceClient({
       {/* Breadcrumb */}
       <nav
         aria-label="Breadcrumb"
-        className="mb-4 flex items-center gap-1.5 text-xs text-[#6E6E73] dark:text-[#98989D]"
+        className="mb-4 flex items-center gap-1.5 text-xs text-[#525866] dark:text-[#9AA3B2]"
       >
         <Link
           href="/dashboard"
-          className="transition-colors hover:text-[#1D1D1F] dark:hover:text-[#F5F5F7]"
+          className="transition-colors hover:text-[#111318] dark:hover:text-[#F5F7FA]"
         >
           Dashboard
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
-        <span className="font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+        <span className="font-medium text-[#111318] dark:text-[#F5F7FA]">
           {subject.name}
         </span>
       </nav>
 
-      {/* Subject Header & Progress Bar */}
-      <div className="glass-panel mb-5 flex flex-col gap-4 rounded-3xl p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#1D1D1F] sm:text-[34px] sm:leading-[1.12] dark:text-[#F5F5F7]">
-              {subject.name}
-            </h1>
-            <Badge variant="default" className="font-mono">
-              {subject.level}
-            </Badge>
-            <Badge variant="outline" className="font-mono">
-              Group {subject.group_number}
-            </Badge>
-            {subject.slug === 'history-hl' && (
-              <Badge variant="subtle" className="font-mono">
-                Active Focus: May 2028 IA &amp; Paper 3
+      {/* Subject Header & Progress Gauge */}
+      <GlassReveal>
+        <GlassSpotlight
+          className={`glass-panel relative mb-5 flex flex-col gap-4 rounded-3xl p-5 sm:p-6 lg:flex-row lg:items-end lg:justify-between ${theme.borderTint}`}
+        >
+          <LiquidArtwork
+            src={theme.heroImage}
+            className="absolute -top-6 right-12 hidden h-48 w-48 sm:block lg:right-64"
+            imgClassName="opacity-70 dark:opacity-75"
+          />
+
+          <div className="relative z-10 min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] text-balance text-[#111318] sm:text-[34px] sm:leading-[1.12] dark:text-[#F5F7FA]">
+                {subject.name}
+              </h1>
+              <Badge
+                variant="default"
+                className={`font-mono ${theme.tintBg} ${theme.borderTint} ${theme.textAccent}`}
+              >
+                {subject.level}
               </Badge>
+              <Badge variant="outline" className="font-mono">
+                Group {subject.group_number}
+              </Badge>
+              <Badge variant="subtle" className="font-mono">
+                {theme.textbookBadge}
+              </Badge>
+              {subject.slug === 'history-hl' && (
+                <Badge variant="subtle" className="font-mono">
+                  Active Focus: May 2028 IA &amp; Paper 3
+                </Badge>
+              )}
+            </div>
+            {subject.slug === 'history-hl' && (
+              <p className="mt-1.5 font-mono text-[11px] text-[#525866] dark:text-[#9AA3B2]">
+                Active Class Focus: May 2028 24-Mark 3-Section IA &amp; Paper 3
+                Europe · Paper 1 &amp; Paper 2 remain indexed for Year 2.
+              </p>
+            )}
+            {subject.description && (
+              <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#525866] dark:text-[#9AA3B2]">
+                {subject.description}
+              </p>
             )}
           </div>
-          {subject.slug === 'history-hl' && (
-            <p className="mt-1.5 font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-              Active Class Focus: May 2028 24-Mark 3-Section IA &amp; Paper 3 Europe · Paper 1 &amp; Paper 2 remain indexed for Year 2.
-            </p>
-          )}
-          {subject.description && (
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#6E6E73] dark:text-[#98989D]">
-              {subject.description}
-            </p>
-          )}
-        </div>
 
-        <div className="glass-surface w-full shrink-0 rounded-2xl px-4 py-3 lg:w-72">
-          <div className="mb-1.5 flex items-center justify-between text-xs">
-            <span className="text-[#6E6E73] dark:text-[#98989D]">
-              Syllabus Checklist
-            </span>
-            <span className="font-mono font-semibold tabular-nums text-[#1D1D1F] dark:text-[#F5F5F7]">
-              {completedSubtopics} / {totalSubtopics} ({completionPct}%)
-            </span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.08]">
-            <div
-              className="h-full rounded-full bg-[#1D1D1F] transition-all duration-300 dark:bg-[#F5F5F7]"
-              style={{ width: `${completionPct}%` }}
+          <div className="glass-surface relative z-10 flex w-full shrink-0 items-center gap-3.5 rounded-2xl px-4 py-3 lg:w-80">
+            <ProgressRing
+              value={completionPct}
+              size={46}
+              strokeWidth={3.5}
+              accentClassName={theme.textAccent}
+              centerLabel={`${completionPct}%`}
+              ariaLabel={`${subject.name} syllabus completion ${completionPct}%`}
             />
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="text-[#525866] dark:text-[#9AA3B2]">
+                  Syllabus Checklist
+                </span>
+                <span className="font-mono font-semibold tabular-nums text-[#111318] dark:text-[#F5F7FA]">
+                  {completedSubtopics} / {totalSubtopics}
+                </span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06] dark:bg-white/[0.09]">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${theme.progressBarClass}`}
+                  style={{ width: `${completionPct}%` }}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </GlassSpotlight>
+      </GlassReveal>
 
       {/* 5 Sticky Floating Liquid Glass Workspace Tabs */}
       <Tabs
@@ -287,7 +319,7 @@ export function SubjectWorkspaceClient({
         value={activeTab}
         onValueChange={(v) => setActiveTab(v as SubjectWorkspaceTab)}
       >
-        <div className="sticky top-[52px] z-20 -mx-2 bg-gradient-to-b from-[#F2F2F5]/95 via-[#F2F2F5]/75 to-transparent px-2 pt-2 pb-1.5 backdrop-blur-[2px] lg:top-0 lg:pt-2.5 dark:from-[#111113]/95 dark:via-[#111113]/75 dark:to-transparent">
+        <div className="sticky top-[52px] z-20 -mx-2 bg-gradient-to-b from-[#E9EFF7]/95 via-[#E9EFF7]/70 to-transparent px-2 pt-2 pb-1.5 backdrop-blur-[2px] lg:top-0 lg:pt-2.5 dark:from-[#0B0D12]/95 dark:via-[#0B0D12]/70 dark:to-transparent">
           <TabsList
             aria-label={`${subject.name} workspace sections`}
             className="glass-floating-bar"
@@ -295,7 +327,7 @@ export function SubjectWorkspaceClient({
             <TabsTrigger value="checklist">
               <CheckSquare className="h-3.5 w-3.5" />
               <span>Syllabus Checklist</span>
-              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+              <span className="font-mono text-[11px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                 {completedSubtopics}/{totalSubtopics}
               </span>
             </TabsTrigger>
@@ -303,7 +335,7 @@ export function SubjectWorkspaceClient({
             <TabsTrigger value="notes">
               <FileText className="h-3.5 w-3.5" />
               <span>Study Notes</span>
-              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+              <span className="font-mono text-[11px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                 {notes.length}
               </span>
             </TabsTrigger>
@@ -311,7 +343,7 @@ export function SubjectWorkspaceClient({
             <TabsTrigger value="qbank">
               <HelpCircle className="h-3.5 w-3.5" />
               <span>Question Bank</span>
-              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+              <span className="font-mono text-[11px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                 {questions.length}
               </span>
             </TabsTrigger>
@@ -319,7 +351,7 @@ export function SubjectWorkspaceClient({
             <TabsTrigger value="materials">
               <FolderOpen className="h-3.5 w-3.5" />
               <span>Classroom Materials</span>
-              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+              <span className="font-mono text-[11px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                 {materials.length}
               </span>
             </TabsTrigger>
@@ -327,7 +359,7 @@ export function SubjectWorkspaceClient({
             <TabsTrigger value="flashcards">
               <Layers className="h-3.5 w-3.5" />
               <span>Flashcards</span>
-              <span className="font-mono text-[11px] tabular-nums text-[#6E6E73] dark:text-[#98989D]">
+              <span className="font-mono text-[11px] tabular-nums text-[#525866] dark:text-[#9AA3B2]">
                 {flashcards.length}
               </span>
             </TabsTrigger>
@@ -349,14 +381,14 @@ export function SubjectWorkspaceClient({
         <TabsContent value="notes">
           {notes.length > 0 && selectedNote ? (
             <div className="space-y-4">
-              {/* Sleek Top Frosted Study Guide Switcher Bar (frees full horizontal width for notes & diagrams) */}
+              {/* Sleek Top Frosted Study Guide Switcher Bar */}
               <div className="glass-surface flex flex-col gap-2.5 rounded-2xl p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2 px-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[#525866] dark:text-[#9AA3B2]">
                       Study Guides
                     </span>
-                    <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-[10.5px] font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+                    <span className="glass-pill rounded-full px-2 py-0.5 font-mono text-[10.5px] font-medium text-[#111318] dark:text-[#F5F7FA]">
                       {selectedNoteIndex >= 0 ? selectedNoteIndex + 1 : 1} of{' '}
                       {notes.length}
                     </span>
@@ -373,7 +405,7 @@ export function SubjectWorkspaceClient({
                           }
                         }}
                         aria-label="Previous study guide"
-                        className="glass-pill inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#1D1D1F] transition-all hover:bg-white/95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+                        className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#111318] transition-all hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F7FA] dark:hover:bg-white/[0.12]"
                       >
                         <ChevronLeft className="h-3.5 w-3.5" />
                         <span>Prev</span>
@@ -393,7 +425,7 @@ export function SubjectWorkspaceClient({
                           }
                         }}
                         aria-label="Next study guide"
-                        className="glass-pill inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#1D1D1F] transition-all hover:bg-white/95 cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+                        className="glass-pill inline-flex h-7 cursor-pointer items-center gap-1 rounded-full px-2.5 text-xs font-medium text-[#111318] transition-all hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F7FA] dark:hover:bg-white/[0.12]"
                       >
                         <span>Next</span>
                         <ChevronRight className="h-3.5 w-3.5" />
@@ -414,18 +446,18 @@ export function SubjectWorkspaceClient({
                         key={note.id}
                         type="button"
                         onClick={() => setSelectedNoteId(note.id)}
-                        className={`flex max-w-[260px] shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-left transition-all cursor-pointer ${
+                        className={`flex max-w-[260px] shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left transition-all ${
                           active
-                            ? 'bg-[#1D1D1F] text-white shadow-sm dark:bg-[#F5F5F7] dark:text-[#111113]'
-                            : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D] dark:hover:text-[#F5F5F7]'
+                            ? 'bg-[#111318] text-white shadow-sm dark:bg-[#F5F7FA] dark:text-[#0B0D12]'
+                            : 'glass-pill text-[#525866] hover:text-[#111318] dark:text-[#9AA3B2] dark:hover:text-[#F5F7FA]'
                         }`}
                       >
                         {topic && (
                           <span
                             className={`shrink-0 rounded-full px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase ${
                               active
-                                ? 'bg-white/15 text-white dark:bg-black/15 dark:text-[#111113]'
-                                : 'bg-black/[0.05] text-[#6E6E73] dark:bg-white/[0.08] dark:text-[#98989D]'
+                                ? 'bg-white/15 text-white dark:bg-black/15 dark:text-[#0B0D12]'
+                                : 'bg-black/[0.05] text-[#525866] dark:bg-white/[0.08] dark:text-[#9AA3B2]'
                             }`}
                           >
                             {topic.code}
@@ -444,15 +476,16 @@ export function SubjectWorkspaceClient({
               <NotionNoteViewer
                 note={selectedNote}
                 topicLabel={selectedNoteTopicLabel}
+                subjectSlug={subject.slug}
               />
             </div>
           ) : (
             <div className="glass-surface rounded-2xl border-dashed px-6 py-12 text-center">
-              <BookOpen className="mx-auto mb-2.5 h-6 w-6 text-[#6E6E73] dark:text-[#98989D]" />
-              <p className="text-sm font-medium text-[#1D1D1F] dark:text-[#F5F5F7]">
+              <BookOpen className="mx-auto mb-2.5 h-6 w-6 text-[#525866] dark:text-[#9AA3B2]" />
+              <p className="text-sm font-medium text-[#111318] dark:text-[#F5F7FA]">
                 No study notes yet for {subject.name}.
               </p>
-              <p className="mt-1 text-xs text-[#6E6E73] dark:text-[#98989D]">
+              <p className="mt-1 text-xs text-[#525866] dark:text-[#9AA3B2]">
                 Select classroom materials or paste lecture notes to generate a
                 study guide with interactive diagrams.
               </p>
@@ -494,6 +527,7 @@ export function SubjectWorkspaceClient({
             userId={userId}
             flashcards={flashcards}
             topics={topics}
+            subjectSlug={subject.slug}
             onFlashcardsChange={setFlashcards}
           />
         </TabsContent>

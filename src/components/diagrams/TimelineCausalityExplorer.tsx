@@ -1,9 +1,18 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { BookOpen, Calendar, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { BookOpen, Calendar, ChevronLeft, ChevronRight, Quote, Search, X } from 'lucide-react';
 import type { TimelineCausalitySpec } from '@/types/diagrams';
 import { MarkdownMath } from '@/components/notes/MarkdownMath';
+
+const CATEGORY_DOT_COLORS = [
+  '#D97706',
+  '#2563EB',
+  '#059669',
+  '#7C3AED',
+  '#E11D48',
+  '#0D9488',
+] as const;
 
 export interface TimelineCausalityExplorerProps {
   spec: TimelineCausalitySpec;
@@ -56,20 +65,45 @@ export function TimelineCausalityExplorer({
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedConcept, setSelectedConcept] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedEventId, setSelectedEventId] = useState<string>(
     spec.events[0]?.id ?? '',
   );
 
+  const categoryColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    let idx = 0;
+    for (const cat of categories) {
+      if (cat === 'All') continue;
+      map.set(cat, CATEGORY_DOT_COLORS[idx % CATEGORY_DOT_COLORS.length]);
+      idx += 1;
+    }
+    return map;
+  }, [categories]);
+
   const filteredEvents = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return spec.events.filter((ev) => {
       const matchCategory =
         selectedCategory === 'All' || ev.category.trim() === selectedCategory;
       const matchConcept =
         selectedConcept === 'All' ||
         (ev.conceptTags ?? []).some((t) => t.trim() === selectedConcept);
-      return matchCategory && matchConcept;
+      const matchSearch =
+        !q ||
+        ev.title.toLowerCase().includes(q) ||
+        ev.dateLabel.toLowerCase().includes(q) ||
+        ev.summaryMarkdown.toLowerCase().includes(q) ||
+        ev.significanceMarkdown.toLowerCase().includes(q) ||
+        (ev.historiographyNotes ?? []).some(
+          (h) =>
+            h.historian.toLowerCase().includes(q) ||
+            h.school.toLowerCase().includes(q) ||
+            h.argument.toLowerCase().includes(q),
+        );
+      return matchCategory && matchConcept && matchSearch;
     });
-  }, [spec.events, selectedCategory, selectedConcept]);
+  }, [spec.events, selectedCategory, selectedConcept, searchQuery]);
 
   const activeIndex = useMemo(() => {
     if (filteredEvents.length === 0) return -1;
@@ -160,30 +194,56 @@ export function TimelineCausalityExplorer({
           })}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => handleStep(-1)}
-            disabled={activeIndex <= 0}
-            aria-label="Previous timeline event"
-            className="glass-pill inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
-          <span className="min-w-[48px] text-center font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
-            {filteredEvents.length > 0
-              ? `${activeIndex + 1} / ${filteredEvents.length}`
-              : '0 / 0'}
-          </span>
-          <button
-            type="button"
-            onClick={() => handleStep(1)}
-            disabled={activeIndex < 0 || activeIndex >= filteredEvents.length - 1}
-            aria-label="Next timeline event"
-            className="glass-pill inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
-          >
-            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative flex items-center">
+            <Search
+              className="pointer-events-none absolute left-2.5 h-3 w-3 text-[#6E6E73] dark:text-[#98989D]"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search events..."
+              aria-label="Search timeline events"
+              className="glass-pill h-7 w-36 rounded-full pr-6 pl-7 text-xs text-[#1D1D1F] placeholder:text-[#6E6E73] focus:outline-none focus:ring-2 focus:ring-[#1D1D1F]/20 sm:w-44 dark:text-[#F5F5F7] dark:placeholder:text-[#98989D]"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear timeline search"
+                className="absolute right-1.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-[#6E6E73] hover:text-[#1D1D1F]"
+              >
+                <X className="h-2.5 w-2.5" aria-hidden="true" />
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => handleStep(-1)}
+              disabled={activeIndex <= 0}
+              aria-label="Previous timeline event"
+              className="glass-pill inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+            <span className="min-w-[48px] text-center font-mono text-[11px] text-[#6E6E73] dark:text-[#98989D]">
+              {filteredEvents.length > 0
+                ? `${activeIndex + 1} / ${filteredEvents.length}`
+                : '0 / 0'}
+            </span>
+            <button
+              type="button"
+              onClick={() => handleStep(1)}
+              disabled={activeIndex < 0 || activeIndex >= filteredEvents.length - 1}
+              aria-label="Next timeline event"
+              className="glass-pill inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#1D1D1F] transition-colors hover:bg-white/95 disabled:cursor-not-allowed disabled:opacity-40 dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]"
+            >
+              <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -227,6 +287,7 @@ export function TimelineCausalityExplorer({
 
               {filteredEvents.map((ev, idx) => {
                 const isActive = ev.id === activeEvent?.id;
+                const dotColor = categoryColorMap.get(ev.category.trim()) ?? '#D97706';
                 return (
                   <button
                     key={ev.id}
@@ -250,11 +311,16 @@ export function TimelineCausalityExplorer({
                     </span>
 
                     <span
-                      className={`my-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border transition-all ${
-                        isActive
-                          ? 'scale-110 border-[#1D1D1F] bg-[#1D1D1F] ring-4 ring-[#1D1D1F]/12 dark:border-[#F5F5F7] dark:bg-[#F5F5F7] dark:ring-[#F5F5F7]/15'
-                          : 'border-[#6E6E73]/60 bg-white group-hover:border-[#1D1D1F] dark:border-[#98989D]/60 dark:bg-[#1A1A1D] dark:group-hover:border-[#F5F5F7]'
+                      className={`my-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 transition-all ${
+                        isActive ? 'scale-125' : ''
                       }`}
+                      style={{
+                        borderColor: dotColor,
+                        backgroundColor: isActive
+                          ? dotColor
+                          : 'var(--diagram-surface, #ffffff)',
+                        boxShadow: isActive ? `0 0 0 4px ${dotColor}28` : undefined,
+                      }}
                     >
                       <span className="sr-only">{idx + 1}</span>
                     </span>

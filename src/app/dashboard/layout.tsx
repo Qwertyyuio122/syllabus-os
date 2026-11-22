@@ -137,7 +137,8 @@ export default async function DashboardLayout({
       id: `subject-${subject.id}`,
       kind: 'subject',
       title: subject.name,
-      subtitle: subject.description ?? `Group ${subject.group_number} · ${subject.level}`,
+      subtitle:
+        subject.description ?? `Group ${subject.group_number} · ${subject.level}`,
       badge: subject.level,
       href: `/dashboard/subjects/${subject.slug}`,
       keywords: `${subject.slug} group ${subject.group_number} ${subject.level}`,
@@ -178,7 +179,9 @@ export default async function DashboardLayout({
           id: `topic-${topic.id}`,
           kind: 'topic',
           title: topic.title,
-          subtitle: subject ? `${subject.name} · Syllabus Checklist` : 'Syllabus Sub-topic',
+          subtitle: subject
+            ? `${subject.name} · Syllabus Checklist`
+            : 'Syllabus Sub-topic',
           badge: topic.code,
           href: subject
             ? `/dashboard/subjects/${subject.slug}?tab=checklist`
@@ -189,7 +192,7 @@ export default async function DashboardLayout({
   ];
 
   return (
-    <div className="liquid-canvas min-h-screen overflow-x-clip text-[#1D1D1F] lg:flex dark:text-[#F5F5F7]">
+    <div className="min-h-screen overflow-x-clip text-[#111318] lg:flex dark:text-[#F5F7FA]">
       <DashboardChrome
         profile={profile}
         userEmail={user.email ?? 'student@syllabus.os'}

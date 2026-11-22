@@ -60,7 +60,7 @@ export const VSEPR_POLARITY_LAB_SPEC: VseprPolarityLabSpec = {
       bondPolarity: 'polar',
       molecularPolarity: 'polar',
       symmetrySummary:
-        'Despite being linear ($180^\\circ$), the terminal atoms ($\text{H}$ vs $\\text{N}$) are different! Both $\\text{H}^{\\delta+}\\to\\text{C}\\to\\text{N}^{\\delta-}$ bond vectors point toward electronegative N ($\\chi=3.0$), giving a strong net dipole.',
+        'Despite being linear ($180^\\circ$), the terminal atoms ($\\text{H}$ vs $\\text{N}$) are different! Both $\\text{H}^{\\delta+}\\to\\text{C}\\to\\text{N}^{\\delta-}$ bond vectors point toward electronegative N ($\\chi=3.0$), giving a strong net dipole.',
       lewisSummary: 'H—C≡N: (1 single + 1 triple bond = 2 domains on C)',
       atoms3d: [
         { id: 'c', element: 'C', x: 0, y: 0, z: 0, delta: 'delta+' },
@@ -90,7 +90,7 @@ export const VSEPR_POLARITY_LAB_SPEC: VseprPolarityLabSpec = {
       bondPolarity: 'non-polar',
       molecularPolarity: 'non-polar',
       symmetrySummary:
-        'Both $\\text{C=S}$ double bonds sit $180^\\circ$ apart ($\Delta\\chi \\approx 0.0$); identical vectors cancel completely, yielding a volatile non-polar liquid.',
+        'Both $\\text{C=S}$ double bonds sit $180^\\circ$ apart ($\\Delta\\chi \\approx 0.0$); identical vectors cancel completely, yielding a volatile non-polar liquid.',
       lewisSummary: '::S=C=S:: (2 domains, 0 lone pairs on C)',
       atoms3d: [
         { id: 'c', element: 'C', x: 0, y: 0, z: 0, delta: 'none' },
@@ -545,11 +545,11 @@ export const BONDING_CONTINUUM_LAB_SPEC: BondingContinuumLabSpec = {
     'Plot real binary compounds or drag custom Pauling electronegativity sliders across the Ionic–Metallic–Covalent continuum, then switch to interactive Ionic Shear, Metallic Alloys & Carbon Allotropes.',
   defaultTab: 'triangle',
   compounds: [
-    { id: 'csf', formula: 'CsF', name: 'Caesium fluoride (Ionic Apex)', enA: 0.8, enB: 4.0, avgEn: 2.4, deltaEn: 3.2, bondingClass: 'ionic', stateAtStp: 'Solid', meltingPointC: '682 °C', conductivity: 'Molten / aq only', explanationMarkdown: 'Maximum electronegativity gap ($\Delta\\chi = 3.2$) puts $\\text{CsF}$ at the top **Ionic** apex of the IB Data Booklet triangle.' },
+    { id: 'csf', formula: 'CsF', name: 'Caesium fluoride (Ionic Apex)', enA: 0.8, enB: 4.0, avgEn: 2.4, deltaEn: 3.2, bondingClass: 'ionic', stateAtStp: 'Solid', meltingPointC: '682 °C', conductivity: 'Molten / aq only', explanationMarkdown: 'Maximum electronegativity gap ($\\Delta\\chi = 3.2$) puts $\\text{CsF}$ at the top **Ionic** apex of the IB Data Booklet triangle.' },
     { id: 'nacl', formula: 'NaCl', name: 'Sodium chloride', enA: 0.9, enB: 3.2, avgEn: 2.05, deltaEn: 2.3, bondingClass: 'ionic', stateAtStp: 'Solid', meltingPointC: '801 °C', conductivity: 'Molten / aq only', explanationMarkdown: 'Classroom Day 2.4 worked example: $\\Delta\\chi = 3.2 - 0.9 = 2.3$, $\\bar{\\chi} = 2.05$ → **Giant Ionic Lattice**.' },
     { id: 'mgo', formula: 'MgO', name: 'Magnesium oxide', enA: 1.3, enB: 3.4, avgEn: 2.35, deltaEn: 2.1, bondingClass: 'ionic', stateAtStp: 'Solid', meltingPointC: '2,852 °C', conductivity: 'Molten only', explanationMarkdown: 'Double ionic charges ($\\text{Mg}^{2+}$ & $\\text{O}^{2-}$) + small radii quadruple electrostatic attraction vs $\\text{NaCl}$, driving melting point to $2852^\\circ\\text{C}$.' },
     { id: 'tlbr', formula: 'TlBr', name: 'Thallium(I) bromide (Transition)', enA: 1.8, enB: 3.0, avgEn: 2.4, deltaEn: 1.2, bondingClass: 'ionic', stateAtStp: 'Solid', meltingPointC: '480 °C', conductivity: 'Molten', explanationMarkdown: 'Directly from classroom **Day 2.4 slide 20**: despite $\\Delta\\chi = 1.2$ sitting in the polar covalent transition band ($\\bar{\\chi} = 2.4$), $\\text{TlBr}$ crystallizes as a $480^\\circ\\text{C}$ crystalline ionic lattice with partial covalent character.' },
-    { id: 'alcl3', formula: 'AlCl₃', name: 'Aluminium chloride', enA: 1.6, enB: 3.2, avgEn: 2.4, deltaEn: 1.6, bondingClass: 'polar_covalent', stateAtStp: 'Solid (sublimes)', meltingPointC: '192 °C (sublimes)', conductivity: 'None in liquid', explanationMarkdown: 'High charge density $\\text{Al}^{3+}$ polarizes large $\\text{Cl}^-$ electron clouds, shifting $\\text{AlCl}_3$ into **polar covalent** character ($\text{Al}_2\\text{Cl}_6$ dimers) with low sublimation point!' },
+    { id: 'alcl3', formula: 'AlCl₃', name: 'Aluminium chloride', enA: 1.6, enB: 3.2, avgEn: 2.4, deltaEn: 1.6, bondingClass: 'polar_covalent', stateAtStp: 'Solid (sublimes)', meltingPointC: '192 °C (sublimes)', conductivity: 'None in liquid', explanationMarkdown: 'High charge density $\\text{Al}^{3+}$ polarizes large $\\text{Cl}^-$ electron clouds, shifting $\\text{AlCl}_3$ into **polar covalent** character ($\\text{Al}_2\\text{Cl}_6$ dimers) with low sublimation point!' },
     { id: 'sio2', formula: 'SiO₂', name: 'Silicon dioxide (Quartz)', enA: 1.9, enB: 3.4, avgEn: 2.65, deltaEn: 1.5, bondingClass: 'polar_covalent', stateAtStp: 'Solid', meltingPointC: '1,710 °C', conductivity: 'Non-conductor', explanationMarkdown: 'Sits in the **Polar Covalent** region yet melts above $1700^\\circ\\text{C}$ because it forms an infinite 3D **covalent network solid**, not discrete molecules.' },
     { id: 'h2o', formula: 'H₂O', name: 'Water', enA: 2.2, enB: 3.4, avgEn: 2.8, deltaEn: 1.2, bondingClass: 'polar_covalent', stateAtStp: 'Liquid', meltingPointC: '0 °C', conductivity: 'Virtually non-conductive', explanationMarkdown: 'Small discrete **polar covalent** molecules ($\\Delta\\chi = 1.2, \\bar{\\chi}=2.8$); boiling requires breaking intermolecular H-bonds, not covalent O–H bonds.' },
     { id: 'hcl', formula: 'HCl', name: 'Hydrogen chloride', enA: 2.2, enB: 3.2, avgEn: 2.7, deltaEn: 1.0, bondingClass: 'polar_covalent', stateAtStp: 'Gas', meltingPointC: '−114 °C', conductivity: 'Only aqueous (H⁺ + Cl⁻)', explanationMarkdown: 'Classroom Day 2.4 slide 10 worked example: $\\Delta\\chi = 1.0$, $\\bar{\\chi} = 2.7$ → **Polar Covalent** gas; dipole–dipole + LDF IMFs.' },
@@ -605,7 +605,7 @@ export const BONDING_CONTINUUM_LAB_SPEC: BondingContinuumLabSpec = {
       title: 'Graphite (C, sp² Layers)',
       bondingType: 'Giant Covalent Layers + Interlayer LDFs',
       summaryMarkdown:
-        'Each C atom bonds covalently to 3 neighbors at $120^\\circ$ in flat hexagonal planes; the 4th valence electron delocalizes across the sheet ($\pi$ cloud), conducting electricity **parallel** to layers. Weak **London dispersion forces** allow planes to slide (lubricant/pencil lead).',
+        'Each C atom bonds covalently to 3 neighbors at $120^\\circ$ in flat hexagonal planes; the 4th valence electron delocalizes across the sheet ($\\pi$ cloud), conducting electricity **parallel** to layers. Weak **London dispersion forces** allow planes to slide (lubricant/pencil lead).',
       keyProperties: [
         { label: 'Coordination / Angle', value: '3 bonds per C · 120° (sp²)' },
         { label: 'Conductivity', value: 'High ALONG planes (1 delocalized e⁻/C)' },
@@ -735,7 +735,7 @@ export const CHEM_IMF_BOILING_EXPLORER: LabeledExplorerSpec = {
   ],
   hotspots: [
     { id: 'h2o-peak', x: 204, y: 72, label: 'Why H₂O Boils Higher Than HF (100 °C vs 19 °C)', category: 'Day 2.2.8–2.2.9 Key', examKeyword: '2 H-bonds/molecule on average (vs 1 in HF) + 3D lattice', detailMarkdown: 'Even though F–H is slightly more polar than O–H, **each $\\text{H}_2\\text{O}$ has 2 H donors and 2 O lone pairs**, forming an average of **2 intermolecular H-bonds per molecule** (4 in ice), whereas HF averages only 1 per molecule!' },
-    { id: 'hf-nh3', x: 204, y: 156, label: 'HF & NH₃ H-Bond Peaks vs Ethanol/Propanone', category: 'H-Bond Donors (N, O, F)', examKeyword: 'H covalently bonded directly to N, O, or F + lone pair', detailMarkdown: 'Methanal ($\text{CH}_2\\text{O}$) and propanone ($\text{CH}_3\\text{COCH}_3$) cannot H-bond to themselves (no O–H), yet DO form H-bonds with water O–H donors (slide 41 Q24 & slide 48).' },
+    { id: 'hf-nh3', x: 204, y: 156, label: 'HF & NH₃ H-Bond Peaks vs Ethanol/Propanone', category: 'H-Bond Donors (N, O, F)', examKeyword: 'H covalently bonded directly to N, O, or F + lone pair', detailMarkdown: 'Methanal ($\\text{CH}_2\\text{O}$) and propanone ($\\text{CH}_3\\text{COCH}_3$) cannot H-bond to themselves (no O–H), yet DO form H-bonds with water O–H donors (slide 41 Q24 & slide 48).' },
     { id: 'ch4-baseline', x: 204, y: 354, label: 'CH₄ & The Period 2 Non-Polar Baseline', category: 'LDF Correction', examKeyword: 'ALL molecules experience LDFs (not only non-polar!)', detailMarkdown: '**Classroom Slide Correction (`Day 2.2.8` slide 1):** LDFs occur between **ALL molecules** (polar and non-polar), not "only non-polar molecules"! In Period 2, $\\text{CH}_4$ lacks N/O/F H-bonding, revealing pure weak LDF baseline ($-162^\\circ\\text{C}$).' },
     { id: 'ldf-rise', x: 524, y: 256, label: 'Period 3 → 5 Rise: Electron Count & Polarizability', category: 'LDF Strength', examKeyword: 'more e⁻ / larger Mr → greater polarizability → stronger LDF', detailMarkdown: 'Moving down Groups 14–17 from Period 3 to Period 5, molecular electron cloud size increases, strengthening **London dispersion forces** and steadily raising boiling points.' },
   ],

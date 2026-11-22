@@ -8,6 +8,8 @@
  *
  * Usage:
  *   npx tsx scripts/ingest-classroom-drive.ts
+ *   npx tsx scripts/ingest-classroom-drive.ts --include-textbooks
+ *   npx tsx scripts/ingest-classroom-drive.ts --textbooks-only
  *   npx tsx scripts/ingest-classroom-drive.ts --validate-seeds
  */
 
@@ -15,6 +17,7 @@ import { execFile } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import JSZip from 'jszip';
 
@@ -75,11 +78,77 @@ export const CLASSROOM_FOLDERS: DriveFolderConfig[] = [
 /**
  * Large textbooks that must NOT be downloaded into seed blobs;
  * emitted as lightweight Drive external references instead.
+ * When `--include-textbooks` or `--textbooks-only` is passed, they are downloaded
+ * strictly into `.tmp-classroom/textbooks/` (gitignored) for offline extraction.
  */
 export const EXTERNAL_ONLY_FILE_IDS = new Set<string>([
-  '1bjwyimkOj1_khD9htn43Kjm5tg31B4jz', // Chemistry - Course Companion - Bylikin (140.7 MB)
-  '1H2GiNQEkD4aHAx3iKNGOwqEqUZbwBekR', // Old IB Textbook.pdf (18.7 MB)
+  '179MNOnslzari-BDpSUiYrP9uD2FJsM4-', // Biology - Course Companion - Allott & Mindorff (Oxford 2023)
+  '1bjwyimkOj1_khD9htn43Kjm5tg31B4jz', // Chemistry - Course Companion - Bylikin (Oxford 2023)
+  '1ZF9VwK8OICUV3pKisEMgdEVbMfc2uSZI', // Mathematics AA SL - Oxford 2019
+  '1H2GiNQEkD4aHAx3iKNGOwqEqUZbwBekR', // Old IB Textbook.pdf (Haese Math SL 3rd ed)
+  '1Skn6VKdwC5J6BDEINabIdOXfr_8zHPnR', // History Paper 3 Europe - Pearson 2026
+  '1cVUxZ1lmFZhmDdbRKRmrUE8jf-y3n5-D', // French B - Le Monde en Français (Cambridge 2018)
 ]);
+
+export interface TextbookSourceConfig {
+  slug: string;
+  subjectSlug: string;
+  driveId: string;
+  fileName: string;
+  title: string;
+  approxSize: string;
+}
+
+export const TEXTBOOK_SOURCES: TextbookSourceConfig[] = [
+  {
+    slug: 'biology-hl',
+    subjectSlug: 'biology-hl',
+    driveId: '179MNOnslzari-BDpSUiYrP9uD2FJsM4-',
+    fileName: 'bio-allott-2023.pdf',
+    title: 'IB Biology Course Companion (Allott & Mindorff, Oxford 2023)',
+    approxSize: '102.0 MB',
+  },
+  {
+    slug: 'chemistry-sl',
+    subjectSlug: 'chemistry-sl',
+    driveId: '1bjwyimkOj1_khD9htn43Kjm5tg31B4jz',
+    fileName: 'chem-bylikin-2023.pdf',
+    title: 'IB Chemistry Course Companion (Bylikin et al., Oxford 2023)',
+    approxSize: '134.2 MB',
+  },
+  {
+    slug: 'math-aa-sl',
+    subjectSlug: 'math-aa-sl',
+    driveId: '1ZF9VwK8OICUV3pKisEMgdEVbMfc2uSZI',
+    fileName: 'math-oxford-2019.pdf',
+    title: 'IB Mathematics: Analysis and Approaches SL (Oxford 2019)',
+    approxSize: '313.6 MB',
+  },
+  {
+    slug: 'math-aa-sl-old',
+    subjectSlug: 'math-aa-sl',
+    driveId: '1H2GiNQEkD4aHAx3iKNGOwqEqUZbwBekR',
+    fileName: 'math-old-textbook.pdf',
+    title: 'Mathematics for the International Student: Mathematics SL (Haese 3rd ed.)',
+    approxSize: '17.8 MB',
+  },
+  {
+    slug: 'history-hl',
+    subjectSlug: 'history-hl',
+    driveId: '1Skn6VKdwC5J6BDEINabIdOXfr_8zHPnR',
+    fileName: 'history-pearson-p3-europe-2026.pdf',
+    title: 'IB DP History Paper 3 Europe in the 20th Century (Pearson 2026)',
+    approxSize: '109.5 MB',
+  },
+  {
+    slug: 'french-b-sl',
+    subjectSlug: 'french-b-sl',
+    driveId: '1cVUxZ1lmFZhmDdbRKRmrUE8jf-y3n5-D',
+    fileName: 'french-le-monde-2018.pdf',
+    title: 'Le Monde en Français (Cambridge 2018)',
+    approxSize: '143.7 MB',
+  },
+];
 
 interface DriveFileEntry {
   id: string;
@@ -302,46 +371,299 @@ async function runWithConcurrency<T>(
   await Promise.all(workers);
 }
 
+function countWordsText(text: string | null | undefined): number {
+  if (!text) return 0;
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).length;
+}
+
 async function validateSeeds(): Promise<void> {
-  const { StudyNoteBlocksSchema } = await import('../src/types/diagrams');
+  const { PlayableDiagramSpecSchema, StudyNoteBlocksSchema } = await import(
+    '../src/types/diagrams'
+  );
+  const { IB_SUBJECTS_CONFIG } = await import('../src/data/ib-syllabi/index');
   const {
     CLASSROOM_SEED_BY_SUBJECT,
     CORE_CLASSROOM_RESOURCES,
     CORE_STARTER_OVERRIDES,
   } = await import('../src/data/classroom-seed/index');
 
+  const validTopicCodesBySlug = new Map<string, Set<string>>();
+  for (const cfg of IB_SUBJECTS_CONFIG) {
+    const codes = new Set<string>();
+    const addCode = (raw: string) => {
+      const upper = raw.trim().toUpperCase();
+      codes.add(upper);
+      const stripped = upper.replace(/^(SL|HL)\s+/i, '').trim();
+      if (stripped) codes.add(stripped);
+    };
+    for (const unit of cfg.units) {
+      addCode(unit.code);
+      for (const sub of unit.subtopics) {
+        addCode(sub.code);
+      }
+    }
+    validTopicCodesBySlug.set(cfg.slug, codes);
+  }
+
   let totalNotes = 0;
   let totalQuestions = 0;
   let totalFlashcards = 0;
   let totalMaterials = 0;
+  let totalWordsAll = 0;
+  let globalMinWords = Infinity;
+  const globalDiagramLocations = new Map<string, string[]>();
+  const globalDiagramTypes = new Map<string, number>();
+  const validationErrors: string[] = [];
 
   for (const [slug, seed] of Object.entries(CLASSROOM_SEED_BY_SUBJECT)) {
     totalMaterials += seed.materials.length;
     totalQuestions += seed.questions.length;
     totalFlashcards += seed.flashcards.length;
+
+    const validCodes = validTopicCodesBySlug.get(slug);
+    const checkTopicCode = (kind: string, code: string | null | undefined, label: string) => {
+      if (!code || !validCodes) {
+        if (!validCodes) {
+          validationErrors.push(`[${slug}] Missing IB_SUBJECTS_CONFIG entry`);
+        } else {
+          validationErrors.push(`[${slug}] Empty topicCode on ${kind} "${label}"`);
+        }
+        return;
+      }
+      const upper = code.trim().toUpperCase();
+      const stripped = upper.replace(/^(SL|HL)\s+/i, '').trim();
+      if (!validCodes.has(upper) && !validCodes.has(stripped)) {
+        validationErrors.push(`[${slug}] Missing topicCode "${code}" on ${kind} "${label}"`);
+      }
+    };
+
+    const noteTitles = new Set<string>();
+    const subjectDiagramIds = new Set<string>();
+    const subjectDiagramTypes = new Map<string, number>();
+    const noteWordCounts: number[] = [];
+
+    for (const mat of seed.materials) {
+      if (mat.topicCode) {
+        checkTopicCode('material', mat.topicCode, mat.fileName);
+      }
+    }
+
+    if (seed.topicGuidanceNotes) {
+      for (const code of Object.keys(seed.topicGuidanceNotes)) {
+        checkTopicCode('topicGuidanceNotes', code, code);
+      }
+    }
+
     for (const note of seed.notes) {
       totalNotes += 1;
+      if (noteTitles.has(note.title)) {
+        validationErrors.push(`[${slug}] Duplicate note title "${note.title}"`);
+      }
+      noteTitles.add(note.title);
+      checkTopicCode('note', note.topicCode, note.title);
+
       const res = StudyNoteBlocksSchema.safeParse(note.blocks);
       if (!res.success) {
         console.error(`Validation failed for ${slug} / ${note.title}:`, res.error.format());
-        process.exit(1);
+        validationErrors.push(`[${slug}] Schema failure in note "${note.title}"`);
+        continue;
+      }
+
+      let words = countWordsText(note.title) + countWordsText(note.summary);
+      for (const block of res.data) {
+        switch (block.type) {
+          case 'heading':
+            words += countWordsText(block.text);
+            break;
+          case 'paragraph':
+            words += countWordsText(block.markdown);
+            break;
+          case 'callout':
+            words += countWordsText(block.title) + countWordsText(block.markdown);
+            break;
+          case 'key_terms':
+            for (const item of block.items) {
+              words += countWordsText(item.term) + countWordsText(item.definitionMarkdown);
+            }
+            break;
+          case 'equation':
+            words += countWordsText(block.caption);
+            for (const v of block.variableLegend ?? []) {
+              words += countWordsText(v.meaning);
+            }
+            break;
+          case 'playable_diagram': {
+            words += countWordsText(block.spec.title) + countWordsText(block.spec.caption);
+            const diagRes = PlayableDiagramSpecSchema.safeParse(block.spec);
+            if (!diagRes.success) {
+              validationErrors.push(
+                `[${slug}] Invalid playable_diagram "${block.spec.id}" in "${note.title}"`,
+              );
+              break;
+            }
+            const diagId = diagRes.data.id;
+            const diagType = diagRes.data.type;
+            subjectDiagramIds.add(diagId);
+            subjectDiagramTypes.set(diagType, (subjectDiagramTypes.get(diagType) ?? 0) + 1);
+            globalDiagramTypes.set(diagType, (globalDiagramTypes.get(diagType) ?? 0) + 1);
+            const locs = globalDiagramLocations.get(diagId) ?? [];
+            locs.push(`${slug}::${note.title}`);
+            globalDiagramLocations.set(diagId, locs);
+            break;
+          }
+        }
+      }
+      noteWordCounts.push(words);
+      totalWordsAll += words;
+      if (words < globalMinWords) {
+        globalMinWords = words;
       }
     }
+
+    for (const q of seed.questions) {
+      checkTopicCode('question', q.topicCode, q.questionMarkdown.slice(0, 60));
+      const pointsSum = q.markscheme.marking_points.reduce((acc, p) => acc + p.marks, 0);
+      if (pointsSum !== q.maxMarks) {
+        validationErrors.push(
+          `[${slug}] Markscheme sum (${pointsSum}) !== maxMarks (${q.maxMarks}) on "${q.questionMarkdown.slice(0, 60)}"`,
+        );
+      }
+    }
+
+    for (const card of seed.flashcards) {
+      checkTopicCode('flashcard', card.topicCode, card.frontMarkdown.slice(0, 60));
+    }
+
+    const avgWords =
+      noteWordCounts.length > 0
+        ? Math.round(noteWordCounts.reduce((a, b) => a + b, 0) / noteWordCounts.length)
+        : 0;
+    const minWords = noteWordCounts.length > 0 ? Math.min(...noteWordCounts) : 0;
+    const maxWords = noteWordCounts.length > 0 ? Math.max(...noteWordCounts) : 0;
+    const typeSummary = Array.from(subjectDiagramTypes.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([type, count]) => `${type}:${count}`)
+      .join(', ');
+
     console.log(
-      `[OK] ${slug}: ${seed.materials.length} materials, ${seed.notes.length} notes, ${seed.questions.length} questions, ${seed.flashcards.length} flashcards`,
+      `[OK] ${slug}: ${seed.materials.length} materials, ${seed.notes.length} notes (avg ${avgWords} / min ${minWords} / max ${maxWords} words), ${subjectDiagramIds.size} unique diagrams [${typeSummary}], ${seed.questions.length} questions, ${seed.flashcards.length} flashcards`,
     );
   }
+
+  const duplicateDiagrams = Array.from(globalDiagramLocations.entries()).filter(
+    ([, locs]) => locs.length > 1,
+  );
+  for (const [diagId, locs] of duplicateDiagrams) {
+    validationErrors.push(`Duplicate diagram ID "${diagId}" found in: ${locs.join(', ')}`);
+  }
+
+  if (validationErrors.length > 0) {
+    console.error(`\nSeed validation failed with ${validationErrors.length} error(s):`);
+    for (const err of validationErrors) {
+      console.error(`  - ${err}`);
+    }
+    process.exit(1);
+  }
+
+  const globalAvgWords = totalNotes > 0 ? Math.round(totalWordsAll / totalNotes) : 0;
+  const minWordsDisplay = Number.isFinite(globalMinWords) ? globalMinWords : 0;
+  const globalTypeSummary = Array.from(globalDiagramTypes.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([type, count]) => `${type}=${count}`)
+    .join(', ');
 
   console.log(
     `[OK] Core: ${CORE_CLASSROOM_RESOURCES.length} resources, ${CORE_STARTER_OVERRIDES.length} starter overrides`,
   );
+  console.log(`Diagram types (${globalDiagramLocations.size} unique): ${globalTypeSummary}`);
   console.log(
-    `Totals: ${totalMaterials} materials, ${totalNotes} schema-valid notes, ${totalQuestions} questions, ${totalFlashcards} flashcards.`,
+    `Totals: ${totalMaterials} materials, ${totalNotes} schema-valid notes (avg ${globalAvgWords} / min ${minWordsDisplay} words), ${globalDiagramLocations.size} unique diagrams (0 duplicate IDs), ${totalQuestions} questions, ${totalFlashcards} flashcards, 0 missing topic codes.`,
   );
+}
+
+async function assertTmpClassroomGitignored(projectRoot: string): Promise<void> {
+  const gitignorePath = path.join(projectRoot, '.gitignore');
+  const contents = await fs.readFile(gitignorePath, 'utf8');
+  const hasIgnoreRule = contents
+    .split(/\r?\n/)
+    .some((line) => line.trim() === '.tmp-classroom/' || line.trim() === '.tmp-classroom');
+  if (!hasIgnoreRule) {
+    throw new Error(
+      'Safety abort: .tmp-classroom/ must be listed in .gitignore before downloading classroom or textbook binaries.',
+    );
+  }
+}
+
+async function downloadTextbooks(projectRoot: string, force = false): Promise<void> {
+  await assertTmpClassroomGitignored(projectRoot);
+  const textbooksDir = path.join(projectRoot, '.tmp-classroom', 'textbooks');
+  await fs.mkdir(textbooksDir, { recursive: true });
+
+  console.log(`\nDownloading ${TEXTBOOK_SOURCES.length} IB textbooks into ${textbooksDir}...`);
+
+  const downloadedManifest: Array<{
+    slug: string;
+    subjectSlug: string;
+    driveId: string;
+    title: string;
+    localFilePath: string;
+    sizeBytes: number;
+    externalUrl: string;
+  }> = [];
+
+  await runWithConcurrency(TEXTBOOK_SOURCES, 3, async (book) => {
+    const outPath = path.join(textbooksDir, book.fileName);
+    let alreadyPresent = false;
+    if (!force) {
+      try {
+        const stat = await fs.stat(outPath);
+        if (stat.size > 1_000_000) {
+          alreadyPresent = true;
+        }
+      } catch {
+        // File does not exist yet
+      }
+    }
+
+    if (alreadyPresent) {
+      console.log(`  [cached] ${book.fileName}`);
+    } else {
+      console.log(`  [downloading] ${book.fileName} (${book.approxSize}, driveId=${book.driveId})...`);
+      await execFileAsync(
+        'gdrive',
+        ['readonly', 'download', book.driveId, '--out', outPath],
+        { maxBuffer: 10 * 1024 * 1024 },
+      );
+      console.log(`  [done] ${book.fileName}`);
+    }
+
+    const stat = await fs.stat(outPath);
+    downloadedManifest.push({
+      slug: book.slug,
+      subjectSlug: book.subjectSlug,
+      driveId: book.driveId,
+      title: book.title,
+      localFilePath: path.relative(projectRoot, outPath),
+      sizeBytes: stat.size,
+      externalUrl: `https://drive.google.com/file/d/${book.driveId}/view?usp=drivesdk`,
+    });
+  });
+
+  downloadedManifest.sort((a, b) => a.slug.localeCompare(b.slug));
+  const manifestPath = path.join(textbooksDir, 'manifest.json');
+  await fs.writeFile(
+    manifestPath,
+    JSON.stringify({ generatedAt: new Date().toISOString(), textbooks: downloadedManifest }, null, 2),
+    'utf8',
+  );
+  console.log(`Textbook manifest written to ${manifestPath}`);
 }
 
 async function runIngest(): Promise<void> {
   const projectRoot = process.cwd();
+  await assertTmpClassroomGitignored(projectRoot);
   const tmpRoot = path.join(projectRoot, '.tmp-classroom');
   const extractedRoot = path.join(tmpRoot, 'extracted');
   await fs.mkdir(extractedRoot, { recursive: true });
@@ -512,14 +834,35 @@ async function runIngest(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  if (process.argv.includes('--validate-seeds')) {
+  const args = new Set(process.argv.slice(2));
+  if (args.has('--validate-seeds')) {
     await validateSeeds();
     return;
   }
+
+  const projectRoot = process.cwd();
+  const includeTextbooks = args.has('--include-textbooks');
+  const textbooksOnly = args.has('--textbooks-only');
+  const forceTextbooks = args.has('--force-textbooks');
+
+  if (textbooksOnly) {
+    await downloadTextbooks(projectRoot, forceTextbooks);
+    return;
+  }
+
   await runIngest();
+  if (includeTextbooks) {
+    await downloadTextbooks(projectRoot, forceTextbooks);
+  }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+const isDirectEntry =
+  typeof process.argv[1] === 'string' &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectEntry) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

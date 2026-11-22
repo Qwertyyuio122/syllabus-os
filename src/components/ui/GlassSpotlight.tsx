@@ -14,7 +14,7 @@ interface GlassSpotlightProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /**
  * Tracks pointer coordinates into `--mx` and `--my` CSS custom properties
- * for an achromatic specular highlight across glass surfaces without re-renders.
+ * for a translucent Liquid Glass specular highlight across surfaces without re-renders.
  */
 export function GlassSpotlight({
   children,

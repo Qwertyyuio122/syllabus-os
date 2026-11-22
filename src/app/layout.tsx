@@ -3,6 +3,7 @@ import { Inter, Newsreader, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import 'katex/dist/katex.min.css';
 import './globals.css';
+import { LiquidBackdrop } from '@/components/layout/LiquidBackdrop';
 import { APP_NAME, APP_TAGLINE } from '@/config/brand';
 
 const inter = Inter({
@@ -43,14 +44,15 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${newsreader.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="liquid-canvas min-h-screen overflow-x-clip text-[#1D1D1F] antialiased dark:text-[#F5F5F7]">
+      <body className="min-h-screen overflow-x-clip bg-[#E9EFF7] text-[#111318] antialiased dark:bg-[#0B0D12] dark:text-[#F5F7FA]">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <LiquidBackdrop />
+          <div className="relative z-10 min-h-screen">{children}</div>
         </ThemeProvider>
       </body>
     </html>

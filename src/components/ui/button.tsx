@@ -7,7 +7,12 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 export interface ButtonProps
@@ -19,15 +24,15 @@ export interface ButtonProps
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#1D1D1F] text-white border border-[#1D1D1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_6px_-2px_rgba(0,0,0,0.22)] hover:bg-[#2C2C2E] active:scale-[0.985] dark:bg-[#F5F5F7] dark:text-[#111113] dark:border-[#F5F5F7] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_2px_8px_-2px_rgba(0,0,0,0.45)] dark:hover:bg-[#E5E5EA]',
+    'bg-[#111318] text-white border border-[#111318] shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_3px_10px_-3px_rgba(15,23,42,0.28)] hover:bg-[#1E222B] active:scale-[0.985] dark:bg-[#F5F7FA] dark:text-[#0B0D12] dark:border-[#F5F7FA] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_4px_12px_-3px_rgba(0,0,0,0.5)] dark:hover:bg-[#E5E9F0]',
   secondary:
-    'glass-surface text-[#1D1D1F] hover:bg-white/90 active:scale-[0.985] dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]',
+    'glass-surface text-[#111318] hover:bg-white/90 active:scale-[0.985] dark:text-[#F5F7FA] dark:hover:bg-white/[0.13]',
   outline:
-    'glass-pill text-[#1D1D1F] hover:bg-white/95 active:scale-[0.985] dark:text-[#F5F5F7] dark:hover:bg-white/[0.12]',
+    'glass-pill text-[#111318] hover:bg-white/95 active:scale-[0.985] dark:text-[#F5F7FA] dark:hover:bg-white/[0.13]',
   ghost:
-    'bg-transparent text-[#1D1D1F] border border-transparent hover:bg-black/[0.05] active:scale-[0.985] dark:text-[#F5F5F7] dark:hover:bg-white/[0.08]',
+    'bg-transparent text-[#111318] border border-transparent hover:bg-black/[0.055] active:scale-[0.985] dark:text-[#F5F7FA] dark:hover:bg-white/[0.08]',
   danger:
-    'bg-white/80 text-[#9B3B3B] border border-[#E6D0D0] backdrop-blur-md hover:bg-[#FAF2F2] active:scale-[0.985] dark:bg-[#291F1F]/80 dark:text-[#E59898] dark:border-[#4A2E2E] dark:hover:bg-[#332626]',
+    'bg-white/80 text-[#991B1B] border border-red-700/20 backdrop-blur-md hover:bg-red-50/90 active:scale-[0.985] dark:bg-red-950/60 dark:text-[#FCA5A5] dark:border-red-400/25 dark:hover:bg-red-950/80',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -55,7 +60,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={asChild ? undefined : type}
         className={cn(
-          'inline-flex items-center justify-center font-medium whitespace-nowrap transition-all duration-150 cursor-pointer disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1D1D1F]/25 dark:focus-visible:ring-[#F5F5F7]/25',
+          'inline-flex cursor-pointer items-center justify-center font-medium whitespace-nowrap transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111318]/25 dark:focus-visible:ring-[#F5F7FA]/25',
           variantClasses[variant],
           sizeClasses[size],
           className,

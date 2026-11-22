@@ -768,7 +768,7 @@ const PLANT_HOTSPOTS = [
     category: 'Non-Organelle Extracellular',
     examKeyword: 'perforated / prevents osmotic lysis (turgidity)',
     detailMarkdown:
-      'Rigid extracellular mesh of **$\beta$-glucose cellulose microfibrils** (Allott Oxford 2023 A2.2 / B1.1). Maintains cell shape and generates inward wall pressure against turgor; absent in animal cells.',
+      'Rigid extracellular mesh of **$\\beta$-glucose cellulose microfibrils** (Allott Oxford 2023 A2.2 / B1.1). Maintains cell shape and generates inward wall pressure against turgor; absent in animal cells.',
   },
   {
     id: 'plasmodesmata',

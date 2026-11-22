@@ -1,16 +1,17 @@
 import * as React from 'react';
+import { getSubjectTheme } from '@/config/subject-themes';
 
 interface SubjectMotifProps {
   slug: string;
 }
 
 /**
- * Low-opacity monochrome hairline SVG architectural watermark per subject slug.
+ * Subtle subject-tinted hairline SVG architectural watermark per subject slug.
  * Strictly decorative (`aria-hidden="true"`).
  */
 export function SubjectMotif({ slug }: SubjectMotifProps) {
-  const baseClass =
-    'pointer-events-none absolute -top-3 -right-3 h-28 w-28 text-[#1D1D1F] opacity-[0.055] transition-opacity duration-300 group-hover:opacity-[0.11] dark:text-[#F5F5F7] dark:opacity-[0.065] dark:group-hover:opacity-[0.12]';
+  const theme = getSubjectTheme(slug);
+  const baseClass = `pointer-events-none absolute -top-3 -right-3 h-28 w-28 ${theme.textAccent} opacity-[0.065] transition-opacity duration-300 group-hover:opacity-[0.13] dark:opacity-[0.08] dark:group-hover:opacity-[0.15]`;
 
   switch (slug) {
     case 'biology-hl':
@@ -183,4 +184,47 @@ export function SubjectMotif({ slug }: SubjectMotifProps) {
         </svg>
       );
   }
+}
+
+interface LiquidArtworkProps {
+  src: string;
+  className?: string;
+  imgClassName?: string;
+}
+
+/**
+ * Renders studio pearl-white Liquid Glass artwork seamlessly in both Light & Dark modes:
+ * - Keeps positioning wrapper non-isolated (no opacity/mask/transform on wrapper) so blend mode
+ *   composites directly against the parent `.glass-panel` surface.
+ * - `closest-side` radial mask guarantees 0 alpha before any box edge in all aspect ratios.
+ * - Light mode: contrast/brightness pushes pearl studio backdrop to #FFFFFF for clean multiply.
+ * - Dark mode: invert + hue-rotate(180deg) + contrast(1.35) clamps off-white studio backdrop to
+ *   #000000 for seamless `mix-blend-screen` while preserving exact refractive hue caustics.
+ */
+export function LiquidArtwork({
+  src,
+  className = '',
+  imgClassName = '',
+}: LiquidArtworkProps) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none select-none ${className}`}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        loading="eager"
+        decoding="sync"
+        style={{
+          maskImage:
+            'radial-gradient(closest-side at 50% 50%, rgba(0,0,0,1) 34%, rgba(0,0,0,0.45) 68%, rgba(0,0,0,0) 98%)',
+          WebkitMaskImage:
+            'radial-gradient(closest-side at 50% 50%, rgba(0,0,0,1) 34%, rgba(0,0,0,0.45) 68%, rgba(0,0,0,0) 98%)',
+        }}
+        className={`h-full w-full object-contain opacity-80 brightness-[1.04] contrast-[1.08] mix-blend-multiply transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none dark:opacity-80 dark:mix-blend-screen dark:invert dark:hue-rotate-180 dark:brightness-[0.9] dark:contrast-[1.35] ${imgClassName}`}
+      />
+    </div>
+  );
 }

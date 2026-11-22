@@ -229,7 +229,7 @@ export function VseprPolarityLab({ spec }: VseprPolarityLabProps) {
                     : 'glass-pill text-[#6E6E73] hover:text-[#1D1D1F] dark:text-[#98989D]'
                 }`}
               >
-                {dom === 'all' ? 'All (16)' : `${dom} Domains`}
+                {dom === 'all' ? `All (${spec.molecules.length})` : `${dom} Domains`}
               </button>
             );
           })}
@@ -414,6 +414,25 @@ export function VseprPolarityLab({ spec }: VseprPolarityLabProps) {
                     fill={monochromeMode ? 'currentColor' : '#C85A53'}
                   />
                 </marker>
+                <marker
+                  id={`${markerId}-net`}
+                  viewBox="0 0 10 10"
+                  refX="8"
+                  refY="5"
+                  markerWidth="7"
+                  markerHeight="7"
+                  orient="auto"
+                >
+                  <path
+                    d="M 0 1.5 L 9 5 L 0 8.5 z"
+                    fill={monochromeMode ? 'currentColor' : '#2563EB'}
+                  />
+                </marker>
+                <radialGradient id={`${markerId}-sheen`} cx="32%" cy="28%" r="65%">
+                  <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.45" />
+                  <stop offset="65%" stopColor="#FFFFFF" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#000000" stopOpacity="0.18" />
+                </radialGradient>
               </defs>
 
               {/* Subtle Orbit Reference Ring */}
@@ -548,6 +567,15 @@ export function VseprPolarityLab({ spec }: VseprPolarityLabProps) {
                       strokeWidth={1.6}
                       strokeOpacity={0.75}
                     />
+                    {!monochromeMode && (
+                      <circle
+                        cx={sx}
+                        cy={sy}
+                        r={style.radius}
+                        fill={`url(#${markerId}-sheen)`}
+                        pointerEvents="none"
+                      />
+                    )}
                     <text
                       x={sx}
                       y={sy + 4.5}
@@ -574,6 +602,21 @@ export function VseprPolarityLab({ spec }: VseprPolarityLabProps) {
                   </g>
                 );
               })}
+
+              {/* 3D Net Dipole Vector Overlay */}
+              {showNetDipole && !isAnswerHidden && projected.netDipoleRot && (
+                <line
+                  x1={CX}
+                  y1={CY}
+                  x2={CX + projected.netDipoleRot.x * (SCALE * 1.15)}
+                  y2={CY - projected.netDipoleRot.y * (SCALE * 1.15)}
+                  stroke={monochromeMode ? 'currentColor' : '#2563EB'}
+                  strokeWidth={2.8}
+                  strokeDasharray="6 3"
+                  markerEnd={`url(#${markerId}-net)`}
+                  opacity={0.88}
+                />
+              )}
 
               {/* Net Molecular Dipole Overlay */}
               {showNetDipole && !isAnswerHidden && (
