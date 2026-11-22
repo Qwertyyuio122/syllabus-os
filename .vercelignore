@@ -1,0 +1,19 @@
+# Local ingestion artifacts (textbook PDFs up to 328 MB each)
+.tmp-classroom
+
+# Build & test output
+.next
+out
+build
+test-results
+playwright-report
+*.tsbuildinfo
+
+# Dependencies
+node_modules
+
+# Local env & VCS metadata
+.env
+.env*.local
+.git
+.vercel
